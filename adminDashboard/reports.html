@@ -301,236 +301,228 @@
         Exporting to Excel...
     </div>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
-        import { 
-            getAuth, 
-            onAuthStateChanged, 
-            signOut 
-        } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
-        import { 
-            getFirestore, 
-            collection, 
-            onSnapshot,
-            query,
-            orderBy
-        } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
+    import { 
+        getAuth, 
+        onAuthStateChanged, 
+        signOut 
+    } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+    import { 
+        getFirestore, 
+        collection, 
+        onSnapshot,
+        query,
+        orderBy,
+        doc
+    } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
 
-        // 🔥 Firebase Config
-        const firebaseConfig = {
-            apiKey: "AIzaSyD5Gkjk7tk48Hv9zgvdlSsdR8FH_nwtGRc",
-            authDomain: "intramurals-score-leaderboard.firebaseapp.com",
-            projectId: "intramurals-score-leaderboard",
-            storageBucket: "intramurals-score-leaderboard.firebasestorage.app",
-            messagingSenderId: "455345215033",
-            appId: "1:455345215033:web:66a387d0fa0fa4453e5fe8",
-            measurementId: "G-E0GM8X4K9L"
-        };
+    // 🔥 Firebase Config
+    const firebaseConfig = {
+        apiKey: "AIzaSyD5Gkjk7tk48Hv9zgvdlSsdR8FH_nwtGRc",
+        authDomain: "intramurals-score-leaderboard.firebaseapp.com",
+        projectId: "intramurals-score-leaderboard",
+        storageBucket: "intramurals-score-leaderboard.firebasestorage.app",
+        messagingSenderId: "455345215033",
+        appId: "1:455345215033:web:66a387d0fa0fa4453e5fe8",
+        measurementId: "G-E0GM8X4K9L"
+    };
 
-        const currentAppId = 'intramurals-2026';
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
+    const currentAppId = 'intramurals-2026';
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
 
-        // 🔹 UI ELEMENTS
-        const authScreen = document.getElementById('authScreen');
-        const mainWrapper = document.getElementById('mainWrapper');
-        const rankingsTable = document.getElementById('rankingsTableBody');
-        const mvpGrid = document.getElementById('mvpGridBody');
-        const matchesList = document.getElementById('matchesListBody');
+    // 🔹 UI ELEMENTS
+    const authScreen = document.getElementById('authScreen');
+    const mainWrapper = document.getElementById('mainWrapper');
+    const rankingsTable = document.getElementById('rankingsTableBody');
+    const mvpGrid = document.getElementById('mvpGridBody');
+    const matchesList = document.getElementById('matchesListBody');
 
-        // 🔹 AUTHENTICATION
-        onAuthStateChanged(auth, (user) => {
-            if (user) {
-                const email = user.email || "Admin";
-                document.getElementById('adminName').textContent = email.split('@')[0];
-                document.getElementById('adminInitials').textContent = email.substring(0, 2).toUpperCase();
-                
-                authScreen.style.display = 'none';
-                mainWrapper.style.display = 'flex';
-                
-                loadData();
-            } else {
-                window.location.replace('../index.html');
-            }
-        });
-
-        // 🔹 DATA LOADING
-        function loadData() {
-            // Setup Dates
-            const now = new Date();
-            const dateStr = now.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
-            document.getElementById('currentDate').textContent = dateStr;
-            document.querySelectorAll('.current-date-full').forEach(el => el.textContent = now.toLocaleString());
-            document.getElementById('reportId').textContent = Math.random().toString(36).substring(2, 10).toUpperCase();
-
-            // 1. Teams/Rankings
-            const teamsRef = collection(db, 'artifacts', currentAppId, 'public', 'data', 'teams');
-            onSnapshot(teamsRef, (snapshot) => {
-                const teams = [];
-                snapshot.forEach(doc => teams.push({ id: doc.id, ...doc.data() }));
-                
-                // Sort by total points (descending)
-                teams.sort((a, b) => (b.totalPoints || 0) - (a.totalPoints || 0));
-                
-                renderRankings(teams);
-            });
-
-            // 2. MVPs
-            const playersRef = collection(db, 'artifacts', currentAppId, 'public', 'data', 'players');
-            onSnapshot(playersRef, (snapshot) => {
-                const players = [];
-                snapshot.forEach(doc => players.push({ id: doc.id, ...doc.data() }));
-                renderMVPs(players.slice(0, 9)); // Show top contenders
-            });
-
-            // 3. Match Summaries
-            const matchesRef = collection(db, 'artifacts', currentAppId, 'public', 'data', 'matches');
-            onSnapshot(matchesRef, (snapshot) => {
-                const matches = [];
-                snapshot.forEach(doc => matches.push({ id: doc.id, ...doc.data() }));
-                renderMatches(matches.slice(0, 10)); // Show recent 10
-            });
-        }
-
-        function renderRankings(teams) {
-            rankingsTable.innerHTML = teams.map((team, index) => `
-                <tr class="border-b border-slate-50 hover:bg-slate-50 transition-colors">
-                    <td class="py-4 px-2">
-                        <span class="h-6 w-6 flex items-center justify-center rounded-full font-black text-xs ${index === 0 ? 'bg-yellow-100 text-yellow-700' : index === 1 ? 'bg-slate-100 text-slate-700' : index === 2 ? 'bg-orange-100 text-orange-700' : 'text-slate-400'}">
-                            ${index + 1}
-                        </span>
-                    </td>
-                    <td class="py-4">
-                        <p class="font-black text-slate-900 uppercase text-xs tracking-tight">${team.name || 'Unknown Team'}</p>
-                        <p class="text-[9px] font-bold text-slate-400 uppercase">${team.department || 'General'}</p>
-                    </td>
-                    <td class="py-4 text-xs font-bold text-yellow-600">${team.gold || 0}</td>
-                    <td class="py-4 text-xs font-bold text-slate-500">${team.silver || 0}</td>
-                    <td class="py-4 text-xs font-bold text-orange-600">${team.bronze || 0}</td>
-                    <td class="py-4 text-right">
-                        <span class="px-3 py-1 bg-blue-50 text-blue-700 rounded-full font-black text-xs">${team.totalPoints || 0} pts</span>
-                    </td>
-                </tr>
-            `).join('') || '<p class="p-8 text-center text-slate-400 font-bold">No ranking data available.</p>';
-        }
-
-        function renderMVPs(players) {
-            mvpGrid.innerHTML = players.map(player => `
-                <div class="p-4 border border-slate-100 rounded-xl hover:shadow-md transition-all">
-                    <div class="flex items-center gap-4">
-                        <div class="h-10 w-10 bg-slate-900 rounded-lg flex items-center justify-center text-white font-black uppercase text-xs">
-                            ${player.name ? player.name.substring(0, 2) : '??'}
-                        </div>
-                        <div>
-                            <p class="font-black text-slate-900 uppercase text-xs">${player.name || 'Anonymous'}</p>
-                            <p class="text-[9px] font-bold text-blue-600 uppercase tracking-widest">${player.sport || 'Athlete'}</p>
-                        </div>
-                    </div>
-                    <div class="mt-4 pt-4 border-t border-dashed border-slate-100 flex justify-between">
-                        <div class="text-[8px] uppercase font-black text-slate-400">Team: <span class="text-slate-900">${player.team || 'N/A'}</span></div>
-                        <div class="text-[8px] uppercase font-black text-orange-500">MVP Tier 1</div>
-                    </div>
-                </div>
-            `).join('') || '<p class="col-span-full p-8 text-center text-slate-400 font-bold">No MVP data available.</p>';
-        }
-
-        function renderMatches(matches) {
-            matchesList.innerHTML = matches.map(match => `
-                <div class="p-4 bg-slate-50 rounded-xl border border-slate-100 flex justify-between items-center">
-                    <div class="flex items-center gap-4">
-                        <span class="text-[8px] font-black uppercase tracking-widest bg-white border border-slate-200 px-2 py-1 rounded text-slate-500">${match.sport || 'Game'}</span>
-                        <p class="text-[10px] font-black uppercase text-slate-800 italic">
-                            ${match.teamA || 'Team 1'} <span class="text-blue-600 text-[8px] mx-1">vs</span> ${match.teamB || 'Team 2'}
-                        </p>
-                    </div>
-                    <div class="text-right">
-                        <p class="text-[10px] font-black text-slate-900">${match.scoreA || 0} - ${match.scoreB || 0}</p>
-                        <p class="text-[8px] font-bold text-slate-400 uppercase">${match.status || 'Finished'}</p>
-                    </div>
-                </div>
-            `).join('') || '<p class="p-8 text-center text-slate-400 font-bold">No match summaries recorded yet.</p>';
-        }
-
-        // 🔹 UI UTILITIES
-        window.switchTab = (tab) => {
-            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
-            document.querySelectorAll('.tab-btn').forEach(btn => {
-                btn.classList.remove('active', 'bg-white', 'shadow-sm', 'text-blue-600');
-                btn.classList.add('text-slate-500');
-            });
-
-            document.getElementById(`tab-${tab}`).classList.remove('hidden');
-            const activeBtn = event.currentTarget;
-            activeBtn.classList.add('active', 'bg-white', 'shadow-sm', 'text-blue-600');
-            activeBtn.classList.remove('text-slate-500');
-
-            // Update Titles
-            const titles = {
-                'rankings': 'Final Rankings Report',
-                'mvp': 'MVP Contenders Record',
-                'matches': 'Comprehensive Match Summaries'
-            };
-            document.getElementById('reportTitle').textContent = titles[tab];
-            document.getElementById('printReportTitle').textContent = titles[tab];
-        };
-
-        window.simulateExport = (type) => {
-            const toast = document.getElementById('toast');
-            toast.textContent = `Generating ${type} file... please wait.`;
-            toast.classList.remove('opacity-0', 'pointer-events-none');
+    // 🔹 AUTHENTICATION
+    onAuthStateChanged(auth, (user) => {
+        if (user) {
+            const email = user.email || "Admin";
+            const namePart = email.split('@')[0] || "User";
             
-            setTimeout(() => {
-                toast.textContent = `${type} Report exported successfully!`;
-                setTimeout(() => {
-                    toast.classList.add('opacity-0', 'pointer-events-none');
-                }, 2000);
-            }, 1500);
+            document.getElementById('adminName').textContent = namePart;
+            document.getElementById('adminInitials').textContent = namePart.substring(0, 2).toUpperCase();
+            
+            if(authScreen) authScreen.style.display = 'none';
+            if(mainWrapper) mainWrapper.style.display = 'flex';
+            
+            loadData();
+        } else {
+            // Redirect if not logged in
+            window.location.replace('../index.html');
+        }
+    });
+
+    // 🔹 DATA LOADING
+    function loadData() {
+        // Setup Dates
+        const now = new Date();
+        const dateStr = now.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+        document.getElementById('currentDate').textContent = dateStr;
+        document.querySelectorAll('.current-date-full').forEach(el => el.textContent = now.toLocaleString());
+        document.getElementById('reportId').textContent = Math.random().toString(36).substring(2, 10).toUpperCase();
+
+        // 1. Teams/Rankings Sync
+        const teamsRef = collection(db, 'artifacts', currentAppId, 'public', 'data', 'teams');
+        onSnapshot(teamsRef, (snapshot) => {
+            const teams = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            // Sort by total points (descending)
+            teams.sort((a, b) => (b.totalPoints || 0) - (a.totalPoints || 0));
+            renderRankings(teams);
+        });
+
+        // 2. Athletes/MVPs Sync (Connecting your player data here)
+        const playersRef = collection(db, 'artifacts', currentAppId, 'public', 'data', 'players');
+        // We query by stats descending to show the top performers first
+        onSnapshot(playersRef, (snapshot) => {
+            const players = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            // Sort by stats (points) descending
+            const sortedPlayers = players.sort((a, b) => (b.stats || 0) - (a.stats || 0));
+            renderMVPs(sortedPlayers.slice(0, 9)); 
+        });
+
+        // 3. Match Summaries Sync
+        const matchesRef = collection(db, 'artifacts', currentAppId, 'public', 'data', 'matches');
+        onSnapshot(matchesRef, (snapshot) => {
+            const matches = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            renderMatches(matches.slice(0, 10));
+        });
+    }
+
+    // 🔹 RENDER FUNCTIONS
+    function renderRankings(teams) {
+        if (!rankingsTable) return;
+        rankingsTable.innerHTML = teams.map((team, index) => `
+            <tr class="border-b border-slate-50 hover:bg-slate-50 transition-colors">
+                <td class="py-4 px-2">
+                    <span class="h-6 w-6 flex items-center justify-center rounded-full font-black text-xs ${index === 0 ? 'bg-yellow-100 text-yellow-700' : index === 1 ? 'bg-slate-100 text-slate-700' : index === 2 ? 'bg-orange-100 text-orange-700' : 'text-slate-400'}">
+                        ${index + 1}
+                    </span>
+                </td>
+                <td class="py-4">
+                    <p class="font-black text-slate-900 uppercase text-xs tracking-tight">${team.name || 'Unknown Team'}</p>
+                    <p class="text-[9px] font-bold text-slate-400 uppercase">${team.department || 'General'}</p>
+                </td>
+                <td class="py-4 text-xs font-bold text-yellow-600">${team.gold || 0}</td>
+                <td class="py-4 text-xs font-bold text-slate-500">${team.silver || 0}</td>
+                <td class="py-4 text-xs font-bold text-orange-600">${team.bronze || 0}</td>
+                <td class="py-4 text-right">
+                    <span class="px-3 py-1 bg-blue-50 text-blue-700 rounded-full font-black text-xs">${team.totalPoints || 0} pts</span>
+                </td>
+            </tr>
+        `).join('') || '<tr><td colspan="6" class="p-8 text-center text-slate-400 font-bold">No ranking data available.</td></tr>';
+    }
+
+    function renderMVPs(players) {
+        if (!mvpGrid) return;
+        mvpGrid.innerHTML = players.map(player => `
+            <div class="p-4 border border-slate-100 rounded-xl hover:shadow-md transition-all bg-white">
+                <div class="flex items-center gap-4">
+                    <div class="h-10 w-10 bg-slate-900 rounded-lg flex items-center justify-center text-white font-black uppercase text-xs">
+                        ${player.fullName ? player.fullName.substring(0, 2) : '??'}
+                    </div>
+                    <div>
+                        <p class="font-black text-slate-900 uppercase text-xs">${player.fullName || 'Anonymous'}</p>
+                        <p class="text-[9px] font-bold text-blue-600 uppercase tracking-widest">${player.sport || 'Athlete'}</p>
+                    </div>
+                </div>
+                <div class="mt-4 pt-4 border-t border-dashed border-slate-100 flex justify-between items-center">
+                    <div class="text-[8px] uppercase font-black text-slate-400">Team: <span class="text-slate-900">${player.team || 'N/A'}</span></div>
+                    <div class="px-2 py-1 bg-orange-50 text-orange-600 rounded text-[9px] font-black">${player.stats || 0} PTS</div>
+                </div>
+            </div>
+        `).join('') || '<p class="col-span-full p-8 text-center text-slate-400 font-bold">No athlete data available.</p>';
+    }
+
+    function renderMatches(matches) {
+        if (!matchesList) return;
+        matchesList.innerHTML = matches.map(match => `
+            <div class="p-4 bg-slate-50 rounded-xl border border-slate-100 flex justify-between items-center">
+                <div class="flex items-center gap-4">
+                    <span class="text-[8px] font-black uppercase tracking-widest bg-white border border-slate-200 px-2 py-1 rounded text-slate-500">${match.sport || 'Game'}</span>
+                    <p class="text-[10px] font-black uppercase text-slate-800 italic">
+                        ${match.teamA || 'Team 1'} <span class="text-blue-600 text-[8px] mx-1">vs</span> ${match.teamB || 'Team 2'}
+                    </p>
+                </div>
+                <div class="text-right">
+                    <p class="text-[10px] font-black text-slate-900">${match.scoreA || 0} - ${match.scoreB || 0}</p>
+                    <p class="text-[8px] font-bold text-slate-400 uppercase">${match.status || 'Finished'}</p>
+                </div>
+            </div>
+        `).join('') || '<p class="p-8 text-center text-slate-400 font-bold">No match summaries recorded yet.</p>';
+    }
+
+    // 🔹 UI INTERACTIVITY
+    window.switchTab = (tab) => {
+        document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.classList.remove('active', 'bg-white', 'shadow-sm', 'text-blue-600');
+            btn.classList.add('text-slate-500');
+        });
+
+        document.getElementById(`tab-${tab}`).classList.remove('hidden');
+        const activeBtn = event.currentTarget;
+        activeBtn.classList.add('active', 'bg-white', 'shadow-sm', 'text-blue-600');
+        activeBtn.classList.remove('text-slate-500');
+
+        const titles = {
+            'rankings': 'Final Rankings Report',
+            'mvp': 'MVP Contenders Record',
+            'matches': 'Comprehensive Match Summaries'
         };
+        document.getElementById('reportTitle').textContent = titles[tab];
+        document.getElementById('printReportTitle').textContent = titles[tab];
+    };
 
-        // Profile Toggle
-        document.getElementById('profileToggle').addEventListener('click', (e) => {
-            e.stopPropagation();
-            document.getElementById('profileDropdown').classList.toggle('show');
-        });
-
-        document.addEventListener('click', () => {
-            document.getElementById('profileDropdown').classList.remove('show');
-        });
-
-        // Sidebar Controls
-        const sidebar = document.getElementById('sidebar');
-        const overlay = document.getElementById('sidebarOverlay');
+    window.simulateExport = (type) => {
+        const toast = document.getElementById('toast');
+        toast.textContent = `Generating ${type} file... please wait.`;
+        toast.classList.remove('opacity-0', 'pointer-events-none');
         
-        document.getElementById('openSidebar').addEventListener('click', () => {
-            sidebar.classList.remove('sidebar-closed');
-            sidebar.classList.add('sidebar-open');
-            overlay.classList.remove('hidden');
-        });
+        setTimeout(() => {
+            toast.textContent = `${type} Report exported successfully!`;
+            setTimeout(() => {
+                toast.classList.add('opacity-0', 'pointer-events-none');
+            }, 2000);
+        }, 1500);
+    };
 
-        document.getElementById('closeSidebar').addEventListener('click', () => {
-            sidebar.classList.add('sidebar-closed');
-            sidebar.classList.remove('sidebar-open');
-            overlay.classList.add('hidden');
-        });
+    // Sidebar & Profile Handlers
+    document.getElementById('profileToggle').addEventListener('click', (e) => {
+        e.stopPropagation();
+        document.getElementById('profileDropdown').classList.toggle('show');
+    });
 
-        overlay.addEventListener('click', () => {
-            sidebar.classList.add('sidebar-closed');
-            overlay.classList.add('hidden');
-        });
+    document.addEventListener('click', () => {
+        const dropdown = document.getElementById('profileDropdown');
+        if(dropdown) dropdown.classList.remove('show');
+    });
 
-        // Logout
-        document.getElementById('logoutBtn').addEventListener('click', async () => {
-            await signOut(auth);
-        });
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('sidebarOverlay');
+    
+    document.getElementById('openSidebar').addEventListener('click', () => {
+        sidebar.classList.replace('sidebar-closed', 'sidebar-open');
+        overlay.classList.remove('hidden');
+    });
 
-        document.getElementById('changePassBtn').addEventListener('click', () => {
-            const toast = document.getElementById('toast');
-            toast.textContent = "Redirecting to account settings...";
-            toast.classList.remove('opacity-0');
-            setTimeout(() => toast.classList.add('opacity-0'), 2000);
-        });
+    document.getElementById('closeSidebar').addEventListener('click', () => {
+        sidebar.classList.replace('sidebar-open', 'sidebar-closed');
+        overlay.classList.add('hidden');
+    });
 
-    </script>
+    // Logout
+    document.getElementById('logoutBtn').addEventListener('click', async () => {
+        await signOut(auth);
+        location.reload();
+    });
+
+</script>
 </body>
 </html>
