@@ -333,6 +333,12 @@
     const auth = getAuth(app);
     const db = getFirestore(app);
 
+    // 🔹 STATE MANAGEMENT (The "Bridge" between collections)
+    let globalTeams = [];
+    let globalSports = [];
+    let globalMatches = [];
+    let globalPlayers = [];
+
     // 🔹 UI ELEMENTS
     const authScreen = document.getElementById('authScreen');
     const mainWrapper = document.getElementById('mainWrapper');
@@ -346,8 +352,8 @@
             const email = user.email || "Admin";
             const namePart = email.split('@')[0] || "User";
             
-            document.getElementById('adminName').textContent = namePart;
-            document.getElementById('adminInitials').textContent = namePart.substring(0, 2).toUpperCase();
+            if(document.getElementById('adminName')) document.getElementById('adminName').textContent = namePart;
+            if(document.getElementById('adminInitials')) document.getElementById('adminInitials').textContent = namePart.substring(0, 2).toUpperCase();
             
             if(authScreen) authScreen.style.display = 'none';
             if(mainWrapper) mainWrapper.style.display = 'flex';
@@ -361,38 +367,52 @@
 
     // 🔹 DATA LOADING
     function loadData() {
-        // Setup Dates
+        // Setup Date/ID Display
         const now = new Date();
         const dateStr = now.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
-        document.getElementById('currentDate').textContent = dateStr;
+        if(document.getElementById('currentDate')) document.getElementById('currentDate').textContent = dateStr;
         document.querySelectorAll('.current-date-full').forEach(el => el.textContent = now.toLocaleString());
-        document.getElementById('reportId').textContent = Math.random().toString(36).substring(2, 10).toUpperCase();
+        if(document.getElementById('reportId')) document.getElementById('reportId').textContent = Math.random().toString(36).substring(2, 10).toUpperCase();
 
-        // 1. Teams/Rankings Sync
-        const teamsRef = collection(db, 'artifacts', currentAppId, 'public', 'data', 'teams');
-        onSnapshot(teamsRef, (snapshot) => {
-            const teams = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-            // Sort by total points (descending)
-            teams.sort((a, b) => (b.totalPoints || 0) - (a.totalPoints || 0));
-            renderRankings(teams);
+        // 1. Sync Sports (Dictionary)
+        const sportsRef = collection(db, 'artifacts', currentAppId, 'public', 'data', 'sports');
+        onSnapshot(sportsRef, (snap) => {
+            globalSports = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+            refreshUI(); 
         });
 
-        // 2. Athletes/MVPs Sync (Connecting your player data here)
+        // 2. Sync Teams (Rankings)
+        const teamsRef = collection(db, 'artifacts', currentAppId, 'public', 'data', 'teams');
+        onSnapshot(teamsRef, (snapshot) => {
+            globalTeams = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            globalTeams.sort((a, b) => (b.totalPoints || 0) - (a.totalPoints || 0));
+            renderRankings(globalTeams);
+            refreshUI();
+        });
+
+        // 3. Sync Players (MVPs)
         const playersRef = collection(db, 'artifacts', currentAppId, 'public', 'data', 'players');
-        // We query by stats descending to show the top performers first
         onSnapshot(playersRef, (snapshot) => {
-            const players = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-            // Sort by stats (points) descending
-            const sortedPlayers = players.sort((a, b) => (b.stats || 0) - (a.stats || 0));
+            globalPlayers = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            const sortedPlayers = [...globalPlayers].sort((a, b) => (b.stats || 0) - (a.stats || 0));
             renderMVPs(sortedPlayers.slice(0, 9)); 
         });
 
-        // 3. Match Summaries Sync
+        // 4. Sync Matches
         const matchesRef = collection(db, 'artifacts', currentAppId, 'public', 'data', 'matches');
         onSnapshot(matchesRef, (snapshot) => {
-            const matches = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-            renderMatches(matches.slice(0, 10));
+            globalMatches = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            renderMatches(globalMatches.slice(0, 10));
         });
+    }
+
+    // Helper to refresh lists when dependent data (like names) arrives
+    function refreshUI() {
+        if (globalMatches.length > 0) renderMatches(globalMatches.slice(0, 10));
+        if (globalPlayers.length > 0) {
+            const sorted = [...globalPlayers].sort((a, b) => (b.stats || 0) - (a.stats || 0));
+            renderMVPs(sorted.slice(0, 9));
+        }
     }
 
     // 🔹 RENDER FUNCTIONS
@@ -406,7 +426,7 @@
                     </span>
                 </td>
                 <td class="py-4">
-                    <p class="font-black text-slate-900 uppercase text-xs tracking-tight">${team.name || 'Unknown Team'}</p>
+                    <p class="font-black text-slate-900 uppercase text-xs tracking-tight">${team.name || team.teamName || 'Unknown Team'}</p>
                     <p class="text-[9px] font-bold text-slate-400 uppercase">${team.department || 'General'}</p>
                 </td>
                 <td class="py-4 text-xs font-bold text-yellow-600">${team.gold || 0}</td>
@@ -421,41 +441,55 @@
 
     function renderMVPs(players) {
         if (!mvpGrid) return;
-        mvpGrid.innerHTML = players.map(player => `
+        mvpGrid.innerHTML = players.map(player => {
+            const teamObj = globalTeams.find(t => t.id === player.teamId);
+            const teamName = teamObj ? (teamObj.name || teamObj.teamName) : (player.team || 'N/A');
+            
+            return `
             <div class="p-4 border border-slate-100 rounded-xl hover:shadow-md transition-all bg-white">
                 <div class="flex items-center gap-4">
                     <div class="h-10 w-10 bg-slate-900 rounded-lg flex items-center justify-center text-white font-black uppercase text-xs">
-                        ${player.fullName ? player.fullName.substring(0, 2) : '??'}
+                        ${(player.fullName || player.name || '??').substring(0, 2).toUpperCase()}
                     </div>
                     <div>
-                        <p class="font-black text-slate-900 uppercase text-xs">${player.fullName || 'Anonymous'}</p>
+                        <p class="font-black text-slate-900 uppercase text-xs">${player.fullName || player.name || 'Anonymous'}</p>
                         <p class="text-[9px] font-bold text-blue-600 uppercase tracking-widest">${player.sport || 'Athlete'}</p>
                     </div>
                 </div>
                 <div class="mt-4 pt-4 border-t border-dashed border-slate-100 flex justify-between items-center">
-                    <div class="text-[8px] uppercase font-black text-slate-400">Team: <span class="text-slate-900">${player.team || 'N/A'}</span></div>
+                    <div class="text-[8px] uppercase font-black text-slate-400">Team: <span class="text-slate-900">${teamName}</span></div>
                     <div class="px-2 py-1 bg-orange-50 text-orange-600 rounded text-[9px] font-black">${player.stats || 0} PTS</div>
                 </div>
-            </div>
-        `).join('') || '<p class="col-span-full p-8 text-center text-slate-400 font-bold">No athlete data available.</p>';
+            </div>`;
+        }).join('') || '<p class="col-span-full p-8 text-center text-slate-400 font-bold">No athlete data available.</p>';
     }
 
     function renderMatches(matches) {
         if (!matchesList) return;
-        matchesList.innerHTML = matches.map(match => `
+        matchesList.innerHTML = matches.map(match => {
+            // Find Names based on IDs
+            const teamA = globalTeams.find(t => t.id === match.teamAId);
+            const teamB = globalTeams.find(t => t.id === match.teamBId);
+            const sport = globalSports.find(s => s.id === match.sportId);
+
+            const nameA = teamA ? (teamA.name || teamA.teamName) : 'Team A';
+            const nameB = teamB ? (teamB.name || teamB.teamName) : 'Team B';
+            const sportName = sport ? (sport.name || sport.sportName) : 'Game';
+
+            return `
             <div class="p-4 bg-slate-50 rounded-xl border border-slate-100 flex justify-between items-center">
                 <div class="flex items-center gap-4">
-                    <span class="text-[8px] font-black uppercase tracking-widest bg-white border border-slate-200 px-2 py-1 rounded text-slate-500">${match.sport || 'Game'}</span>
+                    <span class="text-[8px] font-black uppercase tracking-widest bg-white border border-slate-200 px-2 py-1 rounded text-slate-500">${sportName}</span>
                     <p class="text-[10px] font-black uppercase text-slate-800 italic">
-                        ${match.teamA || 'Team 1'} <span class="text-blue-600 text-[8px] mx-1">vs</span> ${match.teamB || 'Team 2'}
+                        ${nameA} <span class="text-blue-600 text-[8px] mx-1">vs</span> ${nameB}
                     </p>
                 </div>
                 <div class="text-right">
                     <p class="text-[10px] font-black text-slate-900">${match.scoreA || 0} - ${match.scoreB || 0}</p>
-                    <p class="text-[8px] font-bold text-slate-400 uppercase">${match.status || 'Finished'}</p>
+                    <p class="text-[8px] font-bold text-slate-400 uppercase">${match.status || 'Scheduled'}</p>
                 </div>
-            </div>
-        `).join('') || '<p class="p-8 text-center text-slate-400 font-bold">No match summaries recorded yet.</p>';
+            </div>`;
+        }).join('') || '<p class="p-8 text-center text-slate-400 font-bold">No match summaries recorded yet.</p>';
     }
 
     // 🔹 UI INTERACTIVITY
@@ -467,9 +501,11 @@
         });
 
         document.getElementById(`tab-${tab}`).classList.remove('hidden');
-        const activeBtn = event.currentTarget;
-        activeBtn.classList.add('active', 'bg-white', 'shadow-sm', 'text-blue-600');
-        activeBtn.classList.remove('text-slate-500');
+        if(event && event.currentTarget) {
+            const activeBtn = event.currentTarget;
+            activeBtn.classList.add('active', 'bg-white', 'shadow-sm', 'text-blue-600');
+            activeBtn.classList.remove('text-slate-500');
+        }
 
         const titles = {
             'rankings': 'Final Rankings Report',
@@ -482,6 +518,7 @@
 
     window.simulateExport = (type) => {
         const toast = document.getElementById('toast');
+        if(!toast) return;
         toast.textContent = `Generating ${type} file... please wait.`;
         toast.classList.remove('opacity-0', 'pointer-events-none');
         
@@ -494,10 +531,13 @@
     };
 
     // Sidebar & Profile Handlers
-    document.getElementById('profileToggle').addEventListener('click', (e) => {
-        e.stopPropagation();
-        document.getElementById('profileDropdown').classList.toggle('show');
-    });
+    const profileToggle = document.getElementById('profileToggle');
+    if(profileToggle) {
+        profileToggle.addEventListener('click', (e) => {
+            e.stopPropagation();
+            document.getElementById('profileDropdown').classList.toggle('show');
+        });
+    }
 
     document.addEventListener('click', () => {
         const dropdown = document.getElementById('profileDropdown');
@@ -506,22 +546,27 @@
 
     const sidebar = document.getElementById('sidebar');
     const overlay = document.getElementById('sidebarOverlay');
+    const openBtn = document.getElementById('openSidebar');
+    const closeBtn = document.getElementById('closeSidebar');
     
-    document.getElementById('openSidebar').addEventListener('click', () => {
+    if(openBtn) openBtn.addEventListener('click', () => {
         sidebar.classList.replace('sidebar-closed', 'sidebar-open');
         overlay.classList.remove('hidden');
     });
 
-    document.getElementById('closeSidebar').addEventListener('click', () => {
+    if(closeBtn) closeBtn.addEventListener('click', () => {
         sidebar.classList.replace('sidebar-open', 'sidebar-closed');
         overlay.classList.add('hidden');
     });
 
     // Logout
-    document.getElementById('logoutBtn').addEventListener('click', async () => {
-        await signOut(auth);
-        location.reload();
-    });
+    const logoutBtn = document.getElementById('logoutBtn');
+    if(logoutBtn) {
+        logoutBtn.addEventListener('click', async () => {
+            await signOut(auth);
+            location.reload();
+        });
+    }
 
 </script>
 </body>
