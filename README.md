@@ -1,138 +1,67 @@
 # 🏆 Intramurals Leaderboard
 
-**Intramurals Leaderboard** is a full-featured web application designed to track, display, and manage team scores, match results, player statistics, and MVP awards for intramural competitions. It includes both **admin** interfaces (to add/edit teams, players, matches) and **reporting dashboards** (leaderboards, MVP boards, and printable reports).
+![GitHub Pages](https://img.shields.io/badge/GitHub-Pages-blue?style=flat-square&logo=github)
+![JavaScript](https://img.shields.io/badge/JavaScript-ES6-yellow?style=flat-square&logo=javascript)
+![Firebase](https://img.shields.io/badge/Firebase-Firestore-orange?style=flat-square&logo=firebase)
 
-📍 This repository contains the **Frontend Dashboard & Reporting UI** built with HTML, TailwindCSS, and Firebase for real-time data synchronization.
+**Intramurals Leaderboard** is a web application designed to track, display, and manage team scores, match results, player statistics, and MVP awards for intramural competitions. It provides real-time updates using Firebase Firestore and supports admin management of teams, players, and matches.
 
----
+## 🌐 Live Demo
 
-## 📦 Features
+You can view the live demo here: [Intramurals Leaderboard Live](https://luigibarte4563.github.io/Intramurals-Leaderboard/)
 
-### 🧠 Real-Time Leaderboards
-- Displays overall team rankings sorted by points.
-- Shows detailed MVP and match performance dashboards.
+## 🛠️ Features
 
-### 🏟️ Admin Management Tools
-- Create, update, and delete **teams** and **players**.
-- Add and edit **match results** with automatic team name lookups.
-- Assign MVP for matches and finalize MVPs per sport or overall.
+- Admin authentication and dashboard
+- Add, edit, and delete teams
+- Add, edit, and delete players
+- Manage matches and update scores
+- View MVP and player statistics per sport
+- Real-time leaderboard updates
+- Responsive design for desktop and mobile
 
-### 📊 Data & Statistics
-- Syncs data in real-time using **Firebase Firestore listeners**.
-- Dynamic dashboards update automatically with backend changes.
+## ⚡ Technologies Used
 
-### 🖨️ Reporting
-- Printable report views for intramural summaries.
-- Export options (PDF/Excel simulation UI).
+- **Frontend:** HTML, CSS, JavaScript (ES Modules)
+- **Backend / Database:** Firebase Firestore
+- **Authentication:** Firebase Auth (Anonymous Sign-In for demo)
+- **Hosting:** GitHub Pages (Live Demo)
 
-### 🔐 Authentication
-- Anonymous or authenticated access to admin tools using Firebase Auth.
-  
----
+## 🚀 Getting Started
 
-## 🧩 Tech Stack
-
-| Component | Technology |
-|-----------|------------|
-| Frontend UI | HTML5, TailwindCSS |
-| Client Logic | JavaScript (ES Modules) |
-| Backend / Database | Firebase Firestore |
-| Authentication | Firebase Auth |
-| Hosting | (Optional) GitHub Pages or Firebase Hosting |
-
----
-
-## 🚀 Installation
-
-To run this project locally:
-
-1. **Clone the repository**
+1. Clone the repository:
 
    ```bash
    git clone https://github.com/Luigibarte4563/Intramurals-Leaderboard.git
    cd Intramurals-Leaderboard
-Open index.html in your browser
+Open index.html in a browser, or run a local server:
 
-You can use a local server like VSCode Live Server for best results.
-
-Configure Firebase
-
-Make sure you have a Firebase project set up and update the config in JS files:
-
-js
+bash
 Copy code
-const firebaseConfig = {
-  apiKey: "",
-  authDomain: "",
-  projectId: "",
-  storageBucket: "",
-  messagingSenderId: "",
-  appId: ""
-};
-📁 Folder Structure
-sql
+# Using VS Code Live Server extension
+http://127.0.0.1:5500/index.html
+Ensure Firebase configuration is correctly set in your scripts.
+
+🔧 Usage
+Admin Dashboard: Add teams, players, and manage matches.
+
+Leaderboard: View team rankings and player stats.
+
+Match Updates: Record match scores and MVPs in real time.
+
+📂 Project Structure
+graphql
 Copy code
 Intramurals-Leaderboard/
-├─ adminDashboard/
-├─ index.html
-├─ playersManagement.html
-├─ teamsManagement.html
-├─ Matches&Results.html
-├─ Leaderboard.html
-├─ MVP_Management.html
-├─ settings.html
-├─ firebase-scripts.js
-├─ reportView.html
+├─ index.html          # Main landing page
+├─ assets/             # Images, CSS, and JS assets
+├─ scripts/            # Firebase and app logic
 └─ README.md
-Each HTML file contains associated JS logic to handle a specific part of the app.
+🤝 Contribution
+Feel free to fork this repository and submit pull requests. Any improvements to UI, performance, or features are welcome!
 
-📌 Usage
-👤 Admin
-Add/edit teams
+📄 License
+This project is open source and available under the MIT License.
 
-Add/edit players
-
-Record match results
-
-Finalize MVPs
-
-📈 Viewer
-View team rankings
-
-Browse MVP leaderboards
-
-Review match summaries
-
-Print reports
-
-📋 Data Model (Firestore)
-Collections:
-
-swift
+yaml
 Copy code
-artifacts/{appId}/public/data/
-├─ teams
-├─ players
-├─ matches
-├─ sports
-├─ mvp_formulas
-├─ mvp_finalized
-Each document typically contains IDs and relevant fields for lookup/mapping.
-
-✨ Contributing
-Contributions are welcome! If you find bugs or want to add features:
-
-Fork the repository
-
-Create a new branch (feature/xyz)
-
-Commit your changes
-
-Submit a Pull Request
-
-📜 License
-This project is open-source and available under the MIT License.
-Feel free to reuse, adapt, and build upon this project.
-
-⭐ Support
-If you find this project useful, give it a ⭐ on GitHub!
