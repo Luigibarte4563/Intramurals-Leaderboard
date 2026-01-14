@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Matches & Results | Intramurals 2026</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        :root {
+            --primary-blue: #1e3a8a;
+            --accent-gold: #facc15;
+            --sidebar-bg: #0f172a;
+        }
+        body { background-color: #f1f5f9; font-family: 'Inter', sans-serif; }
+        
+        #mainWrapper { display: none; }
+        .sidebar { background-color: var(--sidebar-bg); transition: transform 0.3s ease-in-out; z-index: 1000; }
+        .sidebar-closed { transform: translateX(-100%); }
+        .sidebar-open { transform: translateX(0); }
+
+        .nav-item { color: #94a3b8; transition: all 0.2s ease; border-left: 4px solid transparent; }
+        .nav-item:hover, .nav-item.active { 
+            color: white; 
+            background-color: rgba(255, 255, 255, 0.1); 
+            border-left-color: var(--accent-gold); 
+        }
+
+        .profile-dropdown { display: none; }
+        .profile-dropdown.show { display: block; }
+
+        .custom-modal { display: none; background-color: rgba(0, 0, 0, 0.6); z-index: 2000; }
+        .custom-modal.active { display: flex; }
+
+        #authScreen {
+            position: fixed; inset: 0; background: white; z-index: 9999;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+        }
+        .spinner {
+            width: 40px; height: 40px; border: 4px solid #f3f3f3;
+            border-top: 4px solid var(--primary-blue); border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        .match-card { border-top: 4px solid var(--primary-blue); transition: transform 0.2s; }
+        .match-card:hover { transform: translateY(-2px); }
+        
+        #sidebarOverlay { display: none; background: rgba(0,0,0,0.5); z-index: 999; }
+        #sidebarOverlay.active { display: block; }
+
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+    </style>
+</head>
+<body class="min-h-screen overflow-x-hidden">
+
+    <!-- Loading Screen -->
+    <div id="authScreen">
+        <div class="spinner mb-4"></div>
+        <p class="text-xs font-black uppercase tracking-widest text-slate-400">Loading Matches & Results...</p>
+    </div>
+
+    <!-- Mobile Sidebar Overlay -->
+    <div id="sidebarOverlay" class="fixed inset-0 lg:hidden"></div>
+
+    <div id="mainWrapper" class="flex min-h-screen">
+        
+        <!-- SIDEBAR -->
+        <aside id="sidebar" class="sidebar fixed inset-y-0 left-0 w-64 flex-shrink-0 text-white flex flex-col sidebar-closed lg:relative lg:translate-x-0">
+            <div class="p-6 flex items-center justify-between border-b border-slate-700">
+                <div class="flex items-center gap-3">
+                    <div class="h-8 w-8 bg-blue-600 rounded flex items-center justify-center font-black text-xs">UDD</div>
+                    <span class="font-black tracking-tighter text-xl italic uppercase">Intra<span class="text-yellow-400">2026</span></span>
+                </div>
+                <button id="closeSidebar" class="lg:hidden text-slate-400 hover:text-white">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+
+            <nav class="flex-1 mt-4 overflow-y-auto">
+                <a href="dashboard.html" class="nav-item flex items-center gap-3 px-6 py-4">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a11 11 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
+                    <span class="text-sm font-bold uppercase tracking-wider">Dashboard</span>
+                </a>
+                <a href="sportsManagement.html" class="nav-item flex items-center gap-3 px-6 py-4">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                    <span class="text-sm font-bold uppercase tracking-wider">Sports Management</span>
+                </a>
+                <a href="teamsManagement.html" class="nav-item flex items-center gap-3 px-6 py-4">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+                    <span class="text-sm font-bold uppercase tracking-wider">Teams Management</span>
+                </a>
+                <a href="playersManagement.html" class="nav-item flex items-center gap-3 px-6 py-4">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
+                    <span class="text-sm font-bold uppercase tracking-wider">Players Management</span>
+                </a>
+                <a href="#" class="nav-item active flex items-center gap-3 px-6 py-4">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                    <span class="text-sm font-bold uppercase tracking-wider">Matches & Results</span>
+                </a>
+                <a href="Leaderboard.html" class="nav-item flex items-center gap-3 px-6 py-4">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2v2m4.618 1.187l1.618 3.236L21 15.382m-7.382-4.195L13 8.187l-1.618 3.236L8 15.382m7.382-4.195L21 8.187V11a2 2 0 01-2 2h-5a2 2 0 01-2-2V9.187z"></path></svg>
+                    <span class="text-sm font-bold uppercase tracking-wider">Leaderboard</span>
+                </a>
+                <a href="MVP_Management.html" class="nav-item flex items-center gap-3 px-6 py-4">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"></path></svg>
+                    <span class="text-sm font-bold uppercase tracking-wider">MVP Management</span>
+                </a>
+                <a href="reports.html" class="nav-item flex items-center gap-3 px-6 py-4">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                    <span class="text-sm font-bold uppercase tracking-wider">Reports</span>
+                </a>
+                <a href="settings.html" class="nav-item flex items-center gap-3 px-6 py-4 border-t border-slate-700 mt-2">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                    <span class="text-sm font-bold uppercase tracking-wider">Settings</span>
+                </a>
+            </nav>
+        </aside>
+
+        <!-- MAIN CONTENT -->
+        <main class="flex-1 flex flex-col h-screen overflow-hidden">
+            <!-- Header -->
+            <header class="bg-white min-h-[64px] border-b flex items-center justify-between px-4 lg:px-8 relative z-50">
+                <div class="flex items-center gap-4">
+                    <button id="openSidebar" class="lg:hidden p-2 hover:bg-slate-100 rounded-lg">
+                        <svg class="w-6 h-6 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
+                    </button>
+                    <h2 class="text-sm lg:text-xl font-black text-slate-800 uppercase italic tracking-tight truncate">Matches & Results</h2>
+                </div>
+                
+                <div class="flex items-center gap-4">
+                    <div class="relative">
+                        <button id="profileToggle" class="flex items-center gap-2 hover:bg-slate-50 p-1 lg:p-2 rounded-lg transition-all focus:outline-none">
+                            <div class="text-right hidden sm:block">
+                                <p id="adminName" class="text-[10px] lg:text-xs font-black text-slate-900 uppercase">Admin</p>
+                                <p class="text-[8px] lg:text-[10px] text-slate-500 font-bold uppercase">Game Official</p>
+                            </div>
+                            <div id="adminInitials" class="h-8 w-8 lg:h-10 lg:w-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 font-bold border-2 border-blue-200 text-xs lg:text-base">
+                                AD
+                            </div>
+                        </button>
+                        
+                        <div id="profileDropdown" class="profile-dropdown absolute right-0 mt-2 w-48 lg:w-56 bg-white rounded-xl shadow-xl border border-slate-100 z-[1001]">
+                            <div class="py-2">
+                                <button class="w-full text-left px-4 py-3 text-sm text-slate-700 hover:bg-blue-50 font-semibold transition-colors">
+                                    Change Password
+                                </button>
+                                <div class="h-px bg-slate-100 my-1 mx-2"></div>
+                                <button id="logoutBtn" class="w-full text-left px-4 py-3 text-sm text-red-600 hover:bg-red-50 font-black transition-colors">
+                                    Log Out
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <div class="flex-1 overflow-y-auto p-4 lg:p-8">
+                <!-- Action Bar -->
+                <div class="mb-8 flex flex-wrap gap-4 items-center justify-between">
+                    <button onclick="openModal('addMatchModal')" class="bg-blue-600 text-white px-6 py-3 rounded-xl font-black uppercase text-xs tracking-widest shadow-lg hover:bg-blue-700 transition-all flex items-center gap-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
+                        Schedule Match
+                    </button>
+
+                    <div class="flex gap-2">
+                        <select id="filterSport" class="bg-white border-2 border-slate-200 rounded-lg px-4 py-2 text-xs font-bold uppercase outline-none focus:border-blue-500">
+                            <option value="">All Sports</option>
+                        </select>
+                        <select id="filterStatus" class="bg-white border-2 border-slate-200 rounded-lg px-4 py-2 text-xs font-bold uppercase outline-none focus:border-blue-500">
+                            <option value="all">All Status</option>
+                            <option value="scheduled">Scheduled</option>
+                            <option value="completed">Completed</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Match Grid -->
+                <div id="matchGrid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                    <!-- Cards will be injected here -->
+                    <div class="col-span-full py-20 text-center">
+                        <div class="spinner mx-auto mb-4"></div>
+                        <p class="text-slate-400 font-bold uppercase text-xs tracking-widest">Fetching matches...</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <footer class="h-12 bg-slate-900 text-white flex flex-col sm:flex-row items-center justify-center sm:justify-between px-8 text-[8px] lg:text-[10px] font-black uppercase tracking-[0.2em] gap-2 py-2">
+                <span>Intramurals 2026 Admin Portal</span>
+                <div class="flex items-center gap-2">
+                    <span class="h-2 w-2 bg-green-500 rounded-full animate-pulse"></span>
+                    <span>System Online</span>
+                </div>
+            </footer>
+        </main>
+    </div>
+
+    <!-- MODAL: ADD MATCH -->
+    <div id="addMatchModal" class="custom-modal fixed inset-0 items-center justify-center p-4">
+        <div class="bg-white rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden">
+            <div class="p-6 border-b bg-slate-50 flex justify-between items-center">
+                <h3 class="text-lg font-black uppercase italic text-slate-800">Schedule New Match</h3>
+                <button onclick="closeModal('addMatchModal')" class="text-slate-400 hover:text-slate-600">&times;</button>
+            </div>
+            <form id="matchForm" class="p-6 space-y-4">
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="col-span-2">
+                        <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Sport</label>
+                        <select id="matchSport" required class="w-full bg-slate-50 border-2 border-slate-100 rounded-xl px-4 py-3 text-sm font-bold outline-none focus:border-blue-500"></select>
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Team A</label>
+                        <select id="teamA" required class="w-full bg-slate-50 border-2 border-slate-100 rounded-xl px-4 py-3 text-sm font-bold outline-none focus:border-blue-500"></select>
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Team B</label>
+                        <select id="teamB" required class="w-full bg-slate-50 border-2 border-slate-100 rounded-xl px-4 py-3 text-sm font-bold outline-none focus:border-blue-500"></select>
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Date</label>
+                        <input type="date" id="matchDate" required class="w-full bg-slate-50 border-2 border-slate-100 rounded-xl px-4 py-3 text-sm font-bold outline-none focus:border-blue-500">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Time</label>
+                        <input type="time" id="matchTime" required class="w-full bg-slate-50 border-2 border-slate-100 rounded-xl px-4 py-3 text-sm font-bold outline-none focus:border-blue-500">
+                    </div>
+                    <div class="col-span-2">
+                        <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Venue/Location</label>
+                        <input type="text" id="matchVenue" placeholder="e.g. Main Gymnasium" required class="w-full bg-slate-50 border-2 border-slate-100 rounded-xl px-4 py-3 text-sm font-bold outline-none focus:border-blue-500">
+                    </div>
+                </div>
+                <div class="pt-4 flex gap-3">
+                    <button type="button" onclick="closeModal('addMatchModal')" class="flex-1 py-3 border-2 border-slate-200 text-slate-500 rounded-xl font-black uppercase text-xs tracking-widest hover:bg-slate-50">Cancel</button>
+                    <button type="submit" class="flex-1 py-3 bg-blue-600 text-white rounded-xl font-black uppercase text-xs tracking-widest hover:bg-blue-700 shadow-lg">Save Match</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL: UPDATE RESULTS -->
+    <div id="updateResultsModal" class="custom-modal fixed inset-0 items-center justify-center p-4">
+        <div class="bg-white rounded-2xl w-full max-w-4xl shadow-2xl overflow-hidden max-h-[90vh] flex flex-col">
+            <div class="p-6 border-b bg-slate-50 flex justify-between items-center">
+                <h3 class="text-lg font-black uppercase italic text-slate-800">Match Reporting</h3>
+                <button onclick="closeModal('updateResultsModal')" class="text-slate-400 hover:text-slate-600">&times;</button>
+            </div>
+            
+            <div class="flex-1 overflow-y-auto p-6 space-y-8">
+                <!-- Scores Section -->
+                <section>
+                    <h4 class="text-xs font-black text-blue-600 uppercase tracking-widest mb-4 flex items-center gap-2">
+                        <span class="h-1 w-4 bg-blue-600"></span> Final Score
+                    </h4>
+                    <div class="flex items-center justify-center gap-8 bg-slate-50 p-8 rounded-2xl border-2 border-slate-100">
+                        <div class="text-center">
+                            <p id="resTeamAName" class="font-black uppercase text-sm mb-2">Team A</p>
+                            <input type="number" id="resScoreA" value="0" min="0" class="w-24 text-center text-3xl font-black bg-white border-2 border-slate-200 rounded-xl p-3 focus:border-blue-500 outline-none">
+                        </div>
+                        <div class="text-4xl font-black text-slate-300 italic">VS</div>
+                        <div class="text-center">
+                            <p id="resTeamBName" class="font-black uppercase text-sm mb-2">Team B</p>
+                            <input type="number" id="resScoreB" value="0" min="0" class="w-24 text-center text-3xl font-black bg-white border-2 border-slate-200 rounded-xl p-3 focus:border-blue-500 outline-none">
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Stats & MVP -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <section>
+                        <h4 class="text-xs font-black text-orange-600 uppercase tracking-widest mb-4 flex items-center gap-2">
+                            <span class="h-1 w-4 bg-orange-600"></span> Game MVP
+                        </h4>
+                        <select id="mvpSelect" class="w-full bg-slate-50 border-2 border-slate-100 rounded-xl px-4 py-3 text-sm font-bold outline-none focus:border-orange-500">
+                            <option value="">Select MVP Player</option>
+                        </select>
+                        <p class="mt-2 text-[10px] text-slate-400 font-medium">Player must be registered in the match teams.</p>
+                    </section>
+
+                    <section>
+                        <h4 class="text-xs font-black text-slate-600 uppercase tracking-widest mb-4 flex items-center gap-2">
+                            <span class="h-1 w-4 bg-slate-600"></span> Match Status
+                        </h4>
+                        <select id="resStatus" class="w-full bg-slate-50 border-2 border-slate-100 rounded-xl px-4 py-3 text-sm font-bold outline-none focus:border-slate-500">
+                            <option value="scheduled">Scheduled (Ongoing/Upcoming)</option>
+                            <option value="completed">Completed (Finalized)</option>
+                        </select>
+                    </section>
+                </div>
+            </div>
+
+            <div class="p-6 bg-slate-50 border-t flex gap-3">
+                <button onclick="closeModal('updateResultsModal')" class="px-6 py-3 border-2 border-slate-200 text-slate-500 rounded-xl font-black uppercase text-xs tracking-widest hover:bg-slate-100">Cancel</button>
+                <button id="saveResultsBtn" class="flex-1 py-3 bg-slate-900 text-white rounded-xl font-black uppercase text-xs tracking-widest hover:bg-slate-800 shadow-lg">Finalize Results</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- SCRIPTS -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
+        import { getAuth, onAuthStateChanged, signOut, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+        import { getFirestore, collection, doc, addDoc, updateDoc, onSnapshot, query, deleteDoc, getDocs } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
+
+        // 🔥 Firebase Config (Provided by Env)
+        const firebaseConfig = {
+            apiKey: "AIzaSyD5Gkjk7tk48Hv9zgvdlSsdR8FH_nwtGRc",
+            authDomain: "intramurals-score-leaderboard.firebaseapp.com",
+            projectId: "intramurals-score-leaderboard",
+            storageBucket: "intramurals-score-leaderboard.firebasestorage.app",
+            messagingSenderId: "455345215033",
+            appId: "1:455345215033:web:66a387d0fa0fa4453e5fe8"
+        };
+
+        const currentAppId = 'intramurals-2026';
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // State
+        let currentUserId = null;
+        let sports = [];
+        let teams = [];
+        let matches = [];
+        let players = [];
+        let editingMatchId = null;
+
+        // UI Refs
+        const matchGrid = document.getElementById('matchGrid');
+        const filterSport = document.getElementById('filterSport');
+        const filterStatus = document.getElementById('filterStatus');
+
+        // Initial Load
+        window.addEventListener('load', async () => {
+            // Rule 3: Auth First
+            try {
+                const userCred = await signInAnonymously(auth);
+                currentUserId = userCred.user.uid;
+                
+                setupRealtimeListeners();
+            } catch (err) {
+                console.error("Auth failed", err);
+            }
+        });
+
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                document.getElementById('authScreen').style.display = 'none';
+                document.getElementById('mainWrapper').style.display = 'flex';
+                document.getElementById('adminName').textContent = user.isAnonymous ? "Admin" : user.email.split('@')[0];
+            }
+        });
+
+        // Listeners
+        function setupRealtimeListeners() {
+            // Sports
+            const sportsRef = collection(db, 'artifacts', currentAppId, 'public', 'data', 'sports');
+            onSnapshot(sportsRef, (snap) => {
+                sports = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+                updateDropdowns();
+            });
+
+            // Teams
+            const teamsRef = collection(db, 'artifacts', currentAppId, 'public', 'data', 'teams');
+            onSnapshot(teamsRef, (snap) => {
+                teams = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+                updateDropdowns();
+            });
+
+            // Players (for MVP)
+            const playersRef = collection(db, 'artifacts', currentAppId, 'public', 'data', 'players');
+            onSnapshot(playersRef, (snap) => {
+                players = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+            });
+
+            // Matches
+            const matchesRef = collection(db, 'artifacts', currentAppId, 'public', 'data', 'matches');
+            onSnapshot(matchesRef, (snap) => {
+                matches = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+                renderMatches();
+            }, (err) => console.error("Matches error", err));
+        }
+
+        function updateDropdowns() {
+            const matchSport = document.getElementById('matchSport');
+            const teamASelect = document.getElementById('teamA');
+            const teamBSelect = document.getElementById('teamB');
+            
+            // Filter Sport Dropdown
+            filterSport.innerHTML = '<option value="">All Sports</option>';
+            matchSport.innerHTML = '<option value="">Select Sport</option>';
+            sports.forEach(s => {
+                const opt = `<option value="${s.id}">${s.name || s.sportName}</option>`;
+                filterSport.innerHTML += opt;
+                matchSport.innerHTML += opt;
+            });
+
+            // Teams Dropdowns
+            teamASelect.innerHTML = '<option value="">Select Team A</option>';
+            teamBSelect.innerHTML = '<option value="">Select Team B</option>';
+            teams.forEach(t => {
+                const opt = `<option value="${t.id}">${t.name || t.teamName}</option>`;
+                teamASelect.innerHTML += opt;
+                teamBSelect.innerHTML += opt;
+            });
+        }
+
+        // Add Match
+        document.getElementById('matchForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const data = {
+                sportId: document.getElementById('matchSport').value,
+                teamAId: document.getElementById('teamA').value,
+                teamBId: document.getElementById('teamB').value,
+                date: document.getElementById('matchDate').value,
+                time: document.getElementById('matchTime').value,
+                venue: document.getElementById('matchVenue').value,
+                scoreA: 0,
+                scoreB: 0,
+                status: 'scheduled',
+                mvpId: '',
+                createdAt: new Date().toISOString()
+            };
+
+            if (data.teamAId === data.teamBId) {
+                showToast("Team A and Team B cannot be the same", "error");
+                return;
+            }
+
+            try {
+                await addDoc(collection(db, 'artifacts', currentAppId, 'public', 'data', 'matches'), data);
+                closeModal('addMatchModal');
+                e.target.reset();
+            } catch (err) {
+                console.error("Save failed", err);
+            }
+        });
+
+        // Render Matches
+        function renderMatches() {
+            const sportFilter = filterSport.value;
+            const statusFilter = filterStatus.value;
+
+            let filtered = matches;
+            if (sportFilter) filtered = filtered.filter(m => m.sportId === sportFilter);
+            if (statusFilter !== 'all') filtered = filtered.filter(m => m.status === statusFilter);
+
+            // Sort by date (desc)
+            filtered.sort((a,b) => new Date(b.date) - new Date(a.date));
+
+            if (filtered.length === 0) {
+                matchGrid.innerHTML = `
+                    <div class="col-span-full py-20 text-center bg-white rounded-2xl border-2 border-dashed border-slate-200">
+                        <p class="text-slate-400 font-bold uppercase text-xs tracking-widest">No matches found matching your filters</p>
+                    </div>
+                `;
+                return;
+            }
+
+            matchGrid.innerHTML = filtered.map(match => {
+                const sport = sports.find(s => s.id === match.sportId) || { name: 'Unknown Sport' };
+                const teamA = teams.find(t => t.id === match.teamAId) || { name: 'TBD' };
+                const teamB = teams.find(t => t.id === match.teamBId) || { name: 'TBD' };
+                const isCompleted = match.status === 'completed';
+                const mvp = players.find(p => p.id === match.mvpId);
+
+                return `
+                    <div class="match-card bg-white rounded-2xl shadow-sm p-6 relative flex flex-col h-full border border-slate-100">
+                        <div class="flex justify-between items-start mb-6">
+                            <div>
+                                <span class="bg-blue-50 text-blue-600 text-[9px] font-black uppercase px-2 py-1 rounded mb-2 inline-block">
+                                    ${sport.name || sport.sportName}
+                                </span>
+                                <p class="text-[10px] text-slate-400 font-bold uppercase tracking-tight">
+                                    ${formatDate(match.date)} • ${match.time}
+                                </p>
+                            </div>
+                            <span class="text-[8px] font-black uppercase px-2 py-1 rounded ${isCompleted ? 'bg-green-100 text-green-700' : 'bg-orange-100 text-orange-700'}">
+                                ${match.status}
+                            </span>
+                        </div>
+
+                        <div class="flex items-center justify-between gap-2 mb-6">
+                            <div class="flex-1 text-center">
+                                <p class="font-black uppercase text-xs text-slate-900 truncate mb-1">${teamA.name || teamA.teamName}</p>
+                                <div class="text-2xl font-black ${match.scoreA > match.scoreB ? 'text-blue-600' : 'text-slate-400'}">
+                                    ${match.scoreA}
+                                </div>
+                            </div>
+                            <div class="text-slate-200 font-black italic text-sm">VS</div>
+                            <div class="flex-1 text-center">
+                                <p class="font-black uppercase text-xs text-slate-900 truncate mb-1">${teamB.name || teamB.teamName}</p>
+                                <div class="text-2xl font-black ${match.scoreB > match.scoreA ? 'text-blue-600' : 'text-slate-400'}">
+                                    ${match.scoreB}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bg-slate-50 p-3 rounded-xl mb-6">
+                            <div class="flex items-center gap-2 mb-1">
+                                <svg class="w-3 h-3 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path></svg>
+                                <span class="text-[10px] font-bold text-slate-600 truncate">${match.venue}</span>
+                            </div>
+                            ${mvp ? `
+                                <div class="flex items-center gap-2">
+                                    <svg class="w-3 h-3 text-orange-400" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
+                                    <span class="text-[10px] font-black text-orange-600 uppercase">MVP: ${mvp.name}</span>
+                                </div>
+                            ` : ''}
+                        </div>
+
+                        <div class="mt-auto flex gap-2">
+                            <button onclick="openUpdateModal('${match.id}')" class="flex-1 bg-slate-900 text-white py-2 rounded-lg text-[10px] font-black uppercase tracking-widest hover:bg-slate-800 transition-all">Update Score</button>
+                            <button onclick="deleteMatch('${match.id}')" class="p-2 border-2 border-slate-100 text-slate-300 hover:text-red-500 hover:border-red-100 rounded-lg transition-all">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Global Helpers (attached to window for HTML onclicks)
+        window.openModal = (id) => document.getElementById(id).classList.add('active');
+        window.closeModal = (id) => document.getElementById(id).classList.remove('active');
+
+        window.openUpdateModal = (id) => {
+            const match = matches.find(m => m.id === id);
+            if (!match) return;
+
+            editingMatchId = id;
+            const teamA = teams.find(t => t.id === match.teamAId) || { name: 'Team A' };
+            const teamB = teams.find(t => t.id === match.teamBId) || { name: 'Team B' };
+
+            document.getElementById('resTeamAName').textContent = teamA.name || teamA.teamName;
+            document.getElementById('resTeamBName').textContent = teamB.name || teamB.teamName;
+            document.getElementById('resScoreA').value = match.scoreA;
+            document.getElementById('resScoreB').value = match.scoreB;
+            document.getElementById('resStatus').value = match.status;
+
+            // Load Players for MVP Selection
+            const mvpSelect = document.getElementById('mvpSelect');
+            mvpSelect.innerHTML = '<option value="">Select MVP Player</option>';
+            
+            // Filter players belonging to these two teams
+            const eligiblePlayers = players.filter(p => p.teamId === match.teamAId || p.teamId === match.teamBId);
+            eligiblePlayers.forEach(p => {
+                const opt = document.createElement('option');
+                opt.value = p.id;
+                opt.textContent = `${p.name} (${teams.find(t => t.id === p.teamId)?.name || '?'})`;
+                if (p.id === match.mvpId) opt.selected = true;
+                mvpSelect.appendChild(opt);
+            });
+
+            openModal('updateResultsModal');
+        };
+
+        window.deleteMatch = async (id) => {
+            if (!confirm("Are you sure you want to remove this match schedule?")) return;
+            try {
+                await deleteDoc(doc(db, 'artifacts', currentAppId, 'public', 'data', 'matches', id));
+            } catch (err) { console.error("Delete error", err); }
+        };
+
+        // Finalize Results
+        document.getElementById('saveResultsBtn').addEventListener('click', async () => {
+            if (!editingMatchId) return;
+
+            const scoreA = parseInt(document.getElementById('resScoreA').value);
+            const scoreB = parseInt(document.getElementById('resScoreB').value);
+            const status = document.getElementById('resStatus').value;
+            const mvpId = document.getElementById('mvpSelect').value;
+
+            try {
+                const matchRef = doc(db, 'artifacts', currentAppId, 'public', 'data', 'matches', editingMatchId);
+                await updateDoc(matchRef, {
+                    scoreA,
+                    scoreB,
+                    status,
+                    mvpId,
+                    updatedAt: new Date().toISOString()
+                });
+                closeModal('updateResultsModal');
+            } catch (err) {
+                console.error("Update failed", err);
+            }
+        });
+
+        // Sidebar logic
+        const sidebar = document.getElementById('sidebar');
+        const sidebarOverlay = document.getElementById('sidebarOverlay');
+        const openSidebarBtn = document.getElementById('openSidebar');
+        const closeSidebarBtn = document.getElementById('closeSidebar');
+
+        const toggleSidebar = (isOpen) => {
+            if (isOpen) {
+                sidebar.classList.remove('sidebar-closed');
+                sidebar.classList.add('sidebar-open');
+                sidebarOverlay.classList.add('active');
+            } else {
+                sidebar.classList.remove('sidebar-open');
+                sidebar.classList.add('sidebar-closed');
+                sidebarOverlay.classList.remove('active');
+            }
+        };
+
+        openSidebarBtn.addEventListener('click', () => toggleSidebar(true));
+        closeSidebarBtn.addEventListener('click', () => toggleSidebar(false));
+        sidebarOverlay.addEventListener('click', () => toggleSidebar(false));
+
+        // Profile toggle
+        document.getElementById('profileToggle').addEventListener('click', (e) => {
+            e.stopPropagation();
+            document.getElementById('profileDropdown').classList.toggle('show');
+        });
+        window.addEventListener('click', () => document.getElementById('profileDropdown').classList.remove('show'));
+
+        document.getElementById('logoutBtn').addEventListener('click', () => signOut(auth));
+
+        // Filters
+        filterSport.addEventListener('change', renderMatches);
+        filterStatus.addEventListener('change', renderMatches);
+
+        // Formatting
+        function formatDate(dateStr) {
+            const options = { month: 'short', day: 'numeric', year: 'numeric' };
+            return new Date(dateStr).toLocaleDateString(undefined, options);
+        }
+
+        function showToast(msg, type = "success") {
+            // Simple overlay toast
+            const t = document.createElement('div');
+            t.className = `fixed bottom-4 right-4 px-6 py-3 rounded-lg text-white font-black uppercase text-xs tracking-widest z-[3000] ${type === 'error' ? 'bg-red-500' : 'bg-green-500'} shadow-2xl animate-bounce`;
+            t.textContent = msg;
+            document.body.appendChild(t);
+            setTimeout(() => t.remove(), 3000);
+        }
+
+    </script>
+</body>
+</html>
