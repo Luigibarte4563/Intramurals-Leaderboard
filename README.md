@@ -62,6 +62,3 @@ Feel free to fork this repository and submit pull requests. Any improvements to 
 
 📄 License
 This project is open source and available under the MIT License.
-
-yaml
-Copy code
