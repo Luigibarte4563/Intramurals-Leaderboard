@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Login | Intramurals 2026</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Intramurals Color Palette */
+        :root {
+            --primary-blue: #1e3a8a; /* Deep Athletic Blue */
+            --accent-gold: #facc15;  /* Gold/Yellow for energy */
+            --bg-gray: #f8fafc;
+        }
+
+        body {
+            background-color: var(--bg-gray);
+            background-image: radial-gradient(#cbd5e1 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+
+        .login-card {
+            border-top: 6px solid var(--primary-blue);
+        }
+
+        .btn-primary {
+            background-color: var(--primary-blue);
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            background-color: #172554;
+            transform: translateY(-1px);
+        }
+
+        .logo-container img {
+            max-height: 50px;
+            object-fit: contain;
+        }
+        
+        /* Loading Spinner */
+        .loader {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid var(--primary-blue);
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+            vertical-align: middle;
+            margin-right: 8px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="flex items-center justify-center min-h-screen p-4">
+
+    <div class="login-card bg-white shadow-2xl rounded-xl p-8 w-full max-w-md">
+        
+        <!-- Triple Logo Header -->
+        <div class="logo-container flex justify-between items-center mb-8 px-2">
+            <!-- UDD Logo -->
+            <div class="flex flex-col items-center">
+                <div class="h-12 w-12 bg-gray-100 rounded flex items-center justify-center font-bold text-xs text-blue-900 border" title="Universidad de Dagupan">UDD</div>
+            </div>
+            
+            <span class="text-gray-300 font-light text-xl">✕</span>
+            
+            <!-- SITE Logo -->
+            <div class="flex flex-col items-center">
+                <div class="h-12 w-12 bg-gray-100 rounded flex items-center justify-center font-bold text-xs text-blue-700 border" title="School of Information Technology Education">SITE</div>
+            </div>
+            
+            <span class="text-gray-300 font-light text-xl">✕</span>
+            
+            <!-- Luigi Barte / LB Logo -->
+            <div class="flex flex-col items-center">
+                <div class="h-12 w-12 bg-gray-100 rounded flex items-center justify-center font-bold text-xs text-yellow-600 border" title="Luigi Barte">LB</div>
+            </div>
+        </div>
+
+        <div class="text-center mb-8">
+            <h1 class="text-2xl font-black text-blue-900 tracking-tight uppercase">Admin Login</h1>
+            <p class="text-gray-500 text-sm uppercase tracking-widest font-semibold mt-1">Intramurals 2026</p>
+            <div class="h-1 w-12 bg-yellow-400 mx-auto mt-2 rounded"></div>
+        </div>
+
+        <!-- Login Form -->
+        <form id="loginForm" class="space-y-5">
+            <div>
+                <label class="block text-xs font-bold text-gray-700 uppercase mb-1 ml-1">Admin Email</label>
+                <input type="email" id="email" required placeholder="admin@example.com"
+                    class="w-full px-4 py-3 rounded-lg border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition-all">
+            </div>
+
+            <div>
+                <label class="block text-xs font-bold text-gray-700 uppercase mb-1 ml-1">Password</label>
+                <input type="password" id="password" required placeholder="••••••••"
+                    class="w-full px-4 py-3 rounded-lg border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition-all">
+            </div>
+
+            <button type="submit" id="submitBtn"
+                class="btn-primary w-full text-white font-bold py-3 rounded-lg shadow-lg uppercase tracking-wider text-sm">
+                Login
+            </button>
+        </form>
+
+        <!-- Status & Registration Section -->
+        <div id="statusMessage" class="mt-4 text-center text-sm hidden"></div>
+
+        <div class="mt-6 text-center">
+            <p class="text-sm text-gray-600">
+                Don't have an account? 
+                <a href="#" class="text-blue-700 font-bold hover:underline">Contact System Admin</a>
+            </p>
+        </div>
+
+        <div class="mt-8 pt-6 border-t border-gray-100 text-center">
+            <p class="text-gray-400 text-xs font-medium uppercase">Official Scoring System &copy; 2026</p>
+        </div>
+    </div>
+
+    <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
+    import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-auth.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyD5Gkjk7tk48Hv9zgvdlSsdR8FH_nwtGRc",
+        authDomain: "intramurals-score-leaderboard.firebaseapp.com",
+        databaseURL: "https://intramurals-score-leaderboard-default-rtdb.firebaseio.com",
+        projectId: "intramurals-score-leaderboard",
+        storageBucket: "intramurals-score-leaderboard.firebasestorage.app",
+        messagingSenderId: "455345215033",
+        appId: "1:455345215033:web:66a387d0fa0fa4453e5fe8",
+        measurementId: "G-E0GM8X4K9L"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+
+    const loginForm = document.getElementById('loginForm');
+    const statusMessage = document.getElementById('statusMessage');
+    const submitBtn = document.getElementById('submitBtn');
+
+    function showMessage(msg, isError = false) {
+        statusMessage.textContent = msg;
+        statusMessage.className = `mt-4 text-center text-sm font-semibold p-3 rounded-lg ${
+            isError ? 'bg-red-50 text-red-600' : 'bg-green-50 text-green-600'
+        }`;
+        statusMessage.classList.remove('hidden');
+    }
+
+    loginForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const email = document.getElementById('email').value;
+        const password = document.getElementById('password').value;
+
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<span class="loader"></span> Authenticating...';
+        statusMessage.classList.add('hidden');
+
+        try {
+            await signInWithEmailAndPassword(auth, email, password);
+
+            showMessage("Login Successful! Redirecting...");
+
+            // ✅ REDIRECT AFTER LOGIN
+            setTimeout(() => {
+                window.location.href = "adminDashboard/dashboard.html";
+            }, 1500);
+
+        } catch (error) {
+            let friendlyMsg = "Invalid email or password.";
+            if (error.code === 'auth/user-not-found') friendlyMsg = "Admin account not found.";
+            if (error.code === 'auth/wrong-password') friendlyMsg = "Incorrect password.";
+
+            showMessage(friendlyMsg, true);
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Login';
+        }
+    });
+</script>
+
+</body>
+</html>
