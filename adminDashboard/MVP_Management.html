@@ -244,340 +244,336 @@
     </div>
 
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
-        import { getAuth, onAuthStateChanged, signOut, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
-        import { getFirestore, collection, doc, onSnapshot, setDoc, updateDoc, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
+    import { getAuth, onAuthStateChanged, signOut, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+    import { getFirestore, collection, doc, onSnapshot, setDoc, updateDoc, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
 
-        // 🔥 Firebase Config (Matches Reference)
-        const firebaseConfig = {
-            apiKey: "AIzaSyD5Gkjk7tk48Hv9zgvdlSsdR8FH_nwtGRc",
-            authDomain: "intramurals-score-leaderboard.firebaseapp.com",
-            projectId: "intramurals-score-leaderboard",
-            storageBucket: "intramurals-score-leaderboard.firebasestorage.app",
-            messagingSenderId: "455345215033",
-            appId: "1:455345215033:web:66a387d0fa0fa4453e5fe8"
-        };
+    // 🔥 Firebase Config
+    const firebaseConfig = {
+        apiKey: "AIzaSyD5Gkjk7tk48Hv9zgvdlSsdR8FH_nwtGRc",
+        authDomain: "intramurals-score-leaderboard.firebaseapp.com",
+        projectId: "intramurals-score-leaderboard",
+        storageBucket: "intramurals-score-leaderboard.firebasestorage.app",
+        messagingSenderId: "455345215033",
+        appId: "1:455345215033:web:66a387d0fa0fa4453e5fe8"
+    };
 
-        const currentAppId = 'intramurals-2026';
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
+    const currentAppId = 'intramurals-2026';
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
 
-        // 🔹 APP STATE
-        let state = {
-            sports: [],
-            players: [],
-            matches: [],
-            selectedSport: null,
-            formulas: {},
-            finalized: []
-        };
+    // 🔹 APP STATE
+    let state = {
+        sports: [],
+        players: [],
+        selectedSport: null,
+        formulas: {},
+        finalized: []
+    };
 
-        // 🔹 UI ELEMENTS
-        const authScreen = document.getElementById('authScreen');
-        const mainWrapper = document.getElementById('mainWrapper');
-        const sportSelector = document.getElementById('sportSelector');
-        const formulaSection = document.getElementById('formulaSection');
-        const formulaInputs = document.getElementById('formulaInputs');
-        const candidatesList = document.getElementById('candidatesList');
-        const finalizeSportMvpBtn = document.getElementById('finalizeSportMvpBtn');
-        const finalizedMvpContainer = document.getElementById('finalizedMvpContainer');
-        const sidebar = document.getElementById('sidebar');
-        const sidebarOverlay = document.getElementById('sidebarOverlay');
+    // 🔹 UI ELEMENTS
+    const authScreen = document.getElementById('authScreen');
+    const mainWrapper = document.getElementById('mainWrapper');
+    const sportSelector = document.getElementById('sportSelector');
+    const formulaSection = document.getElementById('formulaSection');
+    const formulaInputs = document.getElementById('formulaInputs');
+    const candidatesList = document.getElementById('candidatesList');
+    const finalizeSportMvpBtn = document.getElementById('finalizeSportMvpBtn');
+    const finalizedMvpContainer = document.getElementById('finalizedMvpContainer');
+    const sidebar = document.getElementById('sidebar');
+    const sidebarOverlay = document.getElementById('sidebarOverlay');
 
-        // 🔹 AUTHENTICATION
-        onAuthStateChanged(auth, async (user) => {
-            if (user) {
-                setupApp(user);
-            } else {
-                // For demo/dev environments where redirect isn't possible, we sign in anonymously
-                try {
-                    await signInAnonymously(auth);
-                } catch(e) {
-                    console.error("Auth failed", e);
-                }
+    // 🔹 AUTHENTICATION
+    onAuthStateChanged(auth, async (user) => {
+        if (user) {
+            setupApp(user);
+        } else {
+            try {
+                await signInAnonymously(auth);
+            } catch(e) {
+                console.error("Auth failed", e);
             }
+        }
+    });
+
+    function setupApp(user) {
+        const email = user.email || "Admin";
+        document.getElementById('adminName').textContent = email.split('@')[0];
+        document.getElementById('adminInitials').textContent = email.substring(0, 2).toUpperCase();
+        
+        authScreen.style.opacity = '0';
+        setTimeout(() => {
+            authScreen.style.display = 'none';
+            mainWrapper.style.display = 'flex';
+        }, 300);
+
+        initDataListeners();
+    }
+
+    // 🔹 DATA LISTENERS
+    function initDataListeners() {
+        // Load Sports
+        onSnapshot(collection(db, 'artifacts', currentAppId, 'public', 'data', 'sports'), (snap) => {
+            state.sports = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+            renderSportOptions();
         });
 
-        function setupApp(user) {
-            const email = user.email || "Admin";
-            document.getElementById('adminName').textContent = email.split('@')[0];
-            document.getElementById('adminInitials').textContent = email.substring(0, 2).toUpperCase();
-            
-            authScreen.style.opacity = '0';
-            setTimeout(() => {
-                authScreen.style.display = 'none';
-                mainWrapper.style.display = 'flex';
-            }, 300);
-
-            initDataListeners();
-        }
-
-        // 🔹 DATA LISTENERS
-        function initDataListeners() {
-            // Load Sports
-            onSnapshot(collection(db, 'artifacts', currentAppId, 'public', 'data', 'sports'), (snap) => {
-                state.sports = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-                renderSportOptions();
+        // Load Players (Mapped to handle 'fullName' or 'name')
+        onSnapshot(collection(db, 'artifacts', currentAppId, 'public', 'data', 'players'), (snap) => {
+            state.players = snap.docs.map(d => {
+                const data = d.data();
+                return { 
+                    id: d.id, 
+                    ...data,
+                    // Normalize name and team fields from both script versions
+                    displayName: data.fullName || data.name || "Unknown Player",
+                    displayTeam: data.team || data.teamName || "Independent",
+                    // Normalize stats (if it's a number from Script 1, wrap it; if object from Script 2, keep it)
+                    playerStats: typeof data.stats === 'object' ? data.stats : { points: data.stats || 0 }
+                };
             });
-
-            // Load Players
-            onSnapshot(collection(db, 'artifacts', currentAppId, 'public', 'data', 'players'), (snap) => {
-                state.players = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-                if (state.selectedSport) updateRankings();
-            });
-
-            // Load Formula settings
-            onSnapshot(collection(db, 'artifacts', currentAppId, 'public', 'data', 'mvp_formulas'), (snap) => {
-                snap.docs.forEach(d => state.formulas[d.id] = d.data());
-                if (state.selectedSport) renderFormulaInputs();
-            });
-
-            // Load Finalized MVPs
-            onSnapshot(collection(db, 'artifacts', currentAppId, 'public', 'data', 'mvp_finalized'), (snap) => {
-                state.finalized = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-                renderFinalized();
-            });
-        }
-
-        // 🔹 RENDERING LOGIC
-        function renderSportOptions() {
-            const current = sportSelector.value;
-            sportSelector.innerHTML = '<option value="" disabled selected>Choose a sport...</option>';
-            state.sports.forEach(sport => {
-                const opt = document.createElement('option');
-                opt.value = sport.id;
-                opt.textContent = sport.name;
-                sportSelector.appendChild(opt);
-            });
-            if(current) sportSelector.value = current;
-        }
-
-        sportSelector.addEventListener('change', (e) => {
-            const sportId = e.target.value;
-            state.selectedSport = state.sports.find(s => s.id === sportId);
-            
-            formulaSection.style.opacity = '1';
-            formulaSection.style.pointerEvents = 'auto';
-            finalizeSportMvpBtn.classList.remove('hidden');
-
-            renderFormulaInputs();
-            updateRankings();
+            if (state.selectedSport) updateRankings();
         });
 
-        function renderFormulaInputs() {
-            const sport = state.selectedSport;
-            if (!sport) return;
+        // Load Formula settings
+        onSnapshot(collection(db, 'artifacts', currentAppId, 'public', 'data', 'mvp_formulas'), (snap) => {
+            snap.docs.forEach(d => state.formulas[d.id] = d.data());
+            if (state.selectedSport) renderFormulaInputs();
+        });
 
-            // Define default metrics if none exist (MVP logic is usually dynamic based on sport type)
-            const defaultMetrics = {
-                'Basketball': ['points', 'rebounds', 'assists', 'steals', 'blocks'],
-                'Volleyball': ['kills', 'aces', 'digs', 'blocks', 'assists'],
-                'Soccer': ['goals', 'assists', 'saves', 'clean_sheets'],
-                'Default': ['score', 'performance_rating']
-            };
+        // Load Finalized MVPs
+        onSnapshot(collection(db, 'artifacts', currentAppId, 'public', 'data', 'mvp_finalized'), (snap) => {
+            state.finalized = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+            renderFinalized();
+        });
+    }
 
-            const metrics = defaultMetrics[sport.name] || defaultMetrics['Default'];
-            const savedFormula = state.formulas[sport.id] || {};
+    // 🔹 RENDERING LOGIC
+    function renderSportOptions() {
+        const current = sportSelector.value;
+        sportSelector.innerHTML = '<option value="" disabled selected>Choose a sport...</option>';
+        state.sports.forEach(sport => {
+            const opt = document.createElement('option');
+            opt.value = sport.id;
+            opt.textContent = sport.name || sport.id;
+            sportSelector.appendChild(opt);
+        });
+        if(current) sportSelector.value = current;
+    }
 
-            formulaInputs.innerHTML = '';
-            metrics.forEach(metric => {
-                const weight = savedFormula[metric] || 1.0;
-                formulaInputs.innerHTML += `
-                    <div class="flex items-center justify-between gap-4">
-                        <label class="text-[10px] font-black uppercase text-slate-500 tracking-wider">${metric.replace('_', ' ')}</label>
-                        <div class="flex items-center gap-2">
-                            <span class="text-[10px] font-bold text-slate-300">x</span>
-                            <input type="number" step="0.1" value="${weight}" data-metric="${metric}" 
-                                class="formula-weight-input w-20 p-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-bold text-slate-800 text-center focus:ring-1 focus:ring-blue-500">
-                        </div>
+    sportSelector.addEventListener('change', (e) => {
+        const sportId = e.target.value;
+        state.selectedSport = state.sports.find(s => s.id === sportId);
+        
+        formulaSection.style.opacity = '1';
+        formulaSection.style.pointerEvents = 'auto';
+        finalizeSportMvpBtn.classList.remove('hidden');
+
+        renderFormulaInputs();
+        updateRankings();
+    });
+
+    function renderFormulaInputs() {
+        const sport = state.selectedSport;
+        if (!sport) return;
+
+        const defaultMetrics = {
+            'Basketball': ['points', 'rebounds', 'assists', 'steals', 'blocks'],
+            'Volleyball': ['kills', 'aces', 'digs', 'blocks', 'assists'],
+            'Soccer': ['goals', 'assists', 'saves', 'clean_sheets'],
+            'Default': ['points', 'score', 'performance_rating']
+        };
+
+        const metrics = defaultMetrics[sport.name] || defaultMetrics['Default'];
+        const savedFormula = state.formulas[sport.id] || {};
+
+        formulaInputs.innerHTML = '';
+        metrics.forEach(metric => {
+            const weight = savedFormula[metric] ?? 1.0;
+            formulaInputs.innerHTML += `
+                <div class="flex items-center justify-between gap-4">
+                    <label class="text-[10px] font-black uppercase text-slate-500 tracking-wider">${metric.replace('_', ' ')}</label>
+                    <div class="flex items-center gap-2">
+                        <span class="text-[10px] font-bold text-slate-300">x</span>
+                        <input type="number" step="0.1" value="${weight}" data-metric="${metric}" 
+                            class="formula-weight-input w-20 p-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-bold text-slate-800 text-center focus:ring-1 focus:ring-blue-500">
                     </div>
-                `;
-            });
-        }
+                </div>
+            `;
+        });
+    }
 
-        function updateRankings() {
-            if (!state.selectedSport) return;
-            const sportId = state.selectedSport.id;
-            const formula = state.formulas[sportId] || {};
-            
-            // Calculate scores
-            const ranked = state.players
-                .filter(p => p.sportId === sportId)
-                .map(player => {
-                    let score = 0;
-                    const stats = player.stats || {};
-                    Object.keys(formula).forEach(metric => {
-                        score += (stats[metric] || 0) * (formula[metric] || 0);
-                    });
-                    return { ...player, mvpScore: score.toFixed(2) };
-                })
-                .sort((a, b) => b.mvpScore - a.mvpScore);
+    function updateRankings() {
+        if (!state.selectedSport) return;
+        const sportId = state.selectedSport.id;
+        const sportName = state.selectedSport.name;
+        const formula = state.formulas[sportId] || { points: 1.0 };
+        
+        // Calculate scores
+        const ranked = state.players
+            .filter(p => p.sport === sportName || p.sportId === sportId)
+            .map(player => {
+                let score = 0;
+                const stats = player.playerStats;
+                Object.keys(formula).forEach(metric => {
+                    score += (stats[metric] || 0) * (formula[metric] || 0);
+                });
+                return { ...player, mvpScore: score.toFixed(2) };
+            })
+            .sort((a, b) => b.mvpScore - a.mvpScore);
 
-            // Render table
-            candidatesList.innerHTML = ranked.length ? '' : '<tr><td colspan="4" class="p-10 text-center text-xs text-slate-400">No players registered for this sport</td></tr>';
-            
-            ranked.forEach((p, idx) => {
-                const isTop = idx === 0;
-                candidatesList.innerHTML += `
-                    <tr class="border-b border-slate-50 group hover:bg-slate-50 transition-colors">
-                        <td class="px-6 py-4">
-                            <span class="inline-flex items-center justify-center h-6 w-6 rounded-full ${isTop ? 'bg-yellow-400 text-black' : 'bg-slate-100 text-slate-500'} font-black text-[10px] italic">
-                                #${idx + 1}
-                            </span>
-                        </td>
-                        <td class="px-6 py-4">
-                            <div class="flex items-center gap-3">
-                                <div class="h-8 w-8 rounded-full bg-slate-100 flex items-center justify-center font-bold text-slate-400 text-[10px] uppercase shadow-inner">
-                                    ${p.name.substring(0, 2)}
-                                </div>
-                                <span class="font-bold text-slate-700 text-sm">${p.name}</span>
+        candidatesList.innerHTML = ranked.length ? '' : '<tr><td colspan="4" class="p-10 text-center text-xs text-slate-400">No players registered for this sport</td></tr>';
+        
+        ranked.forEach((p, idx) => {
+            const isTop = idx === 0;
+            candidatesList.innerHTML += `
+                <tr class="border-b border-slate-50 group hover:bg-slate-50 transition-colors">
+                    <td class="px-6 py-4">
+                        <span class="inline-flex items-center justify-center h-6 w-6 rounded-full ${isTop ? 'bg-yellow-400 text-black' : 'bg-slate-100 text-slate-500'} font-black text-[10px] italic">
+                            #${idx + 1}
+                        </span>
+                    </td>
+                    <td class="px-6 py-4">
+                        <div class="flex items-center gap-3">
+                            <div class="h-8 w-8 rounded-full bg-slate-100 flex items-center justify-center font-bold text-slate-400 text-[10px] uppercase shadow-inner">
+                                ${p.displayName.substring(0, 2)}
                             </div>
-                        </td>
-                        <td class="px-6 py-4">
-                            <span class="text-xs font-medium text-slate-500 uppercase">${p.teamName || 'Independent'}</span>
-                        </td>
-                        <td class="px-6 py-4 text-right">
-                            <span class="font-black text-blue-600 text-sm tabular-nums">${p.mvpScore}</span>
-                        </td>
-                    </tr>
-                `;
-            });
-            
-            // Store top candidate globally for finalization
-            state.topCandidate = ranked[0] || null;
+                            <span class="font-bold text-slate-700 text-sm">${p.displayName}</span>
+                        </div>
+                    </td>
+                    <td class="px-6 py-4">
+                        <span class="text-xs font-medium text-slate-500 uppercase">${p.displayTeam}</span>
+                    </td>
+                    <td class="px-6 py-4 text-right">
+                        <span class="font-black text-blue-600 text-sm tabular-nums">${p.mvpScore}</span>
+                    </td>
+                </tr>
+            `;
+        });
+        
+        state.topCandidate = ranked[0] || null;
+    }
+
+    function renderFinalized() {
+        if (state.finalized.length === 0) {
+            finalizedMvpContainer.innerHTML = '<p class="text-slate-400 text-xs italic col-span-full">No MVPs finalized yet for this season.</p>';
+            return;
         }
 
-        function renderFinalized() {
-            if (state.finalized.length === 0) {
-                finalizedMvpContainer.innerHTML = '<p class="text-slate-400 text-xs italic col-span-full">No MVPs finalized yet for this season.</p>';
-                return;
-            }
-
-            finalizedMvpContainer.innerHTML = '';
-            state.finalized.forEach(mvp => {
-                const isOverall = mvp.type === 'overall';
-                finalizedMvpContainer.innerHTML += `
-                    <div class="p-4 rounded-xl border-2 ${isOverall ? 'border-yellow-400 bg-yellow-50/30' : 'border-slate-100 bg-slate-50/50'} flex items-center gap-4 relative overflow-hidden group">
-                        ${isOverall ? '<div class="absolute -right-2 -top-2 rotate-12 opacity-10"><svg class="w-12 h-12" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg></div>' : ''}
-                        <div class="h-10 w-10 rounded-full ${isOverall ? 'bg-yellow-400 text-black' : 'bg-slate-900 text-white'} flex items-center justify-center font-black text-xs">
-                            ${mvp.playerName.substring(0, 1)}
-                        </div>
-                        <div>
-                            <p class="text-[10px] font-black uppercase ${isOverall ? 'text-yellow-600' : 'text-slate-400'} tracking-tighter">${mvp.sportName || 'Tournament-Wide'}</p>
-                            <p class="font-black text-slate-800 uppercase italic text-sm">${mvp.playerName}</p>
-                            <p class="text-[10px] font-bold text-slate-400 uppercase">${mvp.teamName}</p>
-                        </div>
+        finalizedMvpContainer.innerHTML = '';
+        state.finalized.forEach(mvp => {
+            const isOverall = mvp.type === 'overall';
+            finalizedMvpContainer.innerHTML += `
+                <div class="p-4 rounded-xl border-2 ${isOverall ? 'border-yellow-400 bg-yellow-50/30' : 'border-slate-100 bg-slate-50/50'} flex items-center gap-4 relative overflow-hidden group">
+                    <div class="h-10 w-10 rounded-full ${isOverall ? 'bg-yellow-400 text-black' : 'bg-slate-900 text-white'} flex items-center justify-center font-black text-xs">
+                        ${(mvp.playerName || "P").substring(0, 1)}
                     </div>
-                `;
+                    <div>
+                        <p class="text-[10px] font-black uppercase ${isOverall ? 'text-yellow-600' : 'text-slate-400'} tracking-tighter">${mvp.sportName || 'Tournament-Wide'}</p>
+                        <p class="font-black text-slate-800 uppercase italic text-sm">${mvp.playerName}</p>
+                        <p class="text-[10px] font-bold text-slate-400 uppercase">${mvp.teamName || 'Independent'}</p>
+                    </div>
+                </div>
+            `;
+        });
+    }
+
+    // 🔹 ACTIONS
+    document.getElementById('saveFormulaBtn').addEventListener('click', async () => {
+        if (!state.selectedSport) return;
+        const inputs = document.querySelectorAll('.formula-weight-input');
+        const formula = {};
+        inputs.forEach(input => {
+            formula[input.dataset.metric] = parseFloat(input.value);
+        });
+
+        try {
+            await setDoc(doc(db, 'artifacts', currentAppId, 'public', 'data', 'mvp_formulas', state.selectedSport.id), formula);
+            showToast("Formula Applied");
+            updateRankings();
+        } catch (e) { console.error(e); }
+    });
+
+    finalizeSportMvpBtn.addEventListener('click', async () => {
+        if (!state.topCandidate || !state.selectedSport) return;
+        
+        const confirmAction = confirm(`Finalize ${state.topCandidate.displayName} as the MVP for ${state.selectedSport.name}?`);
+        if (!confirmAction) return;
+
+        try {
+            const docId = `sport_${state.selectedSport.id}`;
+            await setDoc(doc(db, 'artifacts', currentAppId, 'public', 'data', 'mvp_finalized', docId), {
+                playerName: state.topCandidate.displayName,
+                playerId: state.topCandidate.id,
+                teamName: state.topCandidate.displayTeam,
+                sportName: state.selectedSport.name,
+                sportId: state.selectedSport.id,
+                mvpScore: state.topCandidate.mvpScore,
+                type: 'sport',
+                timestamp: Date.now()
             });
-        }
+            showToast(`${state.selectedSport.name} MVP Crowned!`);
+        } catch (e) { console.error(e); }
+    });
 
-        // 🔹 ACTIONS
-        document.getElementById('saveFormulaBtn').addEventListener('click', async () => {
-            if (!state.selectedSport) return;
-            const inputs = document.querySelectorAll('.formula-weight-input');
-            const formula = {};
-            inputs.forEach(input => {
-                formula[input.dataset.metric] = parseFloat(input.value);
+    document.getElementById('finalizeOverallMvpBtn').addEventListener('click', async () => {
+        const sortedPlayers = [...state.players].map(p => {
+            const score = p.playerStats ? Object.values(p.playerStats).reduce((a, b) => a + b, 0) : 0;
+            return { ...p, rawScore: score };
+        }).sort((a, b) => b.rawScore - a.rawScore);
+
+        const best = sortedPlayers[0];
+        if (!best) return;
+
+        const confirmAction = confirm(`Proclaim ${best.displayName} as the OVERALL MVP?`);
+        if (!confirmAction) return;
+
+        try {
+            await setDoc(doc(db, 'artifacts', currentAppId, 'public', 'data', 'mvp_finalized', 'overall_champion'), {
+                playerName: best.displayName,
+                playerId: best.id,
+                teamName: best.displayTeam,
+                sportName: "Overall Tournament",
+                type: 'overall',
+                timestamp: Date.now()
             });
+            showToast(`🏆 Overall MVP Proclaimed!`);
+        } catch (e) { console.error(e); }
+    });
 
-            try {
-                await setDoc(doc(db, 'artifacts', currentAppId, 'public', 'data', 'mvp_formulas', state.selectedSport.id), formula);
-                showToast("Formula Applied");
-                updateRankings();
-            } catch (e) { console.error(e); }
-        });
+    // 🔹 UI UTILS
+    function showToast(msg) {
+        const t = document.getElementById('toast');
+        if(!t) return;
+        t.textContent = msg;
+        t.classList.remove('opacity-0', 'translate-y-10');
+        t.classList.add('opacity-100', 'translate-y-0');
+        setTimeout(() => {
+            t.classList.add('opacity-0', 'translate-y-10');
+            t.classList.remove('opacity-100', 'translate-y-0');
+        }, 3000);
+    }
 
-        finalizeSportMvpBtn.addEventListener('click', async () => {
-            if (!state.topCandidate || !state.selectedSport) return;
-            
-            const confirmAction = confirm(`Finalize ${state.topCandidate.name} as the MVP for ${state.selectedSport.name}? This will be visible to everyone.`);
-            if (!confirmAction) return;
+    // Sidebar & Profile Logic
+    document.getElementById('openSidebar').onclick = () => {
+        sidebar.classList.replace('sidebar-closed', 'sidebar-open');
+        sidebarOverlay?.classList.remove('hidden');
+    };
+    document.getElementById('closeSidebar').onclick = () => {
+        sidebar.classList.replace('sidebar-open', 'sidebar-closed');
+        sidebarOverlay?.classList.add('hidden');
+    };
+    document.getElementById('profileToggle').onclick = (e) => {
+        e.stopPropagation();
+        document.getElementById('profileDropdown').classList.toggle('show');
+    };
+    window.onclick = () => document.getElementById('profileDropdown')?.classList.remove('show');
 
-            try {
-                const docId = `sport_${state.selectedSport.id}`;
-                await setDoc(doc(db, 'artifacts', currentAppId, 'public', 'data', 'mvp_finalized', docId), {
-                    playerName: state.topCandidate.name,
-                    playerId: state.topCandidate.id,
-                    teamName: state.topCandidate.teamName,
-                    sportName: state.selectedSport.name,
-                    sportId: state.selectedSport.id,
-                    mvpScore: state.topCandidate.mvpScore,
-                    type: 'sport',
-                    timestamp: Date.now()
-                });
-                showToast(`${state.selectedSport.name} MVP Crowned!`);
-            } catch (e) { console.error(e); }
-        });
-
-        document.getElementById('finalizeOverallMvpBtn').addEventListener('click', async () => {
-            // Overall MVP usually considers all finalized sport MVPs or a weighted average
-            // Here we allow choosing from all candidates across all sports
-            const sortedPlayers = [...state.players].map(p => {
-                // Simplified cross-sport normalization
-                const score = p.stats ? Object.values(p.stats).reduce((a, b) => a + b, 0) : 0;
-                return { ...p, rawScore: score };
-            }).sort((a, b) => b.rawScore - a.rawScore);
-
-            const best = sortedPlayers[0];
-            if (!best) return;
-
-            const confirmAction = confirm(`Proclaim ${best.name} (${best.teamName}) as the OVERALL INTRAMURALS 2026 MVP?`);
-            if (!confirmAction) return;
-
-            try {
-                await setDoc(doc(db, 'artifacts', currentAppId, 'public', 'data', 'mvp_finalized', 'overall_champion'), {
-                    playerName: best.name,
-                    playerId: best.id,
-                    teamName: best.teamName,
-                    sportName: "Overall Tournament",
-                    type: 'overall',
-                    timestamp: Date.now()
-                });
-                showToast(`🏆 Overall MVP Proclaimed!`);
-            } catch (e) { console.error(e); }
-        });
-
-        // 🔹 UI UTILS
-        function showToast(msg) {
-            const t = document.getElementById('toast');
-            t.textContent = msg;
-            t.classList.remove('opacity-0', 'translate-y-10');
-            t.classList.add('opacity-100', 'translate-y-0');
-            setTimeout(() => {
-                t.classList.add('opacity-0', 'translate-y-10');
-                t.classList.remove('opacity-100', 'translate-y-0');
-            }, 3000);
-        }
-
-        // Sidebar logic
-        const openSidebarBtn = document.getElementById('openSidebar');
-        const closeSidebarBtn = document.getElementById('closeSidebar');
-        const toggleSidebar = (open) => {
-            sidebar.classList.toggle('sidebar-closed', !open);
-            sidebar.classList.toggle('sidebar-open', open);
-            sidebarOverlay.classList.toggle('hidden', !open);
-        };
-        openSidebarBtn.onclick = () => toggleSidebar(true);
-        closeSidebarBtn.onclick = () => toggleSidebar(false);
-        sidebarOverlay.onclick = () => toggleSidebar(false);
-
-        // Profile Toggle
-        const profileToggle = document.getElementById('profileToggle');
-        const profileDropdown = document.getElementById('profileDropdown');
-        profileToggle.onclick = (e) => {
-            e.stopPropagation();
-            profileDropdown.classList.toggle('show');
-        };
-        window.onclick = () => profileDropdown.classList.remove('show');
-
-        // Logout
-        document.getElementById('logoutBtn').onclick = async () => {
-            await signOut(auth);
-            window.location.reload();
-        };
-
-    </script>
+    document.getElementById('logoutBtn').onclick = async () => {
+        await signOut(auth);
+        window.location.reload();
+    };
+</script>
 </body>
 </html>

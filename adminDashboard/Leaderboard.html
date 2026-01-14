@@ -295,125 +295,174 @@
     </main>
 
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
-        import { getAuth, onAuthStateChanged, signOut, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
-        import { getFirestore, collection, onSnapshot, query, where, doc, getDoc } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
+    import { getAuth, onAuthStateChanged, signOut, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+    import { getFirestore, collection, onSnapshot, query, where, doc, getDoc, addDoc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
 
-        // 🔥 Standardized Config
-        const firebaseConfig = {
-            apiKey: "AIzaSyD5Gkjk7tk48Hv9zgvdlSsdR8FH_nwtGRc",
-            authDomain: "intramurals-score-leaderboard.firebaseapp.com",
-            projectId: "intramurals-score-leaderboard",
-            storageBucket: "intramurals-score-leaderboard.firebasestorage.app",
-            messagingSenderId: "455345215033",
-            appId: "1:455345215033:web:66a387d0fa0fa4453e5fe8"
-        };
+    // 🔥 Standardized Config
+    const firebaseConfig = {
+        apiKey: "AIzaSyD5Gkjk7tk48Hv9zgvdlSsdR8FH_nwtGRc",
+        authDomain: "intramurals-score-leaderboard.firebaseapp.com",
+        projectId: "intramurals-score-leaderboard",
+        storageBucket: "intramurals-score-leaderboard.firebasestorage.app",
+        messagingSenderId: "455345215033",
+        appId: "1:455345215033:web:66a387d0fa0fa4453e5fe8"
+    };
 
-        const currentAppId = 'intramurals-2026';
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
+    const currentAppId = 'intramurals-2026';
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
 
-        let currentUser = null;
-        let sportsData = [];
-        let teamsData = [];
-        let playersData = [];
+    // State Management
+    let currentUser = null;
+    let sportsData = [];
+    let teamsData = [];
+    let playersData = [];
+    let matchesData = [];
+    let editingMatchId = null;
 
-        // UI Refs
-        const authOverlay = document.getElementById('authOverlay');
-        const profileDropdown = document.getElementById('profileDropdown');
-        const sportTeamFilter = document.getElementById('sportTeamFilter');
-        const sportPlayerFilter = document.getElementById('sportPlayerFilter');
+    // UI Refs
+    const authOverlay = document.getElementById('authOverlay');
+    const profileDropdown = document.getElementById('profileDropdown');
+    const sportTeamFilter = document.getElementById('sportTeamFilter');
+    const sportPlayerFilter = document.getElementById('sportPlayerFilter');
+    const matchGrid = document.getElementById('matchGrid'); // Ensure this exists in your HTML
 
-        // Initial Auth Guard
-        onAuthStateChanged(auth, async (user) => {
-            if (user) {
-                currentUser = user;
-                setupUI(user);
-                startDataSync();
-            } else {
-                // If not logged in, you'd usually redirect, but for this demo, we can sign in anonymously 
-                // to view the leaderboard if the user is just a viewer. 
-                // Adjust this based on your actual auth logic.
-                await signInAnonymously(auth);
-            }
+    // --- Auth Guard ---
+    onAuthStateChanged(auth, async (user) => {
+        if (user) {
+            currentUser = user;
+            setupUI(user);
+            startDataSync();
+        } else {
+            await signInAnonymously(auth);
+        }
+    });
+
+    function setupUI(user) {
+        const email = user.email || "Admin";
+        document.getElementById('adminName').textContent = email.split('@')[0];
+        document.getElementById('adminInitials').textContent = email.substring(0, 2).toUpperCase();
+        document.getElementById('activeEmail').textContent = email;
+        if (authOverlay) authOverlay.style.display = 'none';
+    }
+
+    // --- Data Fetching Logic (Unified) ---
+    function startDataSync() {
+        const basePath = ['artifacts', currentAppId, 'public', 'data'];
+
+        // Sync Sports
+        onSnapshot(collection(db, ...basePath, 'sports'), (snap) => {
+            sportsData = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+            populateSportFilters();
+            updateAllLeaderboards();
         });
 
-        function setupUI(user) {
-            const email = user.email || "Admin";
-            document.getElementById('adminName').textContent = email.split('@')[0];
-            document.getElementById('adminInitials').textContent = email.substring(0, 2).toUpperCase();
-            document.getElementById('activeEmail').textContent = email;
-            authOverlay.style.display = 'none';
+        // Sync Teams
+        onSnapshot(collection(db, ...basePath, 'teams'), (snap) => {
+            teamsData = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+            updateAllLeaderboards();
+        });
+
+        // Sync Players
+        onSnapshot(collection(db, ...basePath, 'players'), (snap) => {
+            playersData = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+            updateAllLeaderboards();
+        });
+
+        // Sync Matches (The requested connection)
+        onSnapshot(collection(db, ...basePath, 'matches'), (snap) => {
+            matchesData = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+            renderMatches();
+        }, (err) => console.error("Matches sync error:", err));
+    }
+
+    function populateSportFilters() {
+        const options = sportsData.map(s => `<option value="${s.id}">${s.name || s.sportName}</option>`).join('');
+        if (sportTeamFilter) sportTeamFilter.innerHTML = '<option value="">All Sports</option>' + options;
+        if (sportPlayerFilter) sportPlayerFilter.innerHTML = '<option value="">Select Sport</option>' + options;
+        
+        // Also update the Match Form sport dropdown if it exists in this view
+        const matchSportSelect = document.getElementById('matchSport');
+        if (matchSportSelect) matchSportSelect.innerHTML = '<option value="">Select Sport</option>' + options;
+    }
+
+    // --- Matches Rendering Logic ---
+    function renderMatches() {
+        if (!matchGrid) return;
+
+        // Apply filters from your UI (filterSport and filterStatus)
+        const sFilter = document.getElementById('filterSport')?.value;
+        const stFilter = document.getElementById('filterStatus')?.value || 'all';
+
+        let filtered = matchesData;
+        if (sFilter) filtered = filtered.filter(m => m.sportId === sFilter);
+        if (stFilter !== 'all') filtered = filtered.filter(m => m.status === stFilter);
+
+        // Sort by date (descending)
+        filtered.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+        if (filtered.length === 0) {
+            matchGrid.innerHTML = `<div class="col-span-full py-10 text-center text-slate-400 text-xs uppercase font-bold tracking-widest">No matches found</div>`;
+            return;
         }
 
-        // --- Data Fetching Logic ---
+        matchGrid.innerHTML = filtered.map(match => {
+            const sport = sportsData.find(s => s.id === match.sportId) || { name: 'Unknown' };
+            const teamA = teamsData.find(t => t.id === match.teamAId) || { name: 'TBD' };
+            const teamB = teamsData.find(t => t.id === match.teamBId) || { name: 'TBD' };
+            const isCompleted = match.status === 'completed';
+            const mvp = playersData.find(p => p.id === match.mvpId);
 
-        function startDataSync() {
-            // Sync Sports
-            const sportsRef = collection(db, 'artifacts', currentAppId, 'public', 'data', 'sports');
-            onSnapshot(sportsRef, (snap) => {
-                sportsData = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                populateSportFilters();
-                updateAllLeaderboards();
-            });
+            return `
+                <div class="match-card bg-white rounded-2xl shadow-sm p-6 border border-slate-100 flex flex-col h-full">
+                    <div class="flex justify-between items-start mb-4">
+                        <div>
+                            <span class="bg-blue-50 text-blue-600 text-[9px] font-black uppercase px-2 py-1 rounded mb-1 inline-block">${sport.name || sport.sportName}</span>
+                            <p class="text-[10px] text-slate-400 font-bold uppercase">${formatDate(match.date)} • ${match.time}</p>
+                        </div>
+                        <span class="text-[8px] font-black uppercase px-2 py-1 rounded ${isCompleted ? 'bg-green-100 text-green-700' : 'bg-orange-100 text-orange-700'}">${match.status}</span>
+                    </div>
+                    <div class="flex items-center justify-between gap-2 mb-4">
+                        <div class="flex-1 text-center">
+                            <p class="font-black uppercase text-[10px] text-slate-900 truncate">${teamA.name || teamA.teamName}</p>
+                            <div class="text-xl font-black ${match.scoreA > match.scoreB ? 'text-blue-600' : 'text-slate-400'}">${match.scoreA}</div>
+                        </div>
+                        <div class="text-slate-200 font-black italic text-xs">VS</div>
+                        <div class="flex-1 text-center">
+                            <p class="font-black uppercase text-[10px] text-slate-900 truncate">${teamB.name || teamB.teamName}</p>
+                            <div class="text-xl font-black ${match.scoreB > match.scoreA ? 'text-blue-600' : 'text-slate-400'}">${match.scoreB}</div>
+                        </div>
+                    </div>
+                    <div class="mt-auto pt-4 border-t border-slate-50 flex gap-2">
+                        <button onclick="openUpdateModal('${match.id}')" class="flex-1 bg-slate-900 text-white py-2 rounded-lg text-[9px] font-black uppercase tracking-widest">Update</button>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
 
-            // Sync Teams
-            const teamsRef = collection(db, 'artifacts', currentAppId, 'public', 'data', 'teams');
-            onSnapshot(teamsRef, (snap) => {
-                teamsData = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                updateAllLeaderboards();
-            });
+    // --- Leaderboard Rendering Logic ---
+    function updateAllLeaderboards() {
+        renderOverallTeams();
+        renderTeamsPerSport();
+        renderPlayersPerSport();
+    }
 
-            // Sync Players
-            const playersRef = collection(db, 'artifacts', currentAppId, 'public', 'data', 'players');
-            onSnapshot(playersRef, (snap) => {
-                playersData = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                updateAllLeaderboards();
-            });
-        }
+    function renderOverallTeams() {
+        const body = document.getElementById('overallTeamBody');
+        if (!body) return;
+        const sortedTeams = [...teamsData].sort((a, b) => (b.totalPoints || 0) - (a.totalPoints || 0));
 
-        function populateSportFilters() {
-            const options = sportsData.map(s => `<option value="${s.id}">${s.name}</option>`).join('');
-            sportTeamFilter.innerHTML = '<option value="">All Sports</option>' + options;
-            sportPlayerFilter.innerHTML = '<option value="">Select Sport</option>' + options;
-        }
-
-        // --- Leaderboard Rendering ---
-
-        function updateAllLeaderboards() {
-            renderOverallTeams();
-            renderTeamsPerSport();
-            renderPlayersPerSport();
-        }
-
-        function renderOverallTeams() {
-            const body = document.getElementById('overallTeamBody');
-            
-            // Logic: Group total points/wins across all sports for each team
-            // Assuming team documents have 'totalPoints', 'wins', 'losses' 
-            // If not, we'd aggregate them from a 'results' collection. 
-            // Here, we'll use the fields from the team doc as per common dashboard structures.
-            
-            const sortedTeams = [...teamsData].sort((a, b) => (b.totalPoints || 0) - (a.totalPoints || 0));
-
-            if (sortedTeams.length === 0) {
-                body.innerHTML = '<tr><td colspan="5" class="px-6 py-12 text-center text-slate-400 text-xs italic">No team data found.</td></tr>';
-                return;
-            }
-
-            body.innerHTML = sortedTeams.map((team, index) => `
+        body.innerHTML = sortedTeams.length === 0 
+            ? '<tr><td colspan="5" class="px-6 py-12 text-center text-slate-400 text-xs italic">No team data found.</td></tr>'
+            : sortedTeams.map((team, index) => `
                 <tr class="hover:bg-slate-50 transition-colors">
-                    <td class="px-6 py-4">
-                        <span class="rank-badge ${index < 3 ? 'rank-' + (index + 1) : 'bg-slate-100 text-slate-500 text-[10px]'}">
-                            ${index + 1}
-                        </span>
-                    </td>
+                    <td class="px-6 py-4"><span class="rank-badge ${index < 3 ? 'rank-' + (index + 1) : 'bg-slate-100 text-slate-500 text-[10px]'}">${index + 1}</span></td>
                     <td class="px-6 py-4">
                         <div class="flex items-center gap-3">
-                            <div class="h-8 w-8 rounded-lg bg-slate-100 flex items-center justify-center font-black text-slate-400 text-[10px] border border-slate-200">
-                                ${team.name ? team.name.substring(0,2).toUpperCase() : '??'}
-                            </div>
+                            <div class="h-8 w-8 rounded-lg bg-slate-100 flex items-center justify-center font-black text-slate-400 text-[10px] border border-slate-200">${team.name?.substring(0,2).toUpperCase() || '??'}</div>
                             <div>
                                 <p class="text-xs font-black text-slate-900 uppercase tracking-tight">${team.name || 'Unknown Team'}</p>
                                 <p class="text-[9px] text-slate-400 font-bold uppercase">${team.department || 'General'}</p>
@@ -422,154 +471,134 @@
                     </td>
                     <td class="px-6 py-4 text-center text-xs font-bold text-slate-600">${team.wins || 0}</td>
                     <td class="px-6 py-4 text-center text-xs font-bold text-slate-600">${team.losses || 0}</td>
-                    <td class="px-6 py-4 text-center">
-                        <span class="px-3 py-1 bg-blue-50 text-blue-700 rounded-full font-black text-[10px]">
-                            ${team.totalPoints || 0} PTS
-                        </span>
-                    </td>
+                    <td class="px-6 py-4 text-center"><span class="px-3 py-1 bg-blue-50 text-blue-700 rounded-full font-black text-[10px]">${team.totalPoints || 0} PTS</span></td>
                 </tr>
             `).join('');
-        }
+    }
 
-        function renderTeamsPerSport() {
-            const container = document.getElementById('sportTeamList');
-            const filterVal = sportTeamFilter.value;
-            
-            const filteredSports = filterVal ? sportsData.filter(s => s.id === filterVal) : sportsData;
+    function renderTeamsPerSport() {
+        const container = document.getElementById('sportTeamList');
+        if (!container) return;
+        const filterVal = sportTeamFilter.value;
+        const filteredSports = filterVal ? sportsData.filter(s => s.id === filterVal) : sportsData;
 
-            if (filteredSports.length === 0) {
-                container.innerHTML = '<p class="text-slate-400 text-xs italic">No sports available.</p>';
-                return;
-            }
+        container.innerHTML = filteredSports.map(sport => {
+            const sportTeams = teamsData
+                .filter(t => t.sports?.includes(sport.id))
+                .sort((a, b) => (b.sportPoints?.[sport.id] || 0) - (a.sportPoints?.[sport.id] || 0));
 
-            container.innerHTML = filteredSports.map(sport => {
-                // Get teams associated with this sport and sort them
-                // This logic assumes teams have a points/stats object per sport or a separate collection.
-                // For simplicity, we filter teams that list this sport and sort by their performance in it.
-                const sportTeams = teamsData
-                    .filter(t => t.sports && t.sports.includes(sport.id))
-                    .sort((a, b) => (b.sportPoints?.[sport.id] || 0) - (a.sportPoints?.[sport.id] || 0));
-
-                return `
-                    <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden flex flex-col h-full">
-                        <div class="p-4 bg-slate-50 border-b flex justify-between items-center">
-                            <h4 class="text-[10px] font-black uppercase text-slate-800 tracking-widest truncate mr-2">${sport.name}</h4>
-                            <span class="text-[8px] font-black text-blue-600 uppercase">${sport.category || 'General'}</span>
-                        </div>
-                        <div class="p-4 flex-1">
-                            ${sportTeams.length > 0 ? `
-                                <ul class="space-y-3">
-                                    ${sportTeams.slice(0, 5).map((t, i) => `
-                                        <li class="flex items-center justify-between text-xs">
-                                            <div class="flex items-center gap-2">
-                                                <span class="font-black text-slate-400 italic w-4">#${i+1}</span>
-                                                <span class="font-bold text-slate-700 uppercase tracking-tighter">${t.name}</span>
-                                            </div>
-                                            <span class="font-black text-blue-600">${t.sportPoints?.[sport.id] || 0}</span>
-                                        </li>
-                                    `).join('')}
-                                </ul>
-                            ` : `<p class="text-[10px] text-slate-400 italic text-center py-4">No standings yet</p>`}
-                        </div>
+            return `
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden flex flex-col h-full">
+                    <div class="p-4 bg-slate-50 border-b flex justify-between items-center">
+                        <h4 class="text-[10px] font-black uppercase text-slate-800 tracking-widest truncate mr-2">${sport.name}</h4>
+                        <span class="text-[8px] font-black text-blue-600 uppercase">${sport.category || 'General'}</span>
                     </div>
-                `;
-            }).join('');
+                    <div class="p-4 flex-1">
+                        ${sportTeams.length > 0 ? `<ul class="space-y-3">${sportTeams.slice(0, 5).map((t, i) => `
+                            <li class="flex items-center justify-between text-xs">
+                                <div class="flex items-center gap-2"><span class="font-black text-slate-400 italic w-4">#${i+1}</span><span class="font-bold text-slate-700 uppercase tracking-tighter">${t.name}</span></div>
+                                <span class="font-black text-blue-600">${t.sportPoints?.[sport.id] || 0}</span>
+                            </li>`).join('')}</ul>` : `<p class="text-[10px] text-slate-400 italic text-center py-4">No standings yet</p>`}
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+
+    function renderPlayersPerSport() {
+        const body = document.getElementById('playerLeaderboardBody');
+        if (!body) return;
+        const sportId = sportPlayerFilter.value;
+
+        if (!sportId) {
+            body.innerHTML = '<tr><td colspan="4" class="px-6 py-12 text-center text-slate-400 text-xs italic">Please select a sport to view player rankings</td></tr>';
+            return;
         }
 
-        function renderPlayersPerSport() {
-            const body = document.getElementById('playerLeaderboardBody');
-            const sportId = sportPlayerFilter.value;
+        const sportPlayers = playersData
+            .filter(p => p.sportId === sportId || (p.sports?.includes(sportId)))
+            .sort((a, b) => (b.points?.[sportId] || 0) - (a.points?.[sportId] || 0));
 
-            if (!sportId) {
-                body.innerHTML = '<tr><td colspan="4" class="px-6 py-12 text-center text-slate-400 text-xs italic">Please select a sport to view player rankings</td></tr>';
-                return;
-            }
-
-            // Aggregate player scores for this specific sport
-            const sportPlayers = playersData
-                .filter(p => p.sportId === sportId || (p.sports && p.sports.includes(sportId)))
-                .sort((a, b) => (b.points?.[sportId] || 0) - (a.points?.[sportId] || 0));
-
-            if (sportPlayers.length === 0) {
-                body.innerHTML = '<tr><td colspan="4" class="px-6 py-12 text-center text-slate-400 text-xs italic">No player data for this sport.</td></tr>';
-                return;
-            }
-
-            body.innerHTML = sportPlayers.map((player, index) => {
+        body.innerHTML = sportPlayers.length === 0
+            ? '<tr><td colspan="4" class="px-6 py-12 text-center text-slate-400 text-xs italic">No player data for this sport.</td></tr>'
+            : sportPlayers.map((player, index) => {
                 const team = teamsData.find(t => t.id === player.teamId);
                 return `
                     <tr class="hover:bg-slate-50 transition-colors">
-                        <td class="px-6 py-4">
-                            <span class="rank-badge ${index < 3 ? 'rank-' + (index + 1) : 'bg-slate-50 text-slate-400 text-[10px]'}">
-                                ${index + 1}
-                            </span>
-                        </td>
-                        <td class="px-6 py-4">
-                            <p class="text-xs font-black text-slate-900 uppercase">${player.name || 'Unnamed Player'}</p>
-                            <p class="text-[9px] text-slate-400 font-bold uppercase">ID: ${player.id.substring(0,8)}</p>
-                        </td>
-                        <td class="px-6 py-4">
-                            <span class="text-[10px] font-bold text-slate-600 uppercase tracking-tighter">${team ? team.name : 'Independent'}</span>
-                        </td>
-                        <td class="px-6 py-4 text-center">
-                            <span class="text-sm font-black text-slate-900">${player.points?.[sportId] || 0}</span>
-                        </td>
+                        <td class="px-6 py-4"><span class="rank-badge ${index < 3 ? 'rank-' + (index + 1) : 'bg-slate-50 text-slate-400 text-[10px]'}">${index + 1}</span></td>
+                        <td class="px-6 py-4"><p class="text-xs font-black text-slate-900 uppercase">${player.name || 'Unnamed Player'}</p></td>
+                        <td class="px-6 py-4"><span class="text-[10px] font-bold text-slate-600 uppercase tracking-tighter">${team ? team.name : 'Independent'}</span></td>
+                        <td class="px-6 py-4 text-center"><span class="text-sm font-black text-slate-900">${player.points?.[sportId] || 0}</span></td>
                     </tr>
                 `;
             }).join('');
-        }
+    }
 
-        // --- Tab Switching & UI Handlers ---
-
-        window.switchTab = (tabId) => {
-            // Update Buttons
-            document.querySelectorAll('.tab-btn').forEach(btn => {
-                btn.classList.remove('bg-blue-600', 'text-white');
-                btn.classList.add('text-slate-500', 'hover:bg-slate-50');
-            });
-            const activeBtn = document.getElementById(`tab-${tabId}`);
+    // --- Global Helpers & Event Listeners ---
+    window.switchTab = (tabId) => {
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.classList.remove('bg-blue-600', 'text-white');
+            btn.classList.add('text-slate-500', 'hover:bg-slate-50');
+        });
+        const activeBtn = document.getElementById(`tab-${tabId}`);
+        if (activeBtn) {
             activeBtn.classList.remove('text-slate-500', 'hover:bg-slate-50');
             activeBtn.classList.add('bg-blue-600', 'text-white');
+        }
 
-            // Update Sections
-            document.querySelectorAll('.leaderboard-section').forEach(sec => sec.classList.add('hidden'));
-            document.getElementById(`section-${tabId}`).classList.remove('hidden');
-        };
+        document.querySelectorAll('.leaderboard-section').forEach(sec => sec.classList.add('hidden'));
+        const activeSec = document.getElementById(`section-${tabId}`);
+        if (activeSec) activeSec.classList.remove('hidden');
+    };
 
-        // Listeners for filters
-        sportTeamFilter.addEventListener('change', renderTeamsPerSport);
-        sportPlayerFilter.addEventListener('change', renderPlayersPerSport);
-
-        // Sidebar Toggles
-        const sidebar = document.getElementById('sidebar');
-        const overlay = document.getElementById('sidebarOverlay');
+    window.openUpdateModal = (id) => {
+        const match = matchesData.find(m => m.id === id);
+        if (!match) return;
+        editingMatchId = id;
         
-        document.getElementById('openSidebar').onclick = () => {
-            sidebar.classList.replace('sidebar-closed', 'sidebar-open');
-            overlay.classList.remove('hidden');
-        };
+        // Update Modal Text Fields (Assuming these IDs exist in your HTML modal)
+        const teamA = teamsData.find(t => t.id === match.teamAId) || { name: 'Team A' };
+        const teamB = teamsData.find(t => t.id === match.teamBId) || { name: 'Team B' };
+        
+        document.getElementById('resTeamAName').textContent = teamA.name || teamA.teamName;
+        document.getElementById('resTeamBName').textContent = teamB.name || teamB.teamName;
+        document.getElementById('resScoreA').value = match.scoreA;
+        document.getElementById('resScoreB').value = match.scoreB;
+        document.getElementById('resStatus').value = match.status;
 
-        document.getElementById('closeSidebar').onclick = () => {
-            sidebar.classList.replace('sidebar-open', 'sidebar-closed');
-            overlay.classList.add('hidden');
-        };
+        // Open modal (requires your CSS .active class)
+        document.getElementById('updateResultsModal').classList.add('active');
+    };
 
-        overlay.onclick = () => document.getElementById('closeSidebar').click();
+    function formatDate(dateStr) {
+        return new Date(dateStr).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
+    }
 
-        // Profile Toggle
-        document.getElementById('profileToggle').onclick = (e) => {
-            e.stopPropagation();
-            profileDropdown.classList.toggle('show');
-        };
+    // Filters
+    sportTeamFilter?.addEventListener('change', renderTeamsPerSport);
+    sportPlayerFilter?.addEventListener('change', renderPlayersPerSport);
+    document.getElementById('filterSport')?.addEventListener('change', renderMatches);
+    document.getElementById('filterStatus')?.addEventListener('change', renderMatches);
 
-        window.onclick = () => profileDropdown.classList.remove('show');
+    // Sidebar & Profile (Existing Logic)
+    document.getElementById('openSidebar').onclick = () => {
+        document.getElementById('sidebar').classList.replace('sidebar-closed', 'sidebar-open');
+        document.getElementById('sidebarOverlay').classList.remove('hidden');
+    };
+    document.getElementById('closeSidebar').onclick = () => {
+        document.getElementById('sidebar').classList.replace('sidebar-open', 'sidebar-closed');
+        document.getElementById('sidebarOverlay').classList.add('hidden');
+    };
+    document.getElementById('profileToggle').onclick = (e) => {
+        e.stopPropagation();
+        profileDropdown.classList.toggle('show');
+    };
+    window.onclick = () => profileDropdown.classList.remove('show');
+    document.getElementById('logoutBtn').onclick = async () => {
+        await signOut(auth);
+        window.location.href = 'index.html';
+    };
 
-        // Logout
-        document.getElementById('logoutBtn').onclick = async () => {
-            await signOut(auth);
-            window.location.href = 'index.html'; // Assuming login page
-        };
-
-    </script>
+</script>
 </body>
 </html>
