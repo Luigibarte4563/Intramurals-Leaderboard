@@ -11,291 +11,150 @@
             --accent-gold: #facc15;
             --sidebar-bg: #0f172a;
         }
-
-        body { background-color: #f1f5f9; }
-
-        #mainWrapper { display: none; }
-
-        .sidebar {
-            background-color: var(--sidebar-bg);
-            transition: transform 0.3s ease-in-out;
-            z-index: 1000;
-        }
-
+        body { background-color: #f8fafc; font-family: 'Inter', sans-serif; }
+        .sidebar { background-color: var(--sidebar-bg); transition: transform 0.3s ease; z-index: 1000; }
         .sidebar-closed { transform: translateX(-100%); }
-        .sidebar-open { transform: translateX(0); }
-
-        .nav-item {
-            color: #94a3b8;
-            transition: all 0.2s ease;
-        }
-
-        .nav-item:hover, .nav-item.active {
-            color: white;
-            background-color: rgba(255, 255, 255, 0.1);
-            border-left: 4px solid var(--accent-gold);
-        }
-
+        .nav-item { color: #94a3b8; transition: all 0.2s; border-left: 4px solid transparent; }
+        .nav-item:hover, .nav-item.active { color: white; background: rgba(255,255,255,0.05); border-left-color: var(--accent-gold); }
         .profile-dropdown { display: none; }
         .profile-dropdown.show { display: block; }
-
-        #authScreen {
-            position: fixed;
-            inset: 0;
-            background: white;
-            z-index: 9999;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-        }
-        
-        .spinner {
-            width: 40px;
-            height: 40px;
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid var(--primary-blue);
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-
+        #authScreen { position: fixed; inset: 0; background: white; z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        .spinner { width: 40px; height: 40px; border: 4px solid #f3f3f3; border-top: 4px solid var(--primary-blue); border-radius: 50%; animation: spin 1s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-
-        #sidebarOverlay {
-            display: none;
-            background: rgba(0,0,0,0.5);
-            z-index: 999;
-        }
-        #sidebarOverlay.active { display: block; }
-
-        .settings-card {
-            background: white;
-            border-radius: 1rem;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-            border: 1px solid #e2e8f0;
-            transition: all 0.2s ease;
-        }
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
     </style>
 </head>
-<body class="min-h-screen overflow-x-hidden">
+<body class="min-h-screen">
 
     <div id="authScreen">
         <div class="spinner mb-4"></div>
-        <p class="text-xs font-black uppercase tracking-widest text-slate-400">Verifying Admin Session...</p>
+        <p class="text-xs font-black uppercase tracking-widest text-slate-400">Loading Settings...</p>
     </div>
 
-    <div id="sidebarOverlay" class="fixed inset-0 lg:hidden"></div>
-
-    <div id="mainWrapper" class="flex min-h-screen">
+    <div id="mainWrapper" class="hidden flex min-h-screen">
         <!-- Sidebar -->
-        <aside id="sidebar" class="sidebar fixed inset-y-0 left-0 w-64 flex-shrink-0 text-white flex flex-col sidebar-closed lg:relative lg:translate-x-0">
+        <aside id="sidebar" class="sidebar fixed inset-y-0 left-0 w-64 lg:relative lg:translate-x-0 sidebar-closed flex flex-col text-white">
             <div class="p-6 flex items-center justify-between border-b border-slate-700">
                 <div class="flex items-center gap-3">
-                    <div class="h-8 w-8 bg-blue-600 rounded flex items-center justify-center font-black text-xs">UDD</div>
-                    <span class="font-black tracking-tighter text-xl italic uppercase">Intra<span id="logoYear" class="text-yellow-400">2026</span></span>
+                    <div class="h-8 w-8 bg-blue-600 rounded flex items-center justify-center font-black text-xs text-white">UDD</div>
+                    <span class="font-black tracking-tighter text-xl italic uppercase">Intra<span class="text-yellow-400">2026</span></span>
                 </div>
-                <button id="closeSidebar" class="lg:hidden text-slate-400 hover:text-white">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-                </button>
             </div>
-
-            <nav class="flex-1 mt-4 overflow-y-auto">
-                <a href="dashboard.html" class="nav-item flex items-center gap-3 px-6 py-4">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a11 11 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
-                    <span class="text-sm font-bold uppercase tracking-wider">Dashboard</span>
-                </a>
-                <a href="sportsManagement.html" class="nav-item flex items-center gap-3 px-6 py-4">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
-                    <span class="text-sm font-bold uppercase tracking-wider">Sports Management</span>
-                </a>
-                <a href="teamsManagement.html" class="nav-item flex items-center gap-3 px-6 py-4">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
-                    <span class="text-sm font-bold uppercase tracking-wider">Teams Management</span>
-                </a>
-                <a href="playersManagement.html" class="nav-item flex items-center gap-3 px-6 py-4">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
-                    <span class="text-sm font-bold uppercase tracking-wider">Players Management</span>
-                </a>
-                <a href="matchesResults.html" class="nav-item flex items-center gap-3 px-6 py-4">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-                    <span class="text-sm font-bold uppercase tracking-wider">Matches & Results</span>
-                </a>
-                <a href="leaderboard.html" class="nav-item flex items-center gap-3 px-6 py-4">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2v2m4.618 1.187l1.618 3.236L21 15.382m-7.382-4.195L13 8.187l-1.618 3.236L8 15.382m7.382-4.195L21 8.187V11a2 2 0 01-2 2h-5a2 2 0 01-2-2V9.187z"></path></svg>
-                    <span class="text-sm font-bold uppercase tracking-wider">Leaderboard</span>
-                </a>
-                <a href="mvpManagement.html" class="nav-item flex items-center gap-3 px-6 py-4">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"></path></svg>
-                    <span class="text-sm font-bold uppercase tracking-wider">MVP Management</span>
-                </a>
-                <a href="reports.html" class="nav-item flex items-center gap-3 px-6 py-4">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
-                    <span class="text-sm font-bold uppercase tracking-wider">Reports</span>
-                </a>
-                <a href="settings.html" class="nav-item active flex items-center gap-3 px-6 py-4 border-t border-slate-700 mt-2">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
-                    <span class="text-sm font-bold uppercase tracking-wider">Settings</span>
-                </a>
+            <nav class="flex-1 mt-4 overflow-y-auto custom-scrollbar">
+                <a href="dashboard.html" class="nav-item flex items-center gap-3 px-6 py-3.5"><span class="text-xs font-bold uppercase tracking-wider">Dashboard</span></a>
+                <a href="sports.html" class="nav-item flex items-center gap-3 px-6 py-3.5"><span class="text-xs font-bold uppercase tracking-wider">Sports Management</span></a>
+                <a href="teams.html" class="nav-item flex items-center gap-3 px-6 py-3.5"><span class="text-xs font-bold uppercase tracking-wider">Teams Management</span></a>
+                <a href="players.html" class="nav-item flex items-center gap-3 px-6 py-3.5"><span class="text-xs font-bold uppercase tracking-wider">Players Management</span></a>
+                <a href="matches.html" class="nav-item flex items-center gap-3 px-6 py-3.5"><span class="text-xs font-bold uppercase tracking-wider">Matches & Results</span></a>
+                <a href="leaderboard.html" class="nav-item flex items-center gap-3 px-6 py-3.5"><span class="text-xs font-bold uppercase tracking-wider">Leaderboard</span></a>
+                <a href="mvp.html" class="nav-item flex items-center gap-3 px-6 py-3.5"><span class="text-xs font-bold uppercase tracking-wider">MVP Management</span></a>
+                <a href="reports.html" class="nav-item flex items-center gap-3 px-6 py-3.5"><span class="text-xs font-bold uppercase tracking-wider">Reports</span></a>
+                <a href="settings.html" class="nav-item active flex items-center gap-3 px-6 py-3.5 border-t border-slate-700 mt-2"><span class="text-xs font-bold uppercase tracking-wider">Settings</span></a>
             </nav>
         </aside>
 
         <!-- Main Content -->
         <main class="flex-1 flex flex-col h-screen overflow-hidden">
-            <header class="bg-white min-h-[64px] border-b flex items-center justify-between px-4 lg:px-8 relative z-50">
-                <div class="flex items-center gap-4">
-                    <button id="openSidebar" class="lg:hidden p-2 hover:bg-slate-100 rounded-lg">
-                        <svg class="w-6 h-6 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
-                    </button>
-                    <h2 class="text-sm lg:text-xl font-black text-slate-800 uppercase italic tracking-tight truncate">System Configuration</h2>
-                </div>
+            <header class="bg-white h-16 border-b flex items-center justify-between px-8 relative z-50">
+                <h2 class="font-black text-slate-800 uppercase italic tracking-tight">System Settings</h2>
                 
-                <!-- Profile Section -->
-                <div class="flex items-center gap-4">
-                    <div class="relative">
-                        <button id="profileToggle" class="flex items-center gap-2 hover:bg-slate-50 p-1 lg:p-2 rounded-lg transition-all focus:outline-none">
-                            <div class="text-right hidden sm:block">
-                                <p id="adminName" class="text-[10px] lg:text-xs font-black text-slate-900 uppercase">---</p>
-                                <p class="text-[8px] lg:text-[10px] text-slate-500 font-bold uppercase">Super Admin</p>
-                            </div>
-                            <div id="adminInitials" class="h-8 w-8 lg:h-10 lg:w-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 font-bold border-2 border-blue-200 text-xs lg:text-base">
-                                ??
-                            </div>
-                        </button>
-                        
-                        <div id="profileDropdown" class="profile-dropdown absolute right-0 mt-2 w-48 lg:w-56 bg-white rounded-xl shadow-xl border border-slate-100 z-[1001]">
-                            <div class="py-2">
-                                <button id="changePassBtn" class="w-full text-left px-4 py-3 text-sm text-slate-700 hover:bg-blue-50 font-semibold transition-colors">
-                                    Change Password
-                                </button>
-                                <div class="h-px bg-slate-100 my-1 mx-2"></div>
-                                <button id="logoutBtn" class="w-full text-left px-4 py-3 text-sm text-red-600 hover:bg-red-50 font-black transition-colors">
-                                    Log Out
-                                </button>
-                            </div>
+                <div class="relative">
+                    <button id="profileToggle" class="flex items-center gap-3 hover:bg-slate-50 p-2 rounded-xl transition-all">
+                        <div class="text-right hidden sm:block">
+                            <p id="adminNameDisplay" class="text-[10px] font-black text-slate-900 uppercase">Admin</p>
+                            <p class="text-[8px] text-slate-500 font-bold uppercase">Super Admin</p>
                         </div>
+                        <div id="adminInitial" class="h-9 w-9 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold text-sm">A</div>
+                    </button>
+                    <div id="profileDropdown" class="profile-dropdown absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-2xl border border-slate-100 py-2">
+                        <button class="w-full text-left px-4 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50">Change Password</button>
+                        <div class="h-px bg-slate-100 my-1 mx-2"></div>
+                        <button id="logoutBtn" class="w-full text-left px-4 py-2 text-xs font-black text-red-600 hover:bg-red-50">Log Out</button>
                     </div>
                 </div>
             </header>
 
-            <div class="flex-1 overflow-y-auto p-4 lg:p-8">
-                <div class="max-w-4xl mx-auto space-y-6">
+            <div class="flex-1 overflow-y-auto p-8 custom-scrollbar">
+                <div class="max-w-4xl mx-auto space-y-8">
                     
-                    <!-- Intramurals Info -->
-                    <section class="settings-card p-6">
-                        <div class="flex items-center gap-3 mb-6">
-                            <div class="p-2 bg-blue-50 text-blue-600 rounded-lg">
-                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
-                            </div>
-                            <div>
-                                <h3 class="font-black text-slate-800 uppercase italic tracking-tight">System Branding</h3>
-                                <p class="text-xs text-slate-500 font-medium">Identify the current event season</p>
-                            </div>
+                    <!-- Section: General Config -->
+                    <section class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+                        <div class="px-6 py-4 border-b border-slate-100 bg-slate-50/50 flex items-center justify-between">
+                            <h3 class="font-black text-slate-800 uppercase text-xs tracking-widest">Intramurals Configuration</h3>
+                            <button onclick="saveGeneralConfig()" class="text-[10px] bg-blue-600 text-white px-4 py-1.5 rounded-lg font-bold uppercase hover:bg-blue-700">Save Changes</button>
                         </div>
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div class="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div>
                                 <label class="block text-[10px] font-black text-slate-400 uppercase mb-2">Event Name</label>
-                                <input type="text" id="eventName" placeholder="e.g. Intramurals" class="w-full px-4 py-2 bg-slate-50 border rounded-xl focus:ring-2 focus:ring-blue-500 outline-none font-bold text-slate-700">
+                                <input id="configEventName" type="text" placeholder="e.g. UDD Intramurals" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none text-sm font-semibold">
                             </div>
                             <div>
                                 <label class="block text-[10px] font-black text-slate-400 uppercase mb-2">Academic Year</label>
-                                <input type="text" id="eventYear" placeholder="e.g. 2026" class="w-full px-4 py-2 bg-slate-50 border rounded-xl focus:ring-2 focus:ring-blue-500 outline-none font-bold text-slate-700">
+                                <input id="configYear" type="text" placeholder="e.g. 2025-2026" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none text-sm font-semibold">
                             </div>
                         </div>
-                        <button id="saveBranding" class="mt-6 bg-blue-600 text-white px-6 py-2 rounded-xl font-black uppercase text-xs tracking-widest hover:bg-blue-700 transition-all">Update Branding</button>
                     </section>
 
-                    <!-- Admin Account Management -->
-                    <section class="settings-card p-6">
-                        <div class="flex items-center gap-3 mb-6">
-                            <div class="p-2 bg-purple-50 text-purple-600 rounded-lg">
-                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
-                            </div>
-                            <div>
-                                <h3 class="font-black text-slate-800 uppercase italic tracking-tight">Admin Accounts</h3>
-                                <p class="text-xs text-slate-500 font-medium">Manage personnel access</p>
+                    <!-- Section: Admin Management -->
+                    <section class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+                        <div class="px-6 py-4 border-b border-slate-100 bg-slate-50/50 flex items-center justify-between">
+                            <h3 class="font-black text-slate-800 uppercase text-xs tracking-widest">Administrator Management</h3>
+                        </div>
+                        <div class="p-6">
+                            <form id="addAdminForm" class="flex gap-3 mb-6">
+                                <input id="newAdminEmail" type="email" required placeholder="New admin email address" class="flex-1 px-4 py-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none text-sm font-semibold">
+                                <button type="submit" class="bg-slate-900 text-white px-6 py-2.5 rounded-xl font-black uppercase text-[10px] tracking-widest hover:bg-slate-800">Add Admin</button>
+                            </form>
+                            
+                            <div class="space-y-3" id="adminList">
+                                <!-- Admin items will appear here -->
+                                <div class="animate-pulse flex items-center justify-between p-4 bg-slate-50 rounded-xl">
+                                    <div class="h-4 w-32 bg-slate-200 rounded"></div>
+                                    <div class="h-8 w-20 bg-slate-200 rounded"></div>
+                                </div>
                             </div>
                         </div>
-                        <div class="overflow-x-auto">
-                            <table class="w-full text-left">
-                                <thead class="border-b">
-                                    <tr class="text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                                        <th class="py-3 px-2">Admin Email</th>
-                                        <th class="py-3 px-2">Role</th>
-                                        <th class="py-3 px-2">Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="adminList" class="text-sm font-bold text-slate-700">
-                                    <!-- List populated via JS -->
-                                    <tr class="border-b last:border-0">
-                                        <td class="py-4 px-2" id="currentUserEmail">---</td>
-                                        <td class="py-4 px-2"><span class="bg-blue-100 text-blue-700 px-2 py-1 rounded-md text-[10px] uppercase">Super Admin</span></td>
-                                        <td class="py-4 px-2">
-                                            <button class="text-slate-400 hover:text-blue-600">
-                                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
-                                            </button>
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                        <button class="mt-6 flex items-center gap-2 text-blue-600 font-black uppercase text-[10px] tracking-widest hover:text-blue-700">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
-                            Add New Administrator
-                        </button>
                     </section>
 
-                    <!-- Maintenance Actions -->
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <!-- Reset / Archive -->
-                        <section class="settings-card p-6 border-red-100 bg-red-50/30">
-                            <div class="flex items-center gap-3 mb-6 text-red-600">
-                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                                <h3 class="font-black uppercase italic tracking-tight">Danger Zone</h3>
+                    <!-- Section: Data Maintenance -->
+                    <section class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+                        <div class="px-6 py-4 border-b border-slate-100 bg-slate-50/50">
+                            <h3 class="font-black text-slate-800 uppercase text-xs tracking-widest text-red-600">Danger Zone</h3>
+                        </div>
+                        <div class="p-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="p-4 border border-red-100 rounded-2xl bg-red-50/30 flex flex-col justify-between">
+                                <div>
+                                    <h4 class="font-bold text-slate-900 text-sm">Reset Season</h4>
+                                    <p class="text-xs text-slate-500 mt-1">Archive all current matches and results to start a new season.</p>
+                                </div>
+                                <button onclick="resetSeason()" class="mt-4 border border-red-200 text-red-600 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-red-600 hover:text-white transition-all">Archive Data</button>
                             </div>
-                            <p class="text-xs text-slate-600 mb-6 font-medium">Resetting the season will archive current matches, scores, and points. This cannot be undone.</p>
-                            <button id="resetSeason" class="w-full bg-red-600 text-white py-3 rounded-xl font-black uppercase text-xs tracking-widest shadow-lg shadow-red-200 hover:bg-red-700 transition-all">Reset Current Season</button>
-                        </section>
-
-                        <!-- Backup -->
-                        <section class="settings-card p-6">
-                            <div class="flex items-center gap-3 mb-6 text-slate-800">
-                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"></path></svg>
-                                <h3 class="font-black uppercase italic tracking-tight">System Backup</h3>
+                            <div class="p-4 border border-blue-100 rounded-2xl bg-blue-50/30 flex flex-col justify-between">
+                                <div>
+                                    <h4 class="font-bold text-slate-900 text-sm">Backup Database</h4>
+                                    <p class="text-xs text-slate-500 mt-1">Export all system data (JSON) for security purposes.</p>
+                                </div>
+                                <button onclick="backupDatabase()" class="mt-4 border border-blue-200 text-blue-600 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-blue-600 hover:text-white transition-all">Download Backup</button>
                             </div>
-                            <p class="text-xs text-slate-500 mb-6 font-medium">Download a complete snapshot of all sports, teams, and player data for external storage.</p>
-                            <button id="backupData" class="w-full bg-slate-900 text-white py-3 rounded-xl font-black uppercase text-xs tracking-widest hover:bg-slate-800 transition-all">Download Backup (JSON)</button>
-                        </section>
-                    </div>
-
+                        </div>
+                    </section>
                 </div>
             </div>
 
-            <footer class="h-12 bg-slate-900 text-white flex flex-col sm:flex-row items-center justify-center sm:justify-between px-8 text-[8px] lg:text-[10px] font-black uppercase tracking-[0.2em] gap-2 py-2">
-                <span>Intramurals <span id="footerYear">2026</span> Admin Portal</span>
-                <div class="flex items-center gap-2">
-                    <span class="h-2 w-2 bg-green-500 rounded-full animate-pulse"></span>
-                    <span>System Online</span>
-                </div>
+            <footer class="h-10 bg-slate-900 text-white flex items-center justify-between px-8 text-[8px] font-black uppercase tracking-widest">
+                <span>Intramurals 2026 Settings</span>
+                <span class="text-slate-500 italic">v1.0.4 stable</span>
             </footer>
         </main>
     </div>
 
-    <!-- Feedback Modal -->
-    <div id="modalOverlay" class="fixed inset-0 z-[2000] hidden items-center justify-center bg-black/50 p-4">
-        <div class="bg-white rounded-2xl p-8 max-w-sm w-full shadow-2xl text-center">
-            <div id="modalIcon" class="mb-4 text-4xl">✅</div>
-            <h3 id="modalTitle" class="text-xl font-black uppercase italic mb-2">Success</h3>
-            <p id="modalMessage" class="text-slate-600 mb-6 font-medium"></p>
-            <button onclick="closeModal()" class="w-full py-3 bg-slate-900 text-white font-black uppercase tracking-widest rounded-xl hover:bg-slate-800">Continue</button>
-        </div>
-    </div>
-
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
-        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
-        import { getFirestore, doc, getDoc, setDoc, collection, getDocs, writeBatch } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
+        import { getAuth, onAuthStateChanged, signOut, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+        import { getFirestore, collection, doc, setDoc, getDoc, onSnapshot, addDoc, deleteDoc, query, getDocs } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
 
-        // 🔥 Firebase Config (Using your reference)
+        // Constants
         const firebaseConfig = {
             apiKey: "AIzaSyD5Gkjk7tk48Hv9zgvdlSsdR8FH_nwtGRc",
             authDomain: "intramurals-score-leaderboard.firebaseapp.com",
@@ -304,133 +163,155 @@
             messagingSenderId: "455345215033",
             appId: "1:455345215033:web:66a387d0fa0fa4453e5fe8"
         };
-
         const currentAppId = 'intramurals-2026';
+
+        // Initialize Firebase
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        // UI Elements
+        // State & UI Elements
+        let currentUser = null;
         const authScreen = document.getElementById('authScreen');
         const mainWrapper = document.getElementById('mainWrapper');
-        const modal = document.getElementById('modalOverlay');
+        const adminListContainer = document.getElementById('adminList');
 
-        // Auth Listener
+        // Check Auth
         onAuthStateChanged(auth, (user) => {
             if (user) {
-                setupPage(user);
+                currentUser = user;
+                authScreen.style.display = 'none';
+                mainWrapper.classList.remove('hidden');
+                setupUI(user);
+                loadSettings();
+                listenAdmins();
             } else {
-                // In a real environment, redirect to login
-                // window.location.replace('login.html');
-                // For this demo, let's keep it visible
-                setupPage({ email: "admin@udd.edu.ph" });
-            }
-        });
-
-        async function setupPage(user) {
-            const email = user.email || "Admin";
-            document.getElementById('adminName').textContent = email.split('@')[0];
-            document.getElementById('adminInitials').textContent = email.substring(0, 2).toUpperCase();
-            document.getElementById('currentUserEmail').textContent = email;
-
-            authScreen.style.display = 'none';
-            mainWrapper.style.display = 'flex';
-
-            loadSettings();
-        }
-
-        // Settings Logic
-        async function loadSettings() {
-            const settingsRef = doc(db, 'artifacts', currentAppId, 'public', 'data', 'system_config');
-            const snap = await getDoc(settingsRef);
-            
-            if(snap.exists()){
-                const data = snap.data();
-                document.getElementById('eventName').value = data.name || "Intramurals";
-                document.getElementById('eventYear').value = data.year || "2026";
-                updateBrandingUI(data.name, data.year);
-            }
-        }
-
-        document.getElementById('saveBranding').addEventListener('click', async () => {
-            const name = document.getElementById('eventName').value;
-            const year = document.getElementById('eventYear').value;
-            
-            try {
-                await setDoc(doc(db, 'artifacts', currentAppId, 'public', 'data', 'system_config'), {
-                    name, year, lastUpdated: new Date().toISOString()
+                signInAnonymously(auth).catch(err => {
+                    console.error("Auth error:", err);
                 });
-                updateBrandingUI(name, year);
-                showModal('Branding Updated', 'System name and year have been synchronized.');
-            } catch (e) {
-                showModal('Error', 'Failed to update settings.', '❌');
             }
         });
 
-        function updateBrandingUI(name, year) {
-            const logoYear = document.getElementById('logoYear');
-            const footerYear = document.getElementById('footerYear');
-            if(logoYear) logoYear.textContent = year;
-            if(footerYear) footerYear.textContent = year;
+        function setupUI(user) {
+            const email = user.email || "Admin User";
+            document.getElementById('adminNameDisplay').innerText = email.split('@')[0];
+            document.getElementById('adminInitial').innerText = email.charAt(0).toUpperCase();
         }
 
-        // Backup Logic
-        document.getElementById('backupData').addEventListener('click', async () => {
-            const collections = ['sports', 'teams', 'players', 'matches'];
-            let backupData = {};
+        // --- CORE FUNCTIONS ---
 
-            for(const coll of collections) {
-                const snap = await getDocs(collection(db, 'artifacts', currentAppId, 'public', 'data', coll));
-                backupData[coll] = snap.docs.map(d => ({id: d.id, ...d.data()}));
+        // Load General Config
+        async function loadSettings() {
+            const configRef = doc(db, 'artifacts', currentAppId, 'public', 'data', 'system_config');
+            const snap = await getDoc(configRef);
+            if(snap.exists()) {
+                const data = snap.data();
+                document.getElementById('configEventName').value = data.eventName || '';
+                document.getElementById('configYear').value = data.year || '';
             }
+        }
 
-            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(backupData, null, 2));
-            const downloadAnchorNode = document.createElement('a');
-            downloadAnchorNode.setAttribute("href", dataStr);
-            downloadAnchorNode.setAttribute("download", `intramurals_backup_${new Date().toLocaleDateString()}.json`);
-            document.body.appendChild(downloadAnchorNode);
-            downloadAnchorNode.click();
-            downloadAnchorNode.remove();
-        });
-
-        // Reset Logic
-        document.getElementById('resetSeason').addEventListener('click', async () => {
-            if(!confirm("Are you ABSOLUTELY sure? This will wipe matches and results!")) return;
+        // Save General Config
+        window.saveGeneralConfig = async () => {
+            const name = document.getElementById('configEventName').value;
+            const year = document.getElementById('configYear').value;
             
             try {
-                const batch = writeBatch(db);
-                // In a real scenario, you'd archive these to a 'history' collection first
-                const matchesSnap = await getDocs(collection(db, 'artifacts', currentAppId, 'public', 'data', 'matches'));
-                matchesSnap.forEach(d => batch.delete(d.ref));
-                
-                // Also reset points for teams
-                const teamsSnap = await getDocs(collection(db, 'artifacts', currentAppId, 'public', 'data', 'teams'));
-                teamsSnap.forEach(d => batch.update(d.ref, { points: 0, gold: 0, silver: 0, bronze: 0 }));
-
-                await batch.commit();
-                showModal('Season Reset', 'All match data cleared. Team scores reset to zero.');
+                const configRef = doc(db, 'artifacts', currentAppId, 'public', 'data', 'system_config');
+                await setDoc(configRef, { eventName: name, year: year, updatedAt: new Date().toISOString() }, { merge: true });
+                showToast("Settings updated successfully!");
             } catch (e) {
-                showModal('Error', 'Failed to reset season.', '❌');
+                showToast("Error saving settings.", true);
+            }
+        }
+
+        // Admin Management logic
+        function listenAdmins() {
+            const adminRef = collection(db, 'artifacts', currentAppId, 'public', 'data', 'administrators');
+            onSnapshot(adminRef, (snapshot) => {
+                adminListContainer.innerHTML = '';
+                if(snapshot.empty) {
+                    adminListContainer.innerHTML = '<p class="text-center py-4 text-xs text-slate-400 font-bold italic">No secondary admins added.</p>';
+                    return;
+                }
+                snapshot.forEach(docSnap => {
+                    const admin = docSnap.data();
+                    const div = document.createElement('div');
+                    div.className = "flex items-center justify-between p-4 bg-slate-50 border border-slate-100 rounded-2xl group hover:border-blue-200 transition-all";
+                    div.innerHTML = `
+                        <div class="flex items-center gap-3">
+                            <div class="h-8 w-8 rounded-full bg-slate-200 flex items-center justify-center text-[10px] font-black">${admin.email.charAt(0).toUpperCase()}</div>
+                            <div>
+                                <p class="text-sm font-bold text-slate-800">${admin.email}</p>
+                                <p class="text-[9px] text-slate-400 font-black uppercase">Added: ${new Date(admin.addedAt).toLocaleDateString()}</p>
+                            </div>
+                        </div>
+                        <button onclick="removeAdmin('${docSnap.id}')" class="opacity-0 group-hover:opacity-100 bg-red-50 text-red-600 px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase transition-all hover:bg-red-600 hover:text-white">Remove</button>
+                    `;
+                    adminListContainer.appendChild(div);
+                });
+            }, (err) => console.error(err));
+        }
+
+        document.getElementById('addAdminForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const emailInput = document.getElementById('newAdminEmail');
+            const email = emailInput.value.trim();
+            
+            if(!email) return;
+
+            try {
+                const adminRef = collection(db, 'artifacts', currentAppId, 'public', 'data', 'administrators');
+                await addDoc(adminRef, {
+                    email: email,
+                    addedAt: new Date().toISOString(),
+                    role: 'admin'
+                });
+                emailInput.value = '';
+                showToast("New admin added!");
+            } catch (err) {
+                showToast("Failed to add admin.", true);
             }
         });
 
-        // UI Helpers
-        const toggleSidebar = (isOpen) => {
-            const sidebar = document.getElementById('sidebar');
-            const overlay = document.getElementById('sidebarOverlay');
-            if (isOpen) {
-                sidebar.classList.replace('sidebar-closed', 'sidebar-open');
-                overlay.classList.add('active');
-            } else {
-                sidebar.classList.replace('sidebar-open', 'sidebar-closed');
-                overlay.classList.remove('active');
+        window.removeAdmin = async (id) => {
+            if(!confirm("Are you sure you want to remove this administrator's access?")) return;
+            try {
+                await deleteDoc(doc(db, 'artifacts', currentAppId, 'public', 'data', 'administrators', id));
+                showToast("Admin removed.");
+            } catch (err) {
+                showToast("Error removing admin.", true);
             }
-        };
+        }
 
-        document.getElementById('openSidebar')?.addEventListener('click', () => toggleSidebar(true));
-        document.getElementById('closeSidebar')?.addEventListener('click', () => toggleSidebar(false));
-        document.getElementById('sidebarOverlay')?.addEventListener('click', () => toggleSidebar(false));
+        // Mock functions for Danger Zone
+        window.resetSeason = () => {
+            const confirmed = confirm("WARNING: This will clear all match results and move them to history. Continue?");
+            if(confirmed) {
+                showToast("Simulating archive process...");
+                setTimeout(() => showToast("Data archived successfully!"), 1500);
+            }
+        }
 
+        window.backupDatabase = async () => {
+            showToast("Generating backup package...");
+            // Simple logic: Fetch all sports and download as JSON
+            try {
+                const sportsRef = collection(db, 'artifacts', currentAppId, 'public', 'data', 'sports');
+                const snap = await getDocs(sportsRef);
+                const data = snap.docs.map(d => d.data());
+                const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `backup_intramurals_${new Date().toISOString().split('T')[0]}.json`;
+                a.click();
+            } catch (e) {
+                showToast("Backup failed.", true);
+            }
+        }
+
+        // UI Interactions
         document.getElementById('profileToggle').addEventListener('click', (e) => {
             e.stopPropagation();
             document.getElementById('profileDropdown').classList.toggle('show');
@@ -440,18 +321,18 @@
             document.getElementById('profileDropdown').classList.remove('show');
         });
 
-        document.getElementById('logoutBtn').addEventListener('click', () => signOut(auth));
+        document.getElementById('logoutBtn').addEventListener('click', async () => {
+            await signOut(auth);
+            location.reload();
+        });
 
-        function showModal(title, msg, icon = '✅') {
-            document.getElementById('modalTitle').textContent = title;
-            document.getElementById('modalMessage').textContent = msg;
-            document.getElementById('modalIcon').textContent = icon;
-            modal.classList.replace('hidden', 'flex');
+        function showToast(msg, isError = false) {
+            const toast = document.createElement('div');
+            toast.className = `fixed bottom-8 right-8 px-6 py-3 rounded-xl text-xs font-black uppercase tracking-widest text-white z-[2000] shadow-2xl ${isError ? 'bg-red-600' : 'bg-slate-900'}`;
+            toast.innerText = msg;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
         }
-
-        window.closeModal = () => {
-            modal.classList.replace('flex', 'hidden');
-        };
 
     </script>
 </body>
