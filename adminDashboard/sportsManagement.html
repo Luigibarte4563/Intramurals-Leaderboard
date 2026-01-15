@@ -255,12 +255,12 @@
 
         // State
         let sports = [];
+        let teams = []; // Global state for teams
         let currentUser = null;
 
-        // AUTHENTICATION GUARD (MANDATORY RULE 3)
+        // AUTHENTICATION GUARD
         async function startApp() {
             try {
-                // Await auth first before any Firestore call
                 if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
                     await signInWithCustomToken(auth, __initial_auth_token);
                 } else {
@@ -285,18 +285,27 @@
                 connectionStatus.classList.add('bg-green-500');
                 statusText.textContent = "System Connected";
                 
-                // Only initialize listener after we are certain we have a user
+                // Initialize both listeners
                 initSportsListener();
+                initTeamsListener();
             } else {
                 startApp();
             }
         });
 
-        // FIRESTORE SYNC (MANDATORY RULE 1)
+        // TEAM LISTENER (New)
+        function initTeamsListener() {
+            if (!currentUser) return;
+            const teamsRef = collection(db, 'artifacts', currentAppId, 'public', 'data', 'teams');
+            onSnapshot(teamsRef, (snapshot) => {
+                teams = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                renderSports(); // Re-render sports when teams change to update counts
+            });
+        }
+
+        // SPORTS LISTENER
         function initSportsListener() {
             if (!currentUser) return;
-
-            // Strict path structure requirement
             const sportsRef = collection(db, 'artifacts', currentAppId, 'public', 'data', 'sports');
             
             onSnapshot(sportsRef, (snapshot) => {
@@ -304,7 +313,6 @@
                 renderSports();
             }, (error) => {
                 console.error("Database fetch error:", error);
-                // Handle Permission Denied or other errors visually
                 if (error.code === 'permission-denied') {
                     statusText.textContent = "Access Denied";
                     connectionStatus.classList.replace('bg-green-500', 'bg-red-500');
@@ -327,7 +335,11 @@
                 return;
             }
 
-            sportsGrid.innerHTML = sports.map(sport => `
+            sportsGrid.innerHTML = sports.map(sport => {
+                // FILTER TEAMS BY CURRENT SPORT NAME
+                const sportTeamsCount = teams.filter(t => t.sport === sport.name).length;
+
+                return `
                 <div class="sport-card bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden flex flex-col">
                     <div class="p-6">
                         <div class="flex justify-between items-start mb-4">
@@ -344,14 +356,15 @@
                             </div>
                         </div>
                         <h4 class="text-xl font-black text-slate-800 uppercase italic leading-tight mb-2">${sport.name}</h4>
+                        
                         <div class="grid grid-cols-2 gap-4 mt-6">
+                            <div class="bg-blue-50/50 p-3 rounded-xl border border-blue-100">
+                                <p class="text-[8px] font-black text-blue-400 uppercase tracking-widest">Total Teams</p>
+                                <p class="text-lg font-black text-blue-700 mt-0.5">${sportTeamsCount}</p>
+                            </div>
                             <div class="bg-slate-50 p-3 rounded-xl border border-slate-100">
                                 <p class="text-[8px] font-black text-slate-400 uppercase tracking-widest">Type</p>
                                 <p class="text-xs font-bold text-slate-700 mt-0.5">${sport.type || 'Standard'}</p>
-                            </div>
-                            <div class="bg-slate-50 p-3 rounded-xl border border-slate-100">
-                                <p class="text-[8px] font-black text-slate-400 uppercase tracking-widest">Category</p>
-                                <p class="text-xs font-bold text-slate-700 mt-0.5">${sport.category || 'General'}</p>
                             </div>
                         </div>
                     </div>
@@ -361,7 +374,7 @@
                          </button>
                     </div>
                 </div>
-            `).join('');
+            `; }).join('');
         }
 
         // DATABASE OPERATIONS
@@ -437,6 +450,8 @@
 
         window.viewSportData = (id) => {
             const sport = sports.find(s => s.id === id);
+            const sportTeamsCount = teams.filter(t => t.sport === sport.name).length;
+
             document.getElementById('modalIcon').textContent = '📊';
             document.getElementById('modalTitle').textContent = 'Sport Data Overview';
             document.getElementById('modalBody').innerHTML = `
@@ -445,7 +460,7 @@
                         <p class="text-[10px] font-black text-slate-400 uppercase">Live Stats for ${sport.name}</p>
                         <div class="mt-4 grid grid-cols-2 gap-4 text-center">
                             <div>
-                                <p class="text-2xl font-black text-blue-600">--</p>
+                                <p class="text-2xl font-black text-blue-600">${sportTeamsCount}</p>
                                 <p class="text-[8px] font-bold text-slate-500 uppercase">Total Teams</p>
                             </div>
                             <div>
@@ -468,7 +483,7 @@
         window.triggerAction = async (type) => {
             if (type === 'logout') {
                 await signOut(auth);
-                window.location.reload(); // Simple reload for session clear
+                window.location.reload();
             } else if (type === 'changePassword') {
                 if (currentUser && currentUser.email) {
                     await sendPasswordResetEmail(auth, currentUser.email);
@@ -477,8 +492,6 @@
                     document.getElementById('modalBody').innerHTML = `<p class="text-slate-600 text-center">A password reset link has been sent to <b>${currentUser.email}</b>.</p>`;
                     document.getElementById('modalConfirmBtn').classList.add('hidden');
                     document.getElementById('modalOverlay').classList.add('active');
-                } else {
-                    console.warn("No email associated with session.");
                 }
             }
         };
@@ -505,7 +518,6 @@
             profileDropdown.classList.remove('show');
         });
 
-        // Bootstrap Auth
         startApp();
     </script>
 </body>
