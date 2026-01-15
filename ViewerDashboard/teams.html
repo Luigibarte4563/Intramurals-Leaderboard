@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Intramurals 2026 | Teams Viewer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #f8fafc;
+        }
+
+        .sidebar-transition {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .nav-link:hover {
+            background: rgba(59, 130, 246, 0.05);
+            color: #2563eb;
+        }
+
+        .nav-link.active {
+            background: #2563eb;
+            color: white;
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .animate-fade-in {
+            animation: fadeIn 0.4s ease-out forwards;
+        }
+
+        .scrollbar-hide::-webkit-scrollbar {
+            display: none;
+        }
+
+        /* Custom Tabs Styling */
+        .sport-tab.active {
+            border-bottom: 3px solid #2563eb;
+            color: #2563eb;
+        }
+    </style>
+</head>
+
+<body class="overflow-x-hidden">
+
+    <!-- Mobile Sidebar Overlay -->
+    <div id="sidebarOverlay" class="fixed inset-0 bg-slate-900/50 z-40 hidden backdrop-blur-sm"></div>
+
+    <!-- Navigation Sidebar -->
+    <aside id="sidebar" class="fixed top-0 left-0 h-full w-64 bg-white border-r border-slate-200 z-50 transform -translate-x-full lg:translate-x-0 sidebar-transition shadow-xl lg:shadow-none">
+        <div class="p-6">
+            <div class="flex items-center gap-3 mb-8">
+                <div class="h-10 w-10 bg-blue-600 rounded-xl flex items-center justify-center text-white shadow-lg shadow-blue-200">
+                    <i class="fas fa-trophy"></i>
+                </div>
+                <div>
+                    <h1 class="font-extrabold text-slate-900 text-sm tracking-tight leading-none uppercase">Intramurals</h1>
+                    <span class="text-[10px] font-bold text-blue-600 uppercase tracking-widest">2026 Season</span>
+                </div>
+            </div>
+
+            <nav class="space-y-1">
+                <a href="#" onclick="navigate('home')" class="nav-link flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-bold text-slate-500 transition-all">
+                    <i class="fas fa-house w-5"></i> Home
+                </a>
+                <a href="#" onclick="navigate('sports')" class="nav-link flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-bold text-slate-500 transition-all">
+                    <i class="fas fa-volleyball w-5"></i> Sports
+                </a>
+                <a href="#" onclick="navigate('teams')" class="nav-link active flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-bold text-white transition-all">
+                    <i class="fas fa-users w-5"></i> Teams
+                </a>
+                <a href="#" onclick="navigate('players')" class="nav-link flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-bold text-slate-500 transition-all">
+                    <i class="fas fa-user-graduate w-5"></i> Players
+                </a>
+                <a href="#" onclick="navigate('leaderboard')" class="nav-link flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-bold text-slate-500 transition-all">
+                    <i class="fas fa-ranking-star w-5"></i> Leaderboard
+                </a>
+                <a href="#" onclick="navigate('mvp')" class="nav-link flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-bold text-slate-500 transition-all group">
+                    <i class="fas fa-medal w-5 group-hover:text-yellow-500 transition-colors"></i> MVP Awards
+                </a>
+                <a href="#" onclick="navigate('results')" class="nav-link flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-bold text-slate-500 transition-all">
+                    <i class="fas fa-calendar-check w-5"></i> Matches & Results
+                </a>
+                <div class="pt-4 mt-4 border-t border-slate-100">
+                    <a href="#" onclick="navigate('about')" class="nav-link flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-bold text-slate-500 transition-all">
+                        <i class="fas fa-circle-info w-5"></i> About
+                    </a>
+                </div>
+            </nav>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="lg:ml-64 min-h-screen p-4 md:p-8">
+        <!-- Header -->
+        <header class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+            <div>
+                <h2 class="text-2xl font-black text-slate-900 uppercase tracking-tight">Teams Explorer</h2>
+                <p class="text-slate-500 text-xs font-bold uppercase tracking-wider" id="currentDate">Loading date...</p>
+            </div>
+            <div class="flex items-center gap-3">
+                <button id="openSidebar" class="lg:hidden h-10 w-10 flex items-center justify-center bg-white border border-slate-200 rounded-xl">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <div class="relative">
+                    <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+                    <input type="text" id="teamSearch" placeholder="Search teams..." class="pl-10 pr-4 py-2 bg-white border border-slate-200 rounded-xl text-xs font-bold focus:outline-none focus:ring-2 focus:ring-blue-500 w-full md:w-64">
+                </div>
+            </div>
+        </header>
+
+        <!-- View Controls: Sport Tabs -->
+        <div class="flex items-center gap-4 border-b border-slate-200 mb-8 overflow-x-auto scrollbar-hide" id="sportTabs">
+            <button onclick="filterBySport('all')" class="sport-tab active px-4 py-3 text-xs font-black uppercase tracking-widest text-slate-400 whitespace-nowrap transition-all" data-sport="all">All Sports</button>
+            <!-- Dynamic Sport Tabs Injected Here -->
+        </div>
+
+        <!-- Content Area -->
+        <div id="teamsContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <!-- Loading Skeletons -->
+            <div class="h-64 bg-slate-200 rounded-[2rem] animate-pulse"></div>
+            <div class="h-64 bg-slate-200 rounded-[2rem] animate-pulse"></div>
+            <div class="h-64 bg-slate-200 rounded-[2rem] animate-pulse"></div>
+        </div>
+
+        <!-- Team Detail Modal -->
+        <div id="teamModal" class="fixed inset-0 bg-slate-900/60 z-[60] hidden flex items-center justify-center p-4 backdrop-blur-sm">
+            <div class="bg-white w-full max-w-4xl max-h-[90vh] rounded-[2.5rem] overflow-hidden shadow-2xl relative flex flex-col">
+                <button onclick="closeModal()" class="absolute top-6 right-6 h-10 w-10 bg-slate-100 rounded-full flex items-center justify-center text-slate-500 hover:bg-slate-200 z-10">
+                    <i class="fas fa-times"></i>
+                </button>
+                
+                <div id="modalContent" class="overflow-y-auto p-6 md:p-10">
+                    <!-- Dynamic Team Details Injected Here -->
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
+        import { getAuth, onAuthStateChanged, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+        import { getFirestore, collection, onSnapshot } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
+
+        // 🔥 Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyD5Gkjk7tk48Hv9zgvdlSsdR8FH_nwtGRc",
+            authDomain: "intramurals-score-leaderboard.firebaseapp.com",
+            projectId: "intramurals-score-leaderboard",
+            storageBucket: "intramurals-score-leaderboard.firebasestorage.app",
+            messagingSenderId: "455345215033",
+            appId: "1:455345215033:web:66a387d0fa0fa4453e5fe8"
+        };
+
+        const currentAppId = 'intramurals-2026';
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        let state = {
+            sports: [],
+            teams: [],
+            players: [],
+            matches: [],
+            activeSport: 'all',
+            searchTerm: ''
+        };
+
+        window.onload = () => {
+            updateDate();
+            initAuth();
+            setupSidebar();
+            setupSearch();
+        };
+
+        const updateDate = () => {
+            const el = document.getElementById('currentDate');
+            if (el) el.textContent = new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+        };
+
+        const setupSidebar = () => {
+            const overlay = document.getElementById('sidebarOverlay');
+            const sidebar = document.getElementById('sidebar');
+            document.getElementById('openSidebar').onclick = () => {
+                sidebar.classList.remove('-translate-x-full');
+                overlay.classList.remove('hidden');
+            };
+            overlay.onclick = () => {
+                sidebar.classList.add('-translate-x-full');
+                overlay.classList.add('hidden');
+            };
+        };
+
+        const setupSearch = () => {
+            document.getElementById('teamSearch').oninput = (e) => {
+                state.searchTerm = e.target.value.toLowerCase();
+                renderTeams();
+            };
+        };
+
+        const initAuth = async () => {
+            try {
+                await signInAnonymously(auth);
+                onAuthStateChanged(auth, (user) => {
+                    if (user) loadData();
+                });
+            } catch (error) {
+                console.error("Auth failed", error);
+            }
+        };
+
+        const loadData = () => {
+            const basePath = ['artifacts', currentAppId, 'public', 'data'];
+
+            onSnapshot(collection(db, ...basePath, 'sports'), (snap) => {
+                state.sports = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+                renderSportTabs();
+                renderTeams();
+            });
+
+            onSnapshot(collection(db, ...basePath, 'teams'), (snap) => {
+                state.teams = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+                renderTeams();
+            });
+
+            onSnapshot(collection(db, ...basePath, 'players'), (snap) => {
+                state.players = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+                renderTeams();
+            });
+
+            onSnapshot(collection(db, ...basePath, 'matches'), (snap) => {
+                state.matches = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+                renderTeams();
+            });
+        };
+
+        const calculateTeamStats = (teamId) => {
+            const teamMatches = state.matches.filter(m => 
+                m.status === 'completed' && (m.teamAId === teamId || m.teamBId === teamId)
+            );
+            
+            let wins = 0;
+            let losses = 0;
+            let totalScore = 0;
+
+            teamMatches.forEach(m => {
+                const isTeamA = m.teamAId === teamId;
+                const scoreSelf = parseInt(isTeamA ? m.scoreA : m.scoreB) || 0;
+                const scoreOpponent = parseInt(isTeamA ? m.scoreB : m.scoreA) || 0;
+                
+                totalScore += scoreSelf;
+                if (scoreSelf > scoreOpponent) wins++;
+                else if (scoreOpponent > scoreSelf) losses++;
+            });
+
+            return { wins, losses, totalScore };
+        };
+
+        const renderSportTabs = () => {
+            const container = document.getElementById('sportTabs');
+            const tabs = state.sports.map(sport => `
+                <button onclick="window.filterBySport('${sport.id}')" 
+                        class="sport-tab px-4 py-3 text-xs font-black uppercase tracking-widest text-slate-400 whitespace-nowrap transition-all ${state.activeSport === sport.id ? 'active' : ''}" 
+                        data-sport="${sport.id}">
+                    ${sport.name || sport.sportName}
+                </button>
+            `).join('');
+            
+            container.innerHTML = `
+                <button onclick="window.filterBySport('all')" 
+                        class="sport-tab px-4 py-3 text-xs font-black uppercase tracking-widest text-slate-400 whitespace-nowrap transition-all ${state.activeSport === 'all' ? 'active' : ''}" 
+                        data-sport="all">
+                    All Sports
+                </button>
+            ` + tabs;
+        };
+
+        window.filterBySport = (sportId) => {
+            state.activeSport = sportId;
+            renderSportTabs();
+            renderTeams();
+        };
+
+        const renderTeams = () => {
+            const container = document.getElementById('teamsContainer');
+            
+            // Logic to calculate overall rankings
+            const rankings = state.teams.map(t => ({ id: t.id, ...calculateTeamStats(t.id) }))
+                                        .sort((a, b) => (b.wins * 3 + b.totalScore) - (a.wins * 3 + a.totalScore));
+
+            const filteredTeams = state.teams.filter(team => {
+                const matchesSport = state.activeSport === 'all' || team.sportId === state.activeSport || team.sport === state.sports.find(s => s.id === state.activeSport)?.name;
+                const matchesSearch = (team.name || team.teamName || '').toLowerCase().includes(state.searchTerm);
+                return matchesSport && matchesSearch;
+            });
+
+            if (filteredTeams.length === 0) {
+                container.innerHTML = `<div class="col-span-full py-20 text-center text-slate-400 font-bold uppercase text-xs tracking-widest">No teams found</div>`;
+                return;
+            }
+
+            container.innerHTML = filteredTeams.map(team => {
+                const stats = calculateTeamStats(team.id);
+                const rank = rankings.findIndex(r => r.id === team.id) + 1;
+                const sportName = team.sport || state.sports.find(s => s.id === team.sportId)?.name || 'General';
+
+                return `
+                    <div onclick="window.openTeamDetail('${team.id}')" 
+                         class="group p-6 bg-white border border-slate-200 rounded-[2rem] shadow-sm hover:shadow-xl hover:border-blue-200 transition-all cursor-pointer animate-fade-in">
+                        <div class="flex justify-between items-start mb-6">
+                            <div class="h-14 w-14 bg-slate-50 rounded-2xl flex items-center justify-center text-blue-600 group-hover:bg-blue-600 group-hover:text-white transition-all shadow-inner">
+                                <i class="fas fa-users-viewfinder text-xl"></i>
+                            </div>
+                            <span class="px-3 py-1 bg-blue-50 text-blue-600 text-[10px] font-black uppercase rounded-full tracking-wider">Rank #${rank}</span>
+                        </div>
+                        <h3 class="text-xl font-black text-slate-900 uppercase tracking-tight mb-1 group-hover:text-blue-600 transition-colors">${team.name || team.teamName}</h3>
+                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-6 italic">${sportName}</p>
+                        
+                        <div class="grid grid-cols-3 gap-4 border-t border-slate-100 pt-6">
+                            <div>
+                                <p class="text-[9px] font-bold text-slate-400 uppercase">Wins</p>
+                                <p class="text-sm font-black text-green-600">${stats.wins}</p>
+                            </div>
+                            <div>
+                                <p class="text-[9px] font-bold text-slate-400 uppercase">Losses</p>
+                                <p class="text-sm font-black text-red-600">${stats.losses}</p>
+                            </div>
+                            <div>
+                                <p class="text-[9px] font-bold text-slate-400 uppercase">Points</p>
+                                <p class="text-sm font-black text-slate-900">${stats.totalScore}</p>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        };
+
+        window.openTeamDetail = (teamId) => {
+            const team = state.teams.find(t => t.id === teamId);
+            if (!team) return;
+
+            const stats = calculateTeamStats(teamId);
+            const teamPlayers = state.players.filter(p => p.teamId === teamId || p.team === team.name);
+            const sportName = team.sport || state.sports.find(s => s.id === team.sportId)?.name || 'General';
+            
+            const modal = document.getElementById('teamModal');
+            const content = document.getElementById('modalContent');
+            
+            content.innerHTML = `
+                <div class="flex flex-col md:flex-row gap-8 items-start mb-10">
+                    <div class="h-32 w-32 bg-blue-600 rounded-[2rem] flex items-center justify-center text-white shadow-2xl shadow-blue-200 shrink-0">
+                        <i class="fas fa-shield-halved text-5xl"></i>
+                    </div>
+                    <div class="flex-grow">
+                        <p class="text-blue-600 font-black text-xs uppercase tracking-[0.2em] mb-2">${sportName} Division</p>
+                        <h2 class="text-4xl md:text-5xl font-black text-slate-900 uppercase tracking-tighter leading-none mb-4">${team.name || team.teamName}</h2>
+                        <div class="flex flex-wrap gap-3">
+                            <span class="px-4 py-2 bg-slate-100 rounded-xl text-[10px] font-black uppercase text-slate-600"><i class="fas fa-university mr-2"></i>${team.department || 'Departmental'}</span>
+                            <span class="px-4 py-2 bg-yellow-50 rounded-xl text-[10px] font-black uppercase text-yellow-600"><i class="fas fa-trophy mr-2"></i>Active Season</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10">
+                    <div class="p-6 bg-slate-50 rounded-[2rem] text-center border border-slate-100">
+                        <p class="text-[10px] font-bold text-slate-400 uppercase mb-1">Win Rate</p>
+                        <p class="text-2xl font-black text-slate-900">${stats.wins + stats.losses > 0 ? Math.round((stats.wins / (stats.wins + stats.losses)) * 100) : 0}%</p>
+                    </div>
+                    <div class="p-6 bg-green-50 rounded-[2rem] text-center border border-green-100">
+                        <p class="text-[10px] font-bold text-green-600 uppercase mb-1">Wins</p>
+                        <p class="text-2xl font-black text-green-700">${stats.wins}</p>
+                    </div>
+                    <div class="p-6 bg-red-50 rounded-[2rem] text-center border border-red-100">
+                        <p class="text-[10px] font-bold text-red-600 uppercase mb-1">Losses</p>
+                        <p class="text-2xl font-black text-red-700">${stats.losses}</p>
+                    </div>
+                    <div class="p-6 bg-blue-50 rounded-[2rem] text-center border border-blue-100">
+                        <p class="text-[10px] font-bold text-blue-600 uppercase mb-1">Total Points</p>
+                        <p class="text-2xl font-black text-blue-700">${stats.totalScore}</p>
+                    </div>
+                </div>
+
+                <div>
+                    <div class="flex items-center justify-between mb-6">
+                        <h4 class="text-sm font-black text-slate-900 uppercase tracking-widest">Active Roster (${teamPlayers.length})</h4>
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        ${teamPlayers.map(p => `
+                            <div class="flex items-center gap-4 p-4 bg-white border border-slate-100 rounded-2xl hover:border-blue-200 transition-colors">
+                                <div class="h-10 w-10 bg-slate-100 rounded-xl flex items-center justify-center font-black text-slate-400 text-xs">
+                                    ${(p.fullName || p.name || '??').substring(0,2).toUpperCase()}
+                                </div>
+                                <div>
+                                    <p class="text-[11px] font-black text-slate-900 uppercase">${p.fullName || p.name}</p>
+                                    <p class="text-[8px] font-bold text-slate-400 uppercase">${p.position || 'Athlete'}</p>
+                                </div>
+                            </div>
+                        `).join('') || '<p class="col-span-full text-center py-6 text-slate-400 text-xs font-bold uppercase">No players registered</p>'}
+                    </div>
+                </div>
+            `;
+            
+            modal.classList.remove('hidden');
+        };
+
+        window.closeModal = () => {
+            document.getElementById('teamModal').classList.add('hidden');
+        };
+
+        window.navigate = (page) => {
+            // In a real multi-page app, this would use router. 
+            // For this UI demo, we update active states.
+            const links = document.querySelectorAll('.nav-link');
+            links.forEach(l => {
+                l.classList.remove('active', 'bg-blue-600', 'text-white');
+                l.classList.add('text-slate-500');
+            });
+            event.currentTarget.classList.add('active', 'bg-blue-600', 'text-white');
+            event.currentTarget.classList.remove('text-slate-500');
+        };
+
+    </script>
+</body>
+
+</html>
