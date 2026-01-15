@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sports | Intramurals 2026</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #f8fafc;
+        }
+
+        .sidebar-transition {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .nav-link {
+            transition: all 0.2s ease;
+        }
+
+        .nav-link:hover {
+            background: rgba(59, 130, 246, 0.05);
+            color: #2563eb;
+        }
+
+        .nav-link.active {
+            background: #2563eb;
+            color: white;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .animate-fade-in {
+            animation: fadeIn 0.4s ease-out forwards;
+        }
+
+        .sport-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 24px -10px rgba(0,0,0,0.1);
+        }
+        
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+
+<body class="overflow-x-hidden">
+
+    <!-- Mobile Sidebar Overlay -->
+    <div id="sidebarOverlay" class="fixed inset-0 bg-slate-900/50 z-40 hidden backdrop-blur-sm"></div>
+
+    <!-- Navigation Sidebar -->
+    <aside id="sidebar" class="fixed top-0 left-0 h-full w-64 bg-white border-r border-slate-200 z-50 transform -translate-x-full lg:translate-x-0 sidebar-transition shadow-xl lg:shadow-none">
+        <div class="p-6 h-full flex flex-col">
+            <div class="flex items-center gap-3 mb-8">
+                <div class="h-10 w-10 bg-blue-600 rounded-xl flex items-center justify-center text-white shadow-lg shadow-blue-200">
+                    <i class="fas fa-trophy"></i>
+                </div>
+                <div>
+                    <h1 class="font-extrabold text-slate-900 text-sm tracking-tight leading-none uppercase">Intramurals</h1>
+                    <span class="text-[10px] font-bold text-blue-600 uppercase tracking-widest">2026 Season</span>
+                </div>
+            </div>
+
+            <nav class="space-y-1 flex-1 overflow-y-auto custom-scrollbar">
+                <a href="#" class="nav-link flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-bold text-slate-500">
+                    <i class="fas fa-house w-5"></i> Home
+                </a>
+                <a href="#" class="nav-link active flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-bold">
+                    <i class="fas fa-volleyball w-5"></i> Sports
+                </a>
+                <a href="#" class="nav-link flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-bold text-slate-500">
+                    <i class="fas fa-users w-5"></i> Teams
+                </a>
+                <a href="#" class="nav-link flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-bold text-slate-500">
+                    <i class="fas fa-user-graduate w-5"></i> Players
+                </a>
+                <a href="#" class="nav-link flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-bold text-slate-500">
+                    <i class="fas fa-ranking-star w-5"></i> Leaderboard
+                </a>
+                <a href="#" class="nav-link flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-bold text-slate-500 group">
+                    <i class="fas fa-medal w-5 group-hover:text-yellow-500 transition-colors"></i> MVP Awards
+                </a>
+                <a href="#" class="nav-link flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-bold text-slate-500">
+                    <i class="fas fa-calendar-check w-5"></i> Matches & Results
+                </a>
+                <div class="pt-4 mt-4 border-t border-slate-100">
+                    <a href="#" class="nav-link flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-bold text-slate-500">
+                        <i class="fas fa-circle-info w-5"></i> About
+                    </a>
+                </div>
+            </nav>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="lg:ml-64 min-h-screen p-4 md:p-8">
+        <!-- Header -->
+        <header class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+            <div>
+                <nav class="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-2">
+                    <span class="hover:text-blue-600 cursor-pointer">Intramurals 2026</span>
+                    <i class="fas fa-chevron-right text-[8px]"></i>
+                    <span class="text-slate-900">Sports Directory</span>
+                </nav>
+                <h2 class="text-3xl font-black text-slate-900 uppercase tracking-tight">Browse Sports</h2>
+                <p class="text-slate-500 text-xs font-bold uppercase tracking-wider mt-1" id="currentDate">--</p>
+            </div>
+            <div class="flex items-center gap-3">
+                <button id="openSidebar" class="lg:hidden h-10 w-10 flex items-center justify-center bg-white border border-slate-200 rounded-xl">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <div class="relative">
+                    <input type="text" id="sportSearch" placeholder="Search sport..." class="pl-10 pr-4 py-2 bg-white border border-slate-200 rounded-2xl text-xs font-bold focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all w-full md:w-64">
+                    <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+                </div>
+            </div>
+        </header>
+
+        <!-- Sports Explorer View -->
+        <div id="explorerView" class="animate-fade-in">
+            <!-- Filter Bar -->
+            <div class="flex flex-wrap gap-2 mb-6">
+                <button class="filter-btn active px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest bg-blue-600 text-white shadow-lg shadow-blue-100" data-filter="all">All Sports</button>
+                <button class="filter-btn px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest bg-white border border-slate-200 text-slate-500 hover:border-blue-500 hover:text-blue-600 transition-all" data-filter="ongoing">Ongoing</button>
+                <button class="filter-btn px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest bg-white border border-slate-200 text-slate-500 hover:border-blue-500 hover:text-blue-600 transition-all" data-filter="finished">Finished</button>
+            </div>
+
+            <!-- Sports Grid -->
+            <div id="sportsGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                <!-- Skeletons -->
+                <div class="h-48 bg-white border border-slate-200 rounded-[2rem] animate-pulse"></div>
+                <div class="h-48 bg-white border border-slate-200 rounded-[2rem] animate-pulse"></div>
+                <div class="h-48 bg-white border border-slate-200 rounded-[2rem] animate-pulse"></div>
+            </div>
+        </div>
+
+        <!-- Sport Detail View (Hidden by default) -->
+        <div id="detailView" class="hidden animate-fade-in">
+            <button id="backToExplorer" class="mb-6 flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-slate-500 hover:text-blue-600 transition-all">
+                <i class="fas fa-arrow-left"></i> Back to Directory
+            </button>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <!-- Left: Info & Teams -->
+                <div class="lg:col-span-2 space-y-8">
+                    <div id="sportHero" class="relative p-8 rounded-[2.5rem] overflow-hidden text-white shadow-2xl shadow-blue-200 min-h-[250px] flex flex-col justify-end">
+                        <div class="absolute inset-0 bg-gradient-to-br from-blue-600 to-indigo-800 -z-10"></div>
+                        <div class="absolute top-8 right-8 text-8xl opacity-10" id="detailIcon"><i class="fas fa-volleyball"></i></div>
+                        <div>
+                            <span id="detailStatus" class="px-3 py-1 bg-white/20 backdrop-blur rounded-full text-[10px] font-black uppercase tracking-widest mb-3 inline-block">Ongoing</span>
+                            <h1 id="detailTitle" class="text-4xl font-black uppercase tracking-tighter mb-2">Volleyball Men</h1>
+                            <p class="text-blue-100 text-xs font-bold max-w-md opacity-80 uppercase tracking-widest">Major sport event for the 2026 intramurals season.</p>
+                        </div>
+                    </div>
+
+                    <section>
+                        <h3 class="text-xs font-black text-slate-900 uppercase tracking-widest mb-4">Participating Teams</h3>
+                        <div id="participatingTeams" class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                            <!-- Team Cards -->
+                        </div>
+                    </section>
+                </div>
+
+                <!-- Right: Leaderboard & MVP -->
+                <div class="space-y-6">
+                    <!-- Leaderboard Card -->
+                    <div class="bg-white border border-slate-200 rounded-[2rem] overflow-hidden shadow-sm">
+                        <div class="p-6 pb-2">
+                            <h4 class="text-xs font-black text-slate-900 uppercase tracking-widest mb-1">Sport Leaderboard</h4>
+                            <p class="text-[10px] font-bold text-slate-400 uppercase mb-4 tracking-tighter">Current Standings</p>
+                        </div>
+                        <div id="detailLeaderboard">
+                            <!-- Injected Table -->
+                        </div>
+                    </div>
+
+                    <!-- MVP Card -->
+                    <div class="p-6 bg-gradient-to-br from-orange-500 to-red-600 rounded-[2rem] text-white shadow-xl shadow-orange-100 relative overflow-hidden">
+                        <i class="fas fa-crown absolute top-4 right-4 text-white/20 text-4xl rotate-12"></i>
+                        <p class="text-[10px] font-bold text-orange-100 uppercase tracking-widest mb-1">Projected MVP</p>
+                        <h3 id="detailMvpName" class="text-2xl font-black uppercase tracking-tight mb-4">Syncing...</h3>
+                        <div class="flex items-center gap-3">
+                            <div id="detailMvpInitials" class="h-10 w-10 bg-white/20 rounded-xl flex items-center justify-center font-black text-xs uppercase">--</div>
+                            <div>
+                                <p id="detailMvpTeam" class="text-[10px] font-black uppercase italic">Loading Team...</p>
+                                <p id="detailMvpStats" class="text-[10px] font-bold text-orange-100/70 uppercase">0 Wins / 0 Points</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
+        import { getAuth, onAuthStateChanged, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+        import { getFirestore, collection, onSnapshot, query, where } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
+
+        // 🔥 Configuration (Using provided ref)
+        const firebaseConfig = {
+            apiKey: "AIzaSyD5Gkjk7tk48Hv9zgvdlSsdR8FH_nwtGRc",
+            authDomain: "intramurals-score-leaderboard.firebaseapp.com",
+            projectId: "intramurals-score-leaderboard",
+            storageBucket: "intramurals-score-leaderboard.firebasestorage.app",
+            messagingSenderId: "455345215033",
+            appId: "1:455345215033:web:66a387d0fa0fa4453e5fe8"
+        };
+
+        const currentAppId = 'intramurals-2026';
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        let state = {
+            sports: [],
+            teams: [],
+            players: [],
+            matches: [],
+            currentFilter: 'all',
+            searchTerm: ''
+        };
+
+        const icons = {
+            'basketball': 'fa-basketball',
+            'volleyball': 'fa-volleyball',
+            'badminton': 'fa-shuttlecock',
+            'soccer': 'fa-futbol',
+            'football': 'fa-futbol',
+            'table tennis': 'fa-table-tennis-paddle-ball',
+            'chess': 'fa-chess',
+            'esports': 'fa-gamepad',
+            'athletics': 'fa-person-running',
+            'default': 'fa-trophy'
+        };
+
+        window.onload = () => {
+            updateDate();
+            initAuth();
+            setupInteractions();
+        };
+
+        const updateDate = () => {
+            const el = document.getElementById('currentDate');
+            if (el) el.textContent = new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+        };
+
+        const setupInteractions = () => {
+            const overlay = document.getElementById('sidebarOverlay');
+            const sidebar = document.getElementById('sidebar');
+            
+            document.getElementById('openSidebar').onclick = () => {
+                sidebar.classList.remove('-translate-x-full');
+                overlay.classList.remove('hidden');
+            };
+            
+            overlay.onclick = () => {
+                sidebar.classList.add('-translate-x-full');
+                overlay.classList.add('hidden');
+            };
+
+            document.getElementById('backToExplorer').onclick = () => {
+                document.getElementById('detailView').classList.add('hidden');
+                document.getElementById('explorerView').classList.remove('hidden');
+            };
+
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.onclick = (e) => {
+                    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active', 'bg-blue-600', 'text-white'));
+                    document.querySelectorAll('.filter-btn').forEach(b => b.classList.add('bg-white', 'text-slate-500'));
+                    
+                    e.target.classList.remove('bg-white', 'text-slate-500');
+                    e.target.classList.add('active', 'bg-blue-600', 'text-white');
+                    state.currentFilter = e.target.dataset.filter;
+                    renderSports();
+                };
+            });
+
+            document.getElementById('sportSearch').oninput = (e) => {
+                state.searchTerm = e.target.value.toLowerCase();
+                renderSports();
+            };
+        };
+
+        const initAuth = async () => {
+            try {
+                await signInAnonymously(auth);
+                onAuthStateChanged(auth, (user) => {
+                    if (user) loadData();
+                });
+            } catch (error) {
+                console.error("Auth failed", error);
+            }
+        };
+
+        const loadData = () => {
+            const basePath = ['artifacts', currentAppId, 'public', 'data'];
+
+            onSnapshot(collection(db, ...basePath, 'sports'), (snap) => {
+                state.sports = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+                renderSports();
+            }, (err) => console.error("Firestore Error:", err));
+
+            onSnapshot(collection(db, ...basePath, 'teams'), (snap) => {
+                state.teams = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+                renderSports();
+            });
+
+            onSnapshot(collection(db, ...basePath, 'players'), (snap) => {
+                state.players = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+            });
+
+            onSnapshot(collection(db, ...basePath, 'matches'), (snap) => {
+                state.matches = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+                renderSports();
+            });
+        };
+
+        const getSportIcon = (name) => {
+            const key = Object.keys(icons).find(k => name.toLowerCase().includes(k));
+            return icons[key] || icons['default'];
+        };
+
+        const renderSports = () => {
+            const container = document.getElementById('sportsGrid');
+            const filtered = state.sports.filter(s => {
+                const matchesSearch = (s.name || s.sportName || '').toLowerCase().includes(state.searchTerm);
+                const matchesFilter = state.currentFilter === 'all' || s.status?.toLowerCase() === state.currentFilter;
+                return matchesSearch && matchesFilter;
+            });
+
+            if (filtered.length === 0) {
+                container.innerHTML = `<div class="col-span-full py-12 text-center text-slate-400 font-bold uppercase text-xs tracking-widest">No sports found</div>`;
+                return;
+            }
+
+            container.innerHTML = filtered.map(s => {
+                const isFinished = s.status?.toLowerCase() === 'finished';
+                const sportName = s.name || s.sportName || 'Unnamed Sport';
+                const iconClass = getSportIcon(sportName);
+                
+                return `
+                    <div onclick="window.viewSportDetail('${s.id}')" class="sport-card cursor-pointer group p-6 bg-white border border-slate-200 rounded-[2rem] transition-all animate-fade-in relative overflow-hidden">
+                        <div class="absolute -right-4 -top-4 text-7xl opacity-[0.03] group-hover:opacity-[0.08] transition-all">
+                            <i class="fas ${iconClass}"></i>
+                        </div>
+                        <div class="flex justify-between items-start mb-6">
+                            <div class="h-12 w-12 bg-slate-50 rounded-2xl flex items-center justify-center text-blue-600 group-hover:bg-blue-600 group-hover:text-white transition-all shadow-sm">
+                                <i class="fas ${iconClass} text-lg"></i>
+                            </div>
+                            <span class="px-3 py-1 ${isFinished ? 'bg-slate-100 text-slate-500' : 'bg-green-100 text-green-600'} text-[9px] font-black uppercase rounded-full tracking-wider">
+                                ${s.status || 'Ongoing'}
+                            </span>
+                        </div>
+                        <h4 class="text-lg font-black text-slate-900 uppercase tracking-tight mb-1 group-hover:text-blue-600 transition-colors">${sportName}</h4>
+                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Intramurals 2026</p>
+                        
+                        <div class="mt-6 flex items-center justify-between">
+                            <div class="flex -space-x-2">
+                                <div class="h-6 w-6 rounded-full border-2 border-white bg-slate-100 flex items-center justify-center text-[8px] font-bold text-slate-500">T</div>
+                                <div class="h-6 w-6 rounded-full border-2 border-white bg-slate-100 flex items-center justify-center text-[8px] font-bold text-slate-500">A</div>
+                            </div>
+                            <span class="text-[9px] font-black text-blue-600 uppercase">View Detail <i class="fas fa-chevron-right ml-1"></i></span>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        };
+
+        window.viewSportDetail = (sportId) => {
+            const sport = state.sports.find(s => s.id === sportId);
+            if (!sport) return;
+
+            document.getElementById('explorerView').classList.add('hidden');
+            document.getElementById('detailView').classList.remove('hidden');
+
+            const name = sport.name || sport.sportName;
+            document.getElementById('detailTitle').textContent = name;
+            document.getElementById('detailStatus').textContent = sport.status || 'Ongoing';
+            document.getElementById('detailIcon').innerHTML = `<i class="fas ${getSportIcon(name)}"></i>`;
+            
+            const isFinished = sport.status?.toLowerCase() === 'finished';
+            const statusEl = document.getElementById('detailStatus');
+            statusEl.className = `px-3 py-1 ${isFinished ? 'bg-black/20' : 'bg-green-500/40'} backdrop-blur rounded-full text-[10px] font-black uppercase tracking-widest mb-3 inline-block`;
+
+            // Process Participating Teams
+            // In a real app, we might filter teams by sportId if they have a relationship
+            // For now, we'll show teams that have matches in this sport
+            const teamIds = new Set();
+            state.matches.filter(m => m.sportId === sportId).forEach(m => {
+                if(m.teamAId) teamIds.add(m.teamAId);
+                if(m.teamBId) teamIds.add(m.teamBId);
+            });
+
+            const teamsInSport = state.teams.filter(t => teamIds.has(t.id));
+            const teamsContainer = document.getElementById('participatingTeams');
+            
+            if (teamsInSport.length === 0) {
+                teamsContainer.innerHTML = `<div class="col-span-full py-8 text-[10px] font-bold text-slate-400 uppercase">No teams registered for this sport yet</div>`;
+            } else {
+                teamsContainer.innerHTML = teamsInSport.map(t => `
+                    <div class="p-4 bg-white border border-slate-100 rounded-2xl text-center hover:border-blue-200 transition-all shadow-sm">
+                        <div class="h-10 w-10 mx-auto bg-slate-50 rounded-xl flex items-center justify-center text-slate-400 font-black text-xs mb-3">
+                            ${(t.name || 'T').substring(0, 1)}
+                        </div>
+                        <p class="text-[10px] font-black text-slate-900 uppercase truncate">${t.name || 'Team'}</p>
+                        <p class="text-[8px] font-bold text-slate-400 uppercase truncate">${t.department || 'Academic'}</p>
+                    </div>
+                `).join('');
+            }
+
+            // Leaderboard for this Sport
+            const leaderboard = calculateSportLeaderboard(sportId);
+            const leaderTable = document.getElementById('detailLeaderboard');
+            leaderTable.innerHTML = `
+                <table class="w-full text-left">
+                    <thead class="bg-slate-50 border-y border-slate-100">
+                        <tr>
+                            <th class="py-2 px-6 text-[8px] font-black text-slate-400 uppercase">Rank</th>
+                            <th class="py-2 px-2 text-[8px] font-black text-slate-400 uppercase">Team</th>
+                            <th class="py-2 px-6 text-right text-[8px] font-black text-slate-400 uppercase">W-L</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${leaderboard.length > 0 ? leaderboard.map((row, i) => `
+                            <tr class="hover:bg-slate-50 border-b border-slate-50 last:border-0">
+                                <td class="py-3 px-6">
+                                    <span class="h-5 w-5 flex items-center justify-center rounded-full font-black text-[9px] ${i === 0 ? 'bg-yellow-100 text-yellow-700' : 'text-slate-400'}">
+                                        ${i + 1}
+                                    </span>
+                                </td>
+                                <td class="py-3 px-2">
+                                    <p class="font-black text-slate-800 uppercase text-[10px] tracking-tight truncate">${row.name}</p>
+                                </td>
+                                <td class="py-3 px-6 text-right font-black text-blue-600 text-[10px]">
+                                    ${row.wins} - ${row.losses}
+                                </td>
+                            </tr>
+                        `).join('') : `<tr><td colspan="3" class="p-8 text-center text-[10px] font-bold text-slate-400 uppercase">Awaiting Matches</td></tr>`}
+                    </tbody>
+                </table>
+            `;
+
+            // MVP for this Sport
+            const topPlayer = state.players.filter(p => (p.sport || '').toLowerCase() === (name || '').toLowerCase())
+                                .sort((a,b) => (b.stats || 0) - (a.stats || 0))[0];
+            
+            if (topPlayer) {
+                document.getElementById('detailMvpName').textContent = topPlayer.fullName || topPlayer.name;
+                document.getElementById('detailMvpTeam').textContent = state.teams.find(t => t.id === topPlayer.teamId)?.name || 'Unknown Team';
+                document.getElementById('detailMvpStats').textContent = `${topPlayer.stats || 0} Performance Score`;
+                document.getElementById('detailMvpInitials').textContent = (topPlayer.fullName || '??').substring(0, 2).toUpperCase();
+            } else {
+                document.getElementById('detailMvpName').textContent = "Not Determined";
+                document.getElementById('detailMvpTeam').textContent = "Stay tuned";
+                document.getElementById('detailMvpStats').textContent = "Calculated after matches";
+                document.getElementById('detailMvpInitials').textContent = "?";
+            }
+        };
+
+        const calculateSportLeaderboard = (sportId) => {
+            const stats = {};
+            const sportMatches = state.matches.filter(m => m.sportId === sportId && m.status === 'completed');
+            
+            sportMatches.forEach(m => {
+                if (!stats[m.teamAId]) stats[m.teamAId] = { wins: 0, losses: 0, name: state.teams.find(t => t.id === m.teamAId)?.name || 'Team A' };
+                if (!stats[m.teamBId]) stats[m.teamBId] = { wins: 0, losses: 0, name: state.teams.find(t => t.id === m.teamBId)?.name || 'Team B' };
+
+                const sA = parseInt(m.scoreA || 0);
+                const sB = parseInt(m.scoreB || 0);
+
+                if (sA > sB) {
+                    stats[m.teamAId].wins++;
+                    stats[m.teamBId].losses++;
+                } else if (sB > sA) {
+                    stats[m.teamBId].wins++;
+                    stats[m.teamAId].losses++;
+                }
+            });
+
+            return Object.values(stats).sort((a,b) => b.wins - a.wins);
+        };
+    </script>
+</body>
+
+</html>
