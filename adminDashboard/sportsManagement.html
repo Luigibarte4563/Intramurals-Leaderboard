@@ -223,302 +223,283 @@
     </div>
 
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
-        import { getAuth, onAuthStateChanged, signOut, sendPasswordResetEmail, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
-        import { getFirestore, collection, doc, addDoc, updateDoc, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
+    import { getAuth, onAuthStateChanged, signOut, sendPasswordResetEmail, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+    import { getFirestore, collection, doc, addDoc, updateDoc, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
 
-        // Environment variables
-        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
-            apiKey: "AIzaSyD5Gkjk7tk48Hv9zgvdlSsdR8FH_nwtGRc",
-            authDomain: "intramurals-score-leaderboard.firebaseapp.com",
-            projectId: "intramurals-score-leaderboard",
-            storageBucket: "intramurals-score-leaderboard.firebasestorage.app",
-            messagingSenderId: "455345215033",
-            appId: "1:455345215033:web:66a387d0fa0fa4453e5fe8"
-        };
-        const currentAppId = typeof __app_id !== 'undefined' ? __app_id : 'intramurals-2026';
+    // Environment variables
+    const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
+        apiKey: "AIzaSyD5Gkjk7tk48Hv9zgvdlSsdR8FH_nwtGRc",
+        authDomain: "intramurals-score-leaderboard.firebaseapp.com",
+        projectId: "intramurals-score-leaderboard",
+        storageBucket: "intramurals-score-leaderboard.firebasestorage.app",
+        messagingSenderId: "455345215033",
+        appId: "1:455345215033:web:66a387d0fa0fa4453e5fe8"
+    };
+    const currentAppId = typeof __app_id !== 'undefined' ? __app_id : 'intramurals-2026';
 
-        // Global instances
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
+    // Global instances
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
 
-        // UI Selectors
-        const authScreen = document.getElementById('authScreen');
-        const mainWrapper = document.getElementById('mainWrapper');
-        const profileDropdown = document.getElementById('profileDropdown');
-        const sidebar = document.getElementById('sidebar');
-        const sidebarOverlay = document.getElementById('sidebarOverlay');
-        const sportsGrid = document.getElementById('sportsGrid');
-        const connectionStatus = document.getElementById('connectionStatus');
-        const statusText = document.getElementById('statusText');
+    // UI Selectors
+    const authScreen = document.getElementById('authScreen');
+    const mainWrapper = document.getElementById('mainWrapper');
+    const profileDropdown = document.getElementById('profileDropdown');
+    const sidebar = document.getElementById('sidebar');
+    const sidebarOverlay = document.getElementById('sidebarOverlay');
+    const sportsGrid = document.getElementById('sportsGrid');
+    const connectionStatus = document.getElementById('connectionStatus');
+    const statusText = document.getElementById('statusText');
 
-        // State
-        let sports = [];
-        let teams = []; // Global state for teams
-        let currentUser = null;
+    // State
+    let sports = [];
+    let teams = []; 
+    let matches = []; 
+    let currentUser = null;
 
-        // AUTHENTICATION GUARD
-        async function startApp() {
-            try {
-                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                    await signInWithCustomToken(auth, __initial_auth_token);
-                } else {
-                    await signInAnonymously(auth);
-                }
-            } catch (error) {
-                console.error("Auth failed:", error);
-                statusText.textContent = "Auth Error";
-            }
-        }
-
-        onAuthStateChanged(auth, (u) => {
-            if (u) {
-                currentUser = u;
-                document.getElementById('adminName').textContent = u.isAnonymous ? "Guest Admin" : (u.email ? u.email.split('@')[0] : "Admin");
-                document.getElementById('adminInitials').textContent = "AD";
-                
-                authScreen.style.display = 'none';
-                mainWrapper.classList.remove('hidden');
-                
-                connectionStatus.classList.remove('bg-slate-500');
-                connectionStatus.classList.add('bg-green-500');
-                statusText.textContent = "System Connected";
-                
-                // Initialize both listeners
-                initSportsListener();
-                initTeamsListener();
+    // AUTHENTICATION GUARD
+    async function startApp() {
+        try {
+            if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                await signInWithCustomToken(auth, __initial_auth_token);
             } else {
-                startApp();
+                await signInAnonymously(auth);
             }
-        });
-
-        // TEAM LISTENER (New)
-        function initTeamsListener() {
-            if (!currentUser) return;
-            const teamsRef = collection(db, 'artifacts', currentAppId, 'public', 'data', 'teams');
-            onSnapshot(teamsRef, (snapshot) => {
-                teams = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                renderSports(); // Re-render sports when teams change to update counts
-            });
+        } catch (error) {
+            console.error("Auth failed:", error);
+            statusText.textContent = "Auth Error";
         }
+    }
 
-        // SPORTS LISTENER
-        function initSportsListener() {
-            if (!currentUser) return;
-            const sportsRef = collection(db, 'artifacts', currentAppId, 'public', 'data', 'sports');
+    onAuthStateChanged(auth, (u) => {
+        if (u) {
+            currentUser = u;
+            document.getElementById('adminName').textContent = u.isAnonymous ? "Guest Admin" : (u.email ? u.email.split('@')[0] : "Admin");
+            document.getElementById('adminInitials').textContent = "AD";
             
-            onSnapshot(sportsRef, (snapshot) => {
-                sports = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                renderSports();
-            }, (error) => {
-                console.error("Database fetch error:", error);
-                if (error.code === 'permission-denied') {
-                    statusText.textContent = "Access Denied";
-                    connectionStatus.classList.replace('bg-green-500', 'bg-red-500');
-                }
-            });
+            authScreen.style.display = 'none';
+            mainWrapper.classList.remove('hidden');
+            
+            connectionStatus.classList.remove('bg-slate-500');
+            connectionStatus.classList.add('bg-green-500');
+            statusText.textContent = "System Connected";
+            
+            initSportsListener();
+            initTeamsListener();
+            initMatchesListener();
+        } else {
+            startApp();
+        }
+    });
+
+    // LISTENERS
+    function initTeamsListener() {
+        if (!currentUser) return;
+        const teamsRef = collection(db, 'artifacts', currentAppId, 'public', 'data', 'teams');
+        onSnapshot(teamsRef, (snapshot) => {
+            teams = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            renderSports(); 
+        });
+    }
+
+    function initMatchesListener() {
+        if (!currentUser) return;
+        const matchesRef = collection(db, 'artifacts', currentAppId, 'public', 'data', 'matches');
+        onSnapshot(matchesRef, (snapshot) => {
+            matches = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            renderSports(); 
+        });
+    }
+
+    function initSportsListener() {
+        if (!currentUser) return;
+        const sportsRef = collection(db, 'artifacts', currentAppId, 'public', 'data', 'sports');
+        onSnapshot(sportsRef, (snapshot) => {
+            sports = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            renderSports();
+        }, (error) => {
+            console.error("Database fetch error:", error);
+        });
+    }
+
+    // RENDER LOGIC
+    function renderSports() {
+        if (sports.length === 0) {
+            sportsGrid.innerHTML = `<div class="col-span-full py-20 text-center bg-white rounded-3xl border-2 border-dashed border-slate-200"><h4 class="font-black text-slate-400 uppercase italic">No Sports Added Yet</h4></div>`;
+            return;
         }
 
-        // RENDER LOGIC
-        function renderSports() {
-            if (sports.length === 0) {
-                sportsGrid.innerHTML = `
-                    <div class="col-span-full py-20 flex flex-col items-center justify-center text-center bg-white rounded-3xl border-2 border-dashed border-slate-200">
-                        <div class="h-20 w-20 bg-slate-50 rounded-full flex items-center justify-center mb-4">
-                            <svg class="w-10 h-10 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M13 10V3L4 14h7v7l9-11h-7z" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
-                        </div>
-                        <h4 class="font-black text-slate-400 uppercase italic">No Sports Added Yet</h4>
-                        <p class="text-slate-400 text-sm">Click "Add New Sport" to start managing the event.</p>
-                    </div>
-                `;
-                return;
-            }
+        sportsGrid.innerHTML = sports.map(sport => {
+            const sportTeamsCount = teams.filter(t => t.sport === sport.name || t.sportId === sport.id).length;
+            const sportMatches = matches.filter(m => m.sportId === sport.id || m.sport === sport.name);
+            const matchesHeldCount = sportMatches.filter(m => m.status === 'completed').length;
 
-            sportsGrid.innerHTML = sports.map(sport => {
-                // FILTER TEAMS BY CURRENT SPORT NAME
-                const sportTeamsCount = teams.filter(t => t.sport === sport.name).length;
-
-                return `
-                <div class="sport-card bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden flex flex-col">
-                    <div class="p-6">
-                        <div class="flex justify-between items-start mb-4">
-                            <span class="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${sport.status === 'Ongoing' ? 'bg-green-100 text-green-700' : 'bg-slate-100 text-slate-500'}">
-                                ${sport.status || 'Ongoing'}
-                            </span>
-                            <div class="flex gap-1">
-                                <button onclick="openSportModal('${sport.id}')" class="p-2 hover:bg-blue-50 text-slate-400 hover:text-blue-600 rounded-lg transition-colors">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
-                                </button>
-                                <button onclick="deleteSport('${sport.id}')" class="p-2 hover:bg-red-50 text-slate-400 hover:text-red-600 rounded-lg transition-colors">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                                </button>
-                            </div>
-                        </div>
-                        <h4 class="text-xl font-black text-slate-800 uppercase italic leading-tight mb-2">${sport.name}</h4>
-                        
-                        <div class="grid grid-cols-2 gap-4 mt-6">
-                            <div class="bg-blue-50/50 p-3 rounded-xl border border-blue-100">
-                                <p class="text-[8px] font-black text-blue-400 uppercase tracking-widest">Total Teams</p>
-                                <p class="text-lg font-black text-blue-700 mt-0.5">${sportTeamsCount}</p>
-                            </div>
-                            <div class="bg-slate-50 p-3 rounded-xl border border-slate-100">
-                                <p class="text-[8px] font-black text-slate-400 uppercase tracking-widest">Type</p>
-                                <p class="text-xs font-bold text-slate-700 mt-0.5">${sport.type || 'Standard'}</p>
-                            </div>
+            return `
+            <div class="sport-card bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden flex flex-col">
+                <div class="p-6">
+                    <div class="flex justify-between items-start mb-4">
+                        <span class="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${sport.status === 'Ongoing' ? 'bg-green-100 text-green-700' : 'bg-slate-100 text-slate-500'}">
+                            ${sport.status || 'Ongoing'}
+                        </span>
+                        <div class="flex gap-1">
+                            <button onclick="openSportModal('${sport.id}')" class="p-2 hover:bg-blue-50 text-slate-400 hover:text-blue-600 rounded-lg transition-colors">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+                            </button>
+                            <button onclick="deleteSport('${sport.id}')" class="p-2 hover:bg-red-50 text-slate-400 hover:text-red-600 rounded-lg transition-colors">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                            </button>
                         </div>
                     </div>
-                    <div class="mt-auto border-t border-slate-50 p-4 bg-slate-50/50 flex justify-between items-center">
-                         <button onclick="viewSportData('${sport.id}')" class="text-[10px] font-black uppercase text-blue-600 hover:text-blue-800 tracking-widest flex items-center gap-2">
-                            View Details <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></path></svg>
-                         </button>
+                    <h4 class="text-xl font-black text-slate-800 uppercase italic leading-tight mb-1">${sport.name}</h4>
+                    <p class="text-[10px] font-bold text-blue-500 uppercase tracking-widest mb-4 flex items-center gap-1">
+                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M13 10V3L4 14h7v7l9-11h-7z" stroke-width="2"></path></svg>
+                        ${sport.type || 'Standard Game'}
+                    </p>
+                    
+                    <div class="grid grid-cols-2 gap-3 mt-4">
+                        <div class="bg-blue-50/50 p-3 rounded-xl border border-blue-100">
+                            <p class="text-[8px] font-black text-blue-400 uppercase tracking-widest">Total Teams</p>
+                            <p class="text-lg font-black text-blue-700 mt-0.5">${sportTeamsCount}</p>
+                        </div>
+                        <div class="bg-orange-50/50 p-3 rounded-xl border border-orange-100">
+                            <p class="text-[8px] font-black text-orange-400 uppercase tracking-widest">Matches Held</p>
+                            <p class="text-lg font-black text-orange-700 mt-0.5">${matchesHeldCount}</p>
+                        </div>
                     </div>
                 </div>
+                <div class="mt-auto border-t border-slate-50 p-4 bg-slate-50/50 flex justify-between items-center">
+                     <button onclick="viewSportData('${sport.id}')" class="text-[10px] font-black uppercase text-slate-600 hover:text-blue-600 tracking-widest flex items-center gap-2 transition-all">
+                        View Detailed Stats <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                     </button>
+                </div>
+            </div>
             `; }).join('');
-        }
+    }
 
-        // DATABASE OPERATIONS
-        window.openSportModal = (id = null) => {
-            const sport = id ? sports.find(s => s.id === id) : null;
-            const title = id ? 'Edit Sport' : 'Add New Sport';
-            
-            document.getElementById('modalIcon').textContent = id ? '✏️' : '🏆';
-            document.getElementById('modalTitle').textContent = title;
-            document.getElementById('modalBody').innerHTML = `
-                <form id="sportForm" class="space-y-4">
-                    <div>
-                        <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Sport Name</label>
-                        <input type="text" id="s_name" value="${sport ? sport.name : ''}" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 font-bold" placeholder="e.g. Basketball Men's">
-                    </div>
-                    <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Type</label>
-                            <select id="s_type" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 font-bold">
-                                <option value="Ball Games" ${sport?.type === 'Ball Games' ? 'selected' : ''}>Ball Games</option>
-                                <option value="Racket Sports" ${sport?.type === 'Racket Sports' ? 'selected' : ''}>Racket Sports</option>
-                                <option value="E-Sports" ${sport?.type === 'E-Sports' ? 'selected' : ''}>E-Sports</option>
-                                <option value="Board Games" ${sport?.type === 'Board Games' ? 'selected' : ''}>Board Games</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Status</label>
-                            <select id="s_status" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 font-bold">
-                                <option value="Ongoing" ${sport?.status === 'Ongoing' ? 'selected' : ''}>Ongoing</option>
-                                <option value="Finished" ${sport?.status === 'Finished' ? 'selected' : ''}>Finished</option>
-                            </select>
-                        </div>
-                    </div>
-                </form>
-            `;
-            
-            const confirmBtn = document.getElementById('modalConfirmBtn');
-            confirmBtn.classList.remove('hidden');
-            confirmBtn.onclick = async () => {
-                const name = document.getElementById('s_name').value;
-                const type = document.getElementById('s_type').value;
-                const status = document.getElementById('s_status').value;
-                
-                if(!name || !currentUser) return;
-
-                const sportData = { name, type, status, updatedAt: Date.now() };
-
-                try {
-                    if (id) {
-                        await updateDoc(doc(db, 'artifacts', currentAppId, 'public', 'data', 'sports', id), sportData);
-                    } else {
-                        await addDoc(collection(db, 'artifacts', currentAppId, 'public', 'data', 'sports'), { ...sportData, createdAt: Date.now() });
-                    }
-                    closeModal();
-                } catch (e) {
-                    console.error("Save error:", e);
-                }
-            };
-
-            document.getElementById('modalOverlay').classList.add('active');
-        };
-
-        window.deleteSport = async (id) => {
-            if (!currentUser) return;
-            if (confirm('Are you sure you want to remove this sport?')) {
-                try {
-                    await deleteDoc(doc(db, 'artifacts', currentAppId, 'public', 'data', 'sports', id));
-                } catch (e) {
-                    console.error("Delete error:", e);
-                }
-            }
-        };
-
-        window.viewSportData = (id) => {
-            const sport = sports.find(s => s.id === id);
-            const sportTeamsCount = teams.filter(t => t.sport === sport.name).length;
-
-            document.getElementById('modalIcon').textContent = '📊';
-            document.getElementById('modalTitle').textContent = 'Sport Data Overview';
-            document.getElementById('modalBody').innerHTML = `
-                <div class="space-y-4">
-                    <div class="p-4 bg-slate-50 rounded-xl">
-                        <p class="text-[10px] font-black text-slate-400 uppercase">Live Stats for ${sport.name}</p>
-                        <div class="mt-4 grid grid-cols-2 gap-4 text-center">
-                            <div>
-                                <p class="text-2xl font-black text-blue-600">${sportTeamsCount}</p>
-                                <p class="text-[8px] font-bold text-slate-500 uppercase">Total Teams</p>
-                            </div>
-                            <div>
-                                <p class="text-2xl font-black text-orange-600">--</p>
-                                <p class="text-[8px] font-bold text-slate-500 uppercase">Matches Held</p>
-                            </div>
-                        </div>
-                    </div>
-                    <p class="text-xs text-slate-500 text-center italic">Detailed team and match breakdowns are managed in their respective navigation sections.</p>
-                </div>
-            `;
-            document.getElementById('modalConfirmBtn').classList.add('hidden');
-            document.getElementById('modalOverlay').classList.add('active');
-        }
-
-        window.closeModal = () => {
-            document.getElementById('modalOverlay').classList.remove('active');
-        };
-
-        window.triggerAction = async (type) => {
-            if (type === 'logout') {
-                await signOut(auth);
-                window.location.reload();
-            } else if (type === 'changePassword') {
-                if (currentUser && currentUser.email) {
-                    await sendPasswordResetEmail(auth, currentUser.email);
-                    document.getElementById('modalIcon').textContent = '📧';
-                    document.getElementById('modalTitle').textContent = 'Email Sent';
-                    document.getElementById('modalBody').innerHTML = `<p class="text-slate-600 text-center">A password reset link has been sent to <b>${currentUser.email}</b>.</p>`;
-                    document.getElementById('modalConfirmBtn').classList.add('hidden');
-                    document.getElementById('modalOverlay').classList.add('active');
-                }
-            }
-        };
-
-        // UI Interaction Handlers
-        document.getElementById('profileToggle').onclick = (e) => {
-            e.stopPropagation();
-            profileDropdown.classList.toggle('show');
-        };
+    // MODALS & ACTIONS
+    window.openSportModal = (id = null) => {
+        const sport = id ? sports.find(s => s.id === id) : null;
+        const title = id ? 'Edit Sport' : 'Add New Sport';
         
-        document.getElementById('openSidebar').onclick = () => {
-            sidebar.classList.remove('sidebar-closed');
-            sidebar.classList.add('sidebar-open');
-            sidebarOverlay.classList.add('active');
+        document.getElementById('modalIcon').textContent = id ? '✏️' : '🏆';
+        document.getElementById('modalTitle').textContent = title;
+        document.getElementById('modalBody').innerHTML = `
+            <form id="sportForm" class="space-y-4">
+                <div>
+                    <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Sport Name</label>
+                    <input type="text" id="s_name" value="${sport ? sport.name : ''}" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 font-bold" placeholder="e.g. Basketball Men's">
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Type</label>
+                        <select id="s_type" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 font-bold">
+                            <option value="Ball Games" ${sport?.type === 'Ball Games' ? 'selected' : ''}>Ball Games</option>
+                            <option value="Racket Sports" ${sport?.type === 'Racket Sports' ? 'selected' : ''}>Racket Sports</option>
+                            <option value="E-Sports" ${sport?.type === 'E-Sports' ? 'selected' : ''}>E-Sports</option>
+                            <option value="Board Games" ${sport?.type === 'Board Games' ? 'selected' : ''}>Board Games</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Status</label>
+                        <select id="s_status" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 font-bold">
+                            <option value="Ongoing" ${sport?.status === 'Ongoing' ? 'selected' : ''}>Ongoing</option>
+                            <option value="Finished" ${sport?.status === 'Finished' ? 'selected' : ''}>Finished</option>
+                        </select>
+                    </div>
+                </div>
+            </form>
+        `;
+        
+        const confirmBtn = document.getElementById('modalConfirmBtn');
+        confirmBtn.classList.remove('hidden');
+        confirmBtn.onclick = async () => {
+            const name = document.getElementById('s_name').value;
+            const type = document.getElementById('s_type').value;
+            const status = document.getElementById('s_status').value;
+            if(!name || !currentUser) return;
+
+            const sportData = { name, type, status, updatedAt: Date.now() };
+            try {
+                if (id) {
+                    await updateDoc(doc(db, 'artifacts', currentAppId, 'public', 'data', 'sports', id), sportData);
+                } else {
+                    await addDoc(collection(db, 'artifacts', currentAppId, 'public', 'data', 'sports'), { ...sportData, createdAt: Date.now() });
+                }
+                closeModal();
+            } catch (e) { console.error("Save error:", e); }
         };
+        document.getElementById('modalOverlay').classList.add('active');
+    };
 
-        document.getElementById('closeSidebar').onclick = () => {
-            sidebar.classList.add('sidebar-closed');
-            sidebar.classList.remove('sidebar-open');
-            sidebarOverlay.classList.remove('active');
-        };
+    window.viewSportData = (id) => {
+        const sport = sports.find(s => s.id === id);
+        const sportTeamsCount = teams.filter(t => t.sport === sport.name || t.sportId === id).length;
+        const sportMatches = matches.filter(m => m.sportId === id || m.sport === sport.name);
+        const held = sportMatches.filter(m => m.status === 'completed').length;
 
-        document.addEventListener('click', () => {
-            profileDropdown.classList.remove('show');
-        });
+        document.getElementById('modalIcon').textContent = '📊';
+        document.getElementById('modalTitle').textContent = sport.name;
+        document.getElementById('modalBody').innerHTML = `
+            <div class="space-y-4">
+                <div class="flex items-center justify-between px-1">
+                    <span class="text-[10px] font-black uppercase text-blue-500 tracking-widest">${sport.type || 'Standard'}</span>
+                    <span class="text-[10px] font-black uppercase text-slate-400 tracking-widest">${sport.status}</span>
+                </div>
+                <div class="p-4 bg-slate-900 rounded-2xl text-white">
+                    <div class="grid grid-cols-2 gap-4 text-center">
+                        <div class="border-r border-slate-800">
+                            <p class="text-3xl font-black text-blue-400">${sportTeamsCount}</p>
+                            <p class="text-[8px] font-bold text-slate-500 uppercase tracking-widest mt-1">Teams</p>
+                        </div>
+                        <div>
+                            <p class="text-3xl font-black text-orange-400">${held}</p>
+                            <p class="text-[8px] font-bold text-slate-500 uppercase tracking-widest mt-1">Held</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="p-4 border border-slate-100 rounded-xl bg-slate-50 flex justify-between items-center">
+                    <div>
+                        <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Schedule Progress</p>
+                        <p class="text-sm font-bold text-slate-700">${sportMatches.length} Total Matches</p>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-lg font-black text-slate-800">${sportMatches.length > 0 ? Math.round((held/sportMatches.length)*100) : 0}%</p>
+                    </div>
+                </div>
+            </div>
+        `;
+        document.getElementById('modalConfirmBtn').classList.add('hidden');
+        document.getElementById('modalOverlay').classList.add('active');
+    };
 
-        startApp();
-    </script>
+    window.deleteSport = async (id) => {
+        if (!currentUser) return;
+        if (confirm('Remove this sport?')) {
+            try { await deleteDoc(doc(db, 'artifacts', currentAppId, 'public', 'data', 'sports', id)); } 
+            catch (e) { console.error("Delete error:", e); }
+        }
+    };
+
+    window.closeModal = () => document.getElementById('modalOverlay').classList.remove('active');
+
+    // UI Toggle Logic
+    document.getElementById('profileToggle').onclick = (e) => {
+        e.stopPropagation();
+        profileDropdown.classList.toggle('show');
+    };
+    document.getElementById('openSidebar').onclick = () => {
+        sidebar.classList.replace('sidebar-closed', 'sidebar-open');
+        sidebarOverlay.classList.add('active');
+    };
+    document.getElementById('closeSidebar').onclick = () => {
+        sidebar.classList.replace('sidebar-open', 'sidebar-closed');
+        sidebarOverlay.classList.remove('active');
+    };
+    document.addEventListener('click', () => profileDropdown.classList.remove('show'));
+
+    startApp();
+</script>
 </body>
 </html>
