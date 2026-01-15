@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Leaderboard | Intramurals 2026</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #f8fafc;
+        }
+
+        .sidebar-transition {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .nav-link {
+            transition: all 0.2s ease;
+        }
+
+        .nav-link:hover {
+            background: rgba(59, 130, 246, 0.05);
+            color: #2563eb;
+        }
+
+        .nav-link.active {
+            background: #2563eb;
+            color: white !important;
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .leaderboard-row {
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .leaderboard-row:hover {
+            transform: scale(1.005);
+            z-index: 10;
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .animate-slide-up {
+            animation: slideUp 0.5s ease-out forwards;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #e2e8f0;
+            border-radius: 10px;
+        }
+
+        .mvp-glow {
+            box-shadow: 0 0 15px rgba(234, 179, 8, 0.3);
+            border: 1px solid rgba(234, 179, 8, 0.4);
+        }
+    </style>
+</head>
+
+<body class="overflow-x-hidden">
+
+    <!-- Mobile Sidebar Overlay -->
+    <div id="sidebarOverlay" class="fixed inset-0 bg-slate-900/50 z-40 hidden backdrop-blur-sm"></div>
+
+    <!-- Navigation Sidebar -->
+    <aside id="sidebar" class="fixed top-0 left-0 h-full w-64 bg-white border-r border-slate-200 z-50 transform -translate-x-full lg:translate-x-0 sidebar-transition shadow-xl lg:shadow-none">
+        <div class="p-6 h-full flex flex-col">
+            <div class="flex items-center gap-3 mb-8">
+                <div class="h-10 w-10 bg-blue-600 rounded-xl flex items-center justify-center text-white shadow-lg shadow-blue-200">
+                    <i class="fas fa-trophy"></i>
+                </div>
+                <div>
+                    <h1 class="font-extrabold text-slate-900 text-sm tracking-tight leading-none uppercase">Intramurals</h1>
+                    <span class="text-[10px] font-bold text-blue-600 uppercase tracking-widest">2026 Season</span>
+                </div>
+            </div>
+
+            <nav class="space-y-1 flex-1 overflow-y-auto custom-scrollbar">
+                <a href="home.html" class="nav-link flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-bold text-slate-500">
+                    <i class="fas fa-house w-5"></i> Home
+                </a>
+                <a href="sports.html" class="nav-link flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-bold text-slate-500">
+                    <i class="fas fa-volleyball w-5"></i> Sports
+                </a>
+                <a href="teams.html" class="nav-link flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-bold text-slate-500">
+                    <i class="fas fa-users w-5"></i> Teams
+                </a>
+                <a href="players.html" class="nav-link flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-bold text-slate-500">
+                    <i class="fas fa-user-graduate w-5"></i> Players
+                </a>
+                <a href="leaderboard.html" class="nav-link active flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-bold">
+                    <i class="fas fa-ranking-star w-5"></i> Leaderboard
+                </a>
+                <a href="MVPawards.html" class="nav-link flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-bold text-slate-500 group">
+                    <i class="fas fa-medal w-5 group-hover:text-yellow-500 transition-colors"></i> MVP Awards
+                </a>
+                <a href="matches&results.html" class="nav-link flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-bold text-slate-500">
+                    <i class="fas fa-calendar-check w-5"></i> Matches & Results
+                </a>
+                <div class="pt-4 mt-4 border-t border-slate-100">
+                    <a href="about.html" class="nav-link flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-bold text-slate-500">
+                        <i class="fas fa-circle-info w-5"></i> About
+                    </a>
+                </div>
+            </nav>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="lg:ml-64 min-h-screen p-4 md:p-8">
+        <!-- Header -->
+        <header class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+            <div>
+                <h2 class="text-2xl font-black text-slate-900 uppercase tracking-tight">Leaderboard</h2>
+                <p class="text-slate-500 text-xs font-bold uppercase tracking-wider">Real-time Statistical Rankings</p>
+            </div>
+            <div class="flex items-center gap-3">
+                <button id="openSidebar" class="lg:hidden h-10 w-10 flex items-center justify-center bg-white border border-slate-200 rounded-xl">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <div class="flex bg-white p-1 rounded-2xl border border-slate-200">
+                    <button onclick="switchMode('teams')" id="btnTeams" class="px-6 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all bg-blue-600 text-white">Teams</button>
+                    <button onclick="switchMode('players')" id="btnPlayers" class="px-6 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all text-slate-400 hover:text-slate-600">Players</button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Filters Section -->
+        <section class="mb-8 flex flex-wrap items-center gap-3 animate-slide-up">
+            <div class="relative group">
+                <i class="fas fa-filter absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+                <select id="sportFilter" class="appearance-none bg-white border border-slate-200 rounded-2xl pl-10 pr-10 py-3 text-xs font-bold text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500/20 cursor-pointer">
+                    <option value="all">🏆 Overall Ranking</option>
+                    <!-- Sport options injected here -->
+                </select>
+                <i class="fas fa-chevron-down absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 text-[10px] pointer-events-none"></i>
+            </div>
+            <div id="activeFilterBadge" class="px-4 py-3 bg-blue-50 border border-blue-100 rounded-2xl hidden items-center gap-2">
+                <span class="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></span>
+                <span class="text-[10px] font-bold text-blue-600 uppercase tracking-widest">Live: Overall Stats</span>
+            </div>
+        </section>
+
+        <!-- Dynamic Podium (Top 3) -->
+        <div id="podiumContainer" class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+            <!-- Loading States -->
+            <div class="h-40 bg-slate-200/50 rounded-[2rem] animate-pulse"></div>
+            <div class="h-40 bg-slate-200/50 rounded-[2rem] animate-pulse scale-105 shadow-xl"></div>
+            <div class="h-40 bg-slate-200/50 rounded-[2rem] animate-pulse"></div>
+        </div>
+
+        <!-- Leaderboard Table -->
+        <div class="bg-white border border-slate-200 rounded-[2.5rem] overflow-hidden shadow-sm animate-slide-up" style="animation-delay: 0.2s">
+            <div class="overflow-x-auto">
+                <table class="w-full text-left">
+                    <thead class="bg-slate-50/50 border-b border-slate-100">
+                        <tr>
+                            <th class="py-5 px-8 text-[10px] font-black text-slate-400 uppercase tracking-widest">Rank</th>
+                            <th id="thEntity" class="py-5 px-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Team / Org</th>
+                            <th class="py-5 px-4 text-[10px] font-black text-slate-400 uppercase tracking-widest text-center">Wins/Loss</th>
+                            <th id="thScoreLabel" class="py-5 px-8 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">Total Points</th>
+                        </tr>
+                    </thead>
+                    <tbody id="leaderboardBody" class="divide-y divide-slate-50">
+                        <!-- Rankings injected here -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
+        import { getAuth, onAuthStateChanged, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+        import { getFirestore, collection, onSnapshot, query } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
+
+        // 🔥 Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyD5Gkjk7tk48Hv9zgvdlSsdR8FH_nwtGRc",
+            authDomain: "intramurals-score-leaderboard.firebaseapp.com",
+            projectId: "intramurals-score-leaderboard",
+            storageBucket: "intramurals-score-leaderboard.firebasestorage.app",
+            messagingSenderId: "455345215033",
+            appId: "1:455345215033:web:66a387d0fa0fa4453e5fe8",
+            measurementId: "G-E0GM8X4K9L"
+        };
+
+        const currentAppId = 'intramurals-2026';
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        let state = {
+            mode: 'teams', // 'teams' or 'players'
+            filter: 'all', // sportId
+            sports: [],
+            teams: [],
+            players: [],
+            matches: []
+        };
+
+        window.onload = () => {
+            initAuth();
+            setupSidebar();
+            document.getElementById('sportFilter').addEventListener('change', (e) => {
+                state.filter = e.target.value;
+                refreshUI();
+            });
+        };
+
+        const setupSidebar = () => {
+            const overlay = document.getElementById('sidebarOverlay');
+            const sidebar = document.getElementById('sidebar');
+            document.getElementById('openSidebar').onclick = () => {
+                sidebar.classList.remove('-translate-x-full');
+                overlay.classList.remove('hidden');
+            };
+            overlay.onclick = () => {
+                sidebar.classList.add('-translate-x-full');
+                overlay.classList.add('hidden');
+            };
+        };
+
+        window.switchMode = (mode) => {
+            state.mode = mode;
+            const btnTeams = document.getElementById('btnTeams');
+            const btnPlayers = document.getElementById('btnPlayers');
+            
+            if(mode === 'teams') {
+                btnTeams.className = "px-6 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all bg-blue-600 text-white";
+                btnPlayers.className = "px-6 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all text-slate-400 hover:text-slate-600";
+            } else {
+                btnPlayers.className = "px-6 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all bg-blue-600 text-white";
+                btnTeams.className = "px-6 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all text-slate-400 hover:text-slate-600";
+            }
+            refreshUI();
+        };
+
+        const initAuth = async () => {
+            try {
+                await signInAnonymously(auth);
+                onAuthStateChanged(auth, (user) => {
+                    if (user) loadData();
+                });
+            } catch (error) {
+                console.error("Auth failed", error);
+            }
+        };
+
+        const loadData = () => {
+            const basePath = ['artifacts', currentAppId, 'public', 'data'];
+
+            onSnapshot(collection(db, ...basePath, 'sports'), (snap) => {
+                state.sports = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+                populateSportFilter();
+                refreshUI();
+            });
+
+            onSnapshot(collection(db, ...basePath, 'teams'), (snap) => {
+                state.teams = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+                refreshUI();
+            });
+
+            onSnapshot(collection(db, ...basePath, 'players'), (snap) => {
+                state.players = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+                refreshUI();
+            });
+
+            onSnapshot(collection(db, ...basePath, 'matches'), (snap) => {
+                state.matches = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+                refreshUI();
+            });
+        };
+
+        const populateSportFilter = () => {
+            const filter = document.getElementById('sportFilter');
+            const currentVal = filter.value;
+            filter.innerHTML = '<option value="all">🏆 Overall Ranking</option>';
+            state.sports.forEach(s => {
+                const opt = document.createElement('option');
+                opt.value = s.id;
+                opt.textContent = s.name || s.sportName;
+                filter.appendChild(opt);
+            });
+            filter.value = currentVal;
+        };
+
+        const calculateStats = () => {
+            if (state.mode === 'teams') {
+                const results = state.teams.map(team => {
+                    let points = 0;
+                    let wins = 0;
+                    let losses = 0;
+
+                    // Filter matches based on sport selection
+                    const teamMatches = state.matches.filter(m => {
+                        const isRelevantMatch = (m.teamAId === team.id || m.teamBId === team.id) && m.status === 'completed';
+                        return state.filter === 'all' ? isRelevantMatch : (isRelevantMatch && m.sportId === state.filter);
+                    });
+
+                    teamMatches.forEach(m => {
+                        const isA = m.teamAId === team.id;
+                        const sSelf = parseInt(isA ? m.scoreA : m.scoreB);
+                        const sOpp = parseInt(isA ? m.scoreB : m.scoreA);
+
+                        if (sSelf > sOpp) {
+                            points += 3;
+                            wins++;
+                        } else if (sSelf < sOpp) {
+                            losses++;
+                        } else {
+                            points += 1;
+                        }
+                    });
+
+                    return { ...team, points, wins, losses };
+                });
+
+                return results.sort((a, b) => b.points - a.points || b.wins - a.wins);
+            } else {
+                // Player Logic
+                const results = state.players.map(player => {
+                    // Simple logic: Use 'stats' field if present, or count match participation
+                    const score = player.stats || 0;
+                    const isMvp = player.isMvp || false;
+                    return { ...player, points: score, wins: player.wins || 0, losses: player.losses || 0, isMvp };
+                }).filter(p => {
+                    return state.filter === 'all' ? true : p.sportId === state.filter || p.sport === state.sports.find(s=>s.id === state.filter)?.name;
+                });
+
+                return results.sort((a, b) => b.points - a.points);
+            }
+        };
+
+        const refreshUI = () => {
+            const data = calculateStats();
+            const body = document.getElementById('leaderboardBody');
+            const podium = document.getElementById('podiumContainer');
+            const thEntity = document.getElementById('thEntity');
+            const thScoreLabel = document.getElementById('thScoreLabel');
+            const activeBadge = document.getElementById('activeFilterBadge');
+
+            activeBadge.classList.remove('hidden');
+            activeBadge.querySelector('span:last-child').textContent = state.filter === 'all' 
+                ? `Live: Overall ${state.mode}` 
+                : `Live: ${state.sports.find(s=>s.id === state.filter)?.name || 'Sport'}`;
+
+            thEntity.textContent = state.mode === 'teams' ? 'Team / Organization' : 'Player Name';
+            thScoreLabel.textContent = state.mode === 'teams' ? 'Total Points' : 'Performance Score';
+
+            // Update Podium
+            if (data.length > 0) {
+                const top3 = data.slice(0, 3);
+                podium.innerHTML = `
+                    <div class="p-8 bg-white border border-slate-200 rounded-[2.5rem] flex flex-col items-center text-center order-2 md:order-1 relative">
+                        <div class="absolute -top-3 bg-slate-100 text-slate-500 px-4 py-1 rounded-full text-[10px] font-black uppercase">Silver</div>
+                        <div class="h-16 w-16 bg-slate-100 rounded-2xl flex items-center justify-center text-slate-400 font-black mb-4">2</div>
+                        <h4 class="text-sm font-black text-slate-900 uppercase tracking-tight">${top3[1]?.name || top3[1]?.fullName || '---'}</h4>
+                        <p class="text-[10px] font-bold text-slate-400 uppercase">${top3[1]?.points || 0} Points</p>
+                    </div>
+                    <div class="p-8 bg-blue-600 rounded-[2.5rem] flex flex-col items-center text-center order-1 md:order-2 relative shadow-2xl shadow-blue-200 scale-105">
+                         <div class="absolute -top-3 bg-yellow-400 text-white px-4 py-1 rounded-full text-[10px] font-black uppercase shadow-lg">Gold</div>
+                        <div class="h-20 w-20 bg-white/20 rounded-2xl flex items-center justify-center text-white text-2xl mb-4">
+                            <i class="fas fa-crown text-yellow-300"></i>
+                        </div>
+                        <h4 class="text-lg font-black text-white uppercase tracking-tight">${top3[0]?.name || top3[0]?.fullName || '---'}</h4>
+                        <p class="text-xs font-bold text-blue-100 uppercase">${top3[0]?.points || 0} Points</p>
+                    </div>
+                    <div class="p-8 bg-white border border-slate-200 rounded-[2.5rem] flex flex-col items-center text-center order-3 relative">
+                        <div class="absolute -top-3 bg-orange-100 text-orange-600 px-4 py-1 rounded-full text-[10px] font-black uppercase">Bronze</div>
+                        <div class="h-16 w-16 bg-orange-50 rounded-2xl flex items-center justify-center text-orange-300 font-black mb-4">3</div>
+                        <h4 class="text-sm font-black text-slate-900 uppercase tracking-tight">${top3[2]?.name || top3[2]?.fullName || '---'}</h4>
+                        <p class="text-[10px] font-bold text-slate-400 uppercase">${top3[2]?.points || 0} Points</p>
+                    </div>
+                `;
+            }
+
+            // Update List
+            body.innerHTML = data.map((item, i) => {
+                const name = item.name || item.fullName || 'Unknown';
+                const sub = item.department || item.teamName || item.sport || 'General';
+                const isMvp = item.isMvp;
+
+                return `
+                    <tr class="leaderboard-row hover:bg-slate-50/80 transition-all cursor-default group">
+                        <td class="py-5 px-8">
+                            <div class="flex items-center gap-3">
+                                <span class="h-8 w-8 rounded-xl flex items-center justify-center font-black text-xs ${
+                                    i === 0 ? 'bg-yellow-400 text-white shadow-lg shadow-yellow-200' :
+                                    i === 1 ? 'bg-slate-200 text-slate-600' :
+                                    i === 2 ? 'bg-orange-100 text-orange-600' : 'text-slate-400'
+                                }">
+                                    ${i + 1}
+                                </span>
+                            </div>
+                        </td>
+                        <td class="py-5 px-4">
+                            <div class="flex items-center gap-3">
+                                <div class="h-10 w-10 bg-slate-100 rounded-xl flex items-center justify-center text-slate-400">
+                                    <i class="fas ${state.mode === 'teams' ? 'fa-shield' : 'fa-user'}"></i>
+                                </div>
+                                <div>
+                                    <div class="flex items-center gap-2">
+                                        <p class="font-black text-slate-900 uppercase text-xs tracking-tight">${name}</p>
+                                        ${isMvp ? `
+                                            <span class="bg-yellow-100 text-yellow-700 text-[8px] font-black px-2 py-0.5 rounded-full uppercase mvp-glow animate-pulse">
+                                                <i class="fas fa-star mr-1"></i>MVP
+                                            </span>
+                                        ` : ''}
+                                    </div>
+                                    <p class="text-[9px] font-bold text-slate-400 uppercase tracking-tighter">${sub}</p>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="py-5 px-4 text-center">
+                            <div class="inline-flex items-center gap-2 px-3 py-1 bg-slate-50 rounded-lg">
+                                <span class="text-[10px] font-black text-green-600">${item.wins || 0}W</span>
+                                <span class="text-[8px] text-slate-300">/</span>
+                                <span class="text-[10px] font-black text-red-400">${item.losses || 0}L</span>
+                            </div>
+                        </td>
+                        <td class="py-5 px-8 text-right">
+                            <span class="text-sm font-black text-blue-600">${item.points || 0}</span>
+                        </td>
+                    </tr>
+                `;
+            }).join('') || '<tr><td colspan="4" class="p-20 text-center text-xs font-black text-slate-400 uppercase tracking-widest">No ranking data available for this filter</td></tr>';
+        };
+    </script>
+</body>
+
+</html>

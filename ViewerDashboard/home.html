@@ -59,56 +59,42 @@
     <div id="sidebarOverlay" class="fixed inset-0 bg-slate-900/50 z-40 hidden backdrop-blur-sm"></div>
 
     <!-- Navigation Sidebar -->
-    <aside id="sidebar"
-        class="fixed top-0 left-0 h-full w-64 bg-white border-r border-slate-200 z-50 transform -translate-x-full lg:translate-x-0 sidebar-transition shadow-xl lg:shadow-none">
-        <div class="p-6">
+    <aside id="sidebar" class="fixed top-0 left-0 h-full w-64 bg-white border-r border-slate-200 z-50 transform -translate-x-full lg:translate-x-0 sidebar-transition shadow-xl lg:shadow-none">
+        <div class="p-6 h-full flex flex-col">
             <div class="flex items-center gap-3 mb-8">
-                <div
-                    class="h-10 w-10 bg-blue-600 rounded-xl flex items-center justify-center text-white shadow-lg shadow-blue-200">
+                <div class="h-10 w-10 bg-blue-600 rounded-xl flex items-center justify-center text-white shadow-lg shadow-blue-200">
                     <i class="fas fa-trophy"></i>
                 </div>
                 <div>
-                    <h1 class="font-extrabold text-slate-900 text-sm tracking-tight leading-none uppercase">Intramurals
-                    </h1>
+                    <h1 class="font-extrabold text-slate-900 text-sm tracking-tight leading-none uppercase">Intramurals</h1>
                     <span class="text-[10px] font-bold text-blue-600 uppercase tracking-widest">2026 Season</span>
                 </div>
             </div>
 
-            <nav class="space-y-1">
-                <a href="home.html"
-                    class="nav-link flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-bold text-slate-500 transition-all hover:bg-slate-50">
+            <nav class="space-y-1 flex-1 overflow-y-auto custom-scrollbar">
+                <a href="home.html" class="nav-link active flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-bold text-slate-500">
                     <i class="fas fa-house w-5"></i> Home
                 </a>
-                <a href="sports.html"
-                    class="nav-link flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-bold text-slate-500 transition-all hover:bg-slate-50">
+                <a href="sports.html" class="nav-link flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-bold">
                     <i class="fas fa-volleyball w-5"></i> Sports
                 </a>
-                <a href="teams.html"
-                    class="nav-link flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-bold text-slate-500 transition-all hover:bg-slate-50">
+                <a href="teams.html" class="nav-link flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-bold text-slate-500">
                     <i class="fas fa-users w-5"></i> Teams
                 </a>
-                <a href="players.html"
-                    class="nav-link flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-bold text-slate-500 transition-all hover:bg-slate-50">
+                <a href="players.html" class="nav-link flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-bold text-slate-500">
                     <i class="fas fa-user-graduate w-5"></i> Players
                 </a>
-                <a href="leaderboard.html"
-                    class="nav-link flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-bold text-slate-500 transition-all hover:bg-slate-50">
+                <a href="leaderboard.html" class="nav-link flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-bold text-slate-500">
                     <i class="fas fa-ranking-star w-5"></i> Leaderboard
                 </a>
-
-                <a href="MVPawards.html"
-                    class="nav-link flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-bold text-slate-500 transition-all hover:bg-slate-50 hover:text-blue-600 group">
+                <a href="MVPawards.html" class="nav-link flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-bold text-slate-500 group">
                     <i class="fas fa-medal w-5 group-hover:text-yellow-500 transition-colors"></i> MVP Awards
                 </a>
-
-                <a href="matches&results.html"
-                    class="nav-link flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-bold text-slate-500 transition-all hover:bg-slate-50">
+                <a href="matches&results.html" class="nav-link flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-bold text-slate-500">
                     <i class="fas fa-calendar-check w-5"></i> Matches & Results
                 </a>
-
                 <div class="pt-4 mt-4 border-t border-slate-100">
-                    <a href="about.html"
-                        class="nav-link flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-bold text-slate-500 transition-all hover:bg-slate-50">
+                    <a href="about.html" class="nav-link flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-bold text-slate-500">
                         <i class="fas fa-circle-info w-5"></i> About
                     </a>
                 </div>

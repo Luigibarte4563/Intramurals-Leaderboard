@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About | Intramurals 2026</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #f8fafc;
+        }
+
+        .sidebar-transition {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .nav-link:hover {
+            background: rgba(59, 130, 246, 0.05);
+            color: #2563eb;
+        }
+
+        .nav-link.active {
+            background: #2563eb;
+            color: white;
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .animate-fade-in {
+            animation: fadeIn 0.4s ease-out forwards;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #e2e8f0;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+
+<body class="overflow-x-hidden">
+
+    <!-- Mobile Sidebar Overlay -->
+    <div id="sidebarOverlay" class="fixed inset-0 bg-slate-900/50 z-40 hidden backdrop-blur-sm"></div>
+
+    <!-- Navigation Sidebar -->
+    <aside id="sidebar" class="fixed top-0 left-0 h-full w-64 bg-white border-r border-slate-200 z-50 transform -translate-x-full lg:translate-x-0 sidebar-transition shadow-xl lg:shadow-none">
+        <div class="p-6 h-full flex flex-col">
+            <div class="flex items-center gap-3 mb-8">
+                <div class="h-10 w-10 bg-blue-600 rounded-xl flex items-center justify-center text-white shadow-lg shadow-blue-200">
+                    <i class="fas fa-trophy"></i>
+                </div>
+                <div>
+                    <h1 class="font-extrabold text-slate-900 text-sm tracking-tight leading-none uppercase">Intramurals</h1>
+                    <span class="text-[10px] font-bold text-blue-600 uppercase tracking-widest">2026 Season</span>
+                </div>
+            </div>
+
+            <nav class="space-y-1 flex-1 overflow-y-auto custom-scrollbar">
+                <a href="home.html" class="nav-link flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-bold text-slate-500">
+                    <i class="fas fa-house w-5"></i> Home
+                </a>
+                <a href="sports.html" class="nav-link flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-bold text-slate-500">
+                    <i class="fas fa-volleyball w-5"></i> Sports
+                </a>
+                <a href="teams.html" class="nav-link flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-bold text-slate-500">
+                    <i class="fas fa-users w-5"></i> Teams
+                </a>
+                <a href="players.html" class="nav-link flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-bold text-slate-500">
+                    <i class="fas fa-user-graduate w-5"></i> Players
+                </a>
+                <a href="leaderboard.html" class="nav-link flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-bold text-slate-500">
+                    <i class="fas fa-ranking-star w-5"></i> Leaderboard
+                </a>
+                <a href="MVPawards.html" class="nav-link flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-bold text-slate-500 group">
+                    <i class="fas fa-medal w-5 group-hover:text-yellow-500 transition-colors"></i> MVP Awards
+                </a>
+                <a href="matches&results.html" class="nav-link flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-bold text-slate-500">
+                    <i class="fas fa-calendar-check w-5"></i> Matches & Results
+                </a>
+                <div class="pt-4 mt-4 border-t border-slate-100">
+                    <a href="about.html" class="nav-link active flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-bold">
+                        <i class="fas fa-circle-info w-5"></i> About
+                    </a>
+                </div>
+            </nav>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="lg:ml-64 min-h-screen p-4 md:p-8">
+        <!-- Header -->
+        <header class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+            <div>
+                <h2 class="text-2xl font-black text-slate-900 uppercase tracking-tight">About the Event</h2>
+                <p class="text-slate-500 text-xs font-bold uppercase tracking-wider" id="currentDate">Loading date...</p>
+            </div>
+            <div class="flex items-center gap-3">
+                <button id="openSidebar" class="lg:hidden h-10 w-10 flex items-center justify-center bg-white border border-slate-200 rounded-xl">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <div class="px-4 py-2 bg-blue-50 border border-blue-100 rounded-2xl">
+                    <span class="text-[10px] font-black text-blue-600 uppercase tracking-widest">
+                        <i class="fas fa-info-circle mr-1"></i> Documentation
+                    </span>
+                </div>
+            </div>
+        </header>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- Left Side: Main Info -->
+            <div class="lg:col-span-2 space-y-8">
+                
+                <!-- Event Description -->
+                <section class="bg-white border border-slate-200 rounded-[2rem] p-8 shadow-sm animate-fade-in">
+                    <div class="flex items-center gap-3 mb-6">
+                        <div class="h-10 w-10 bg-blue-100 rounded-xl flex items-center justify-center text-blue-600">
+                            <i class="fas fa-flag-checkered"></i>
+                        </div>
+                        <h3 class="text-lg font-black text-slate-900 uppercase tracking-tight">Purpose & Overview</h3>
+                    </div>
+                    <div class="space-y-4 text-slate-600 leading-relaxed text-sm">
+                        <p>
+                            The <strong>Intramurals 2026</strong> is the premier annual sporting event designed to foster camaraderie, 
+                            sportsmanship, and healthy competition among students across all departments. This year's theme, 
+                            <em>"Breaking Barriers, Building Champions,"</em> emphasizes personal growth and team unity.
+                        </p>
+                        <p>
+                            Our platform serves as the central hub for real-time statistics, match schedules, and official standings, 
+                            ensuring transparency and engagement for every participant and spectator.
+                        </p>
+                    </div>
+                </section>
+
+                <!-- Rules & Scoring -->
+                <section class="bg-white border border-slate-200 rounded-[2rem] p-8 shadow-sm animate-fade-in" style="animation-delay: 0.1s">
+                    <div class="flex items-center gap-3 mb-6">
+                        <div class="h-10 w-10 bg-orange-100 rounded-xl flex items-center justify-center text-orange-600">
+                            <i class="fas fa-scroll"></i>
+                        </div>
+                        <h3 class="text-lg font-black text-slate-900 uppercase tracking-tight">Rules & Scoring System</h3>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="p-5 bg-slate-50 rounded-2xl border border-slate-100">
+                            <h4 class="text-[10px] font-black text-blue-600 uppercase tracking-widest mb-3">Overall Point Weights</h4>
+                            <ul class="space-y-3">
+                                <li class="flex justify-between items-center text-xs">
+                                    <span class="font-bold text-slate-700">Gold Medal</span>
+                                    <span class="px-2 py-1 bg-yellow-100 text-yellow-700 rounded-lg font-black">5 Points</span>
+                                </li>
+                                <li class="flex justify-between items-center text-xs">
+                                    <span class="font-bold text-slate-700">Silver Medal</span>
+                                    <span class="px-2 py-1 bg-slate-200 text-slate-600 rounded-lg font-black">3 Points</span>
+                                </li>
+                                <li class="flex justify-between items-center text-xs">
+                                    <span class="font-bold text-slate-700">Bronze Medal</span>
+                                    <span class="px-2 py-1 bg-orange-100 text-orange-700 rounded-lg font-black">1 Point</span>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="p-5 bg-slate-50 rounded-2xl border border-slate-100">
+                            <h4 class="text-[10px] font-black text-blue-600 uppercase tracking-widest mb-3">Match Points (League)</h4>
+                            <ul class="space-y-3">
+                                <li class="flex justify-between items-center text-xs">
+                                    <span class="font-bold text-slate-700">Win</span>
+                                    <span class="text-green-600 font-black">+3 Points</span>
+                                </li>
+                                <li class="flex justify-between items-center text-xs">
+                                    <span class="font-bold text-slate-700">Draw</span>
+                                    <span class="text-slate-500 font-black">+1 Point</span>
+                                </li>
+                                <li class="flex justify-between items-center text-xs">
+                                    <span class="font-bold text-slate-700">Loss</span>
+                                    <span class="text-red-600 font-black">0 Points</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-6 p-4 border-l-4 border-blue-500 bg-blue-50 rounded-r-xl">
+                        <p class="text-[11px] font-bold text-slate-600 uppercase italic">
+                            "In case of a tie in total points, the team with the higher number of Gold medals takes the lead."
+                        </p>
+                    </div>
+                </section>
+            </div>
+
+            <!-- Right Side: Organizers & Contact -->
+            <div class="space-y-8 animate-fade-in" style="animation-delay: 0.2s">
+                
+                <!-- Organizers -->
+                <section class="bg-white border border-slate-200 rounded-[2rem] p-6 shadow-sm">
+                    <h4 class="text-xs font-black text-slate-900 uppercase tracking-widest mb-6">Organizing Committee</h4>
+                    <div class="space-y-4">
+                        <div class="flex items-center gap-4 p-3 hover:bg-slate-50 rounded-2xl transition-colors">
+                            <div class="h-12 w-12 bg-slate-100 rounded-full flex items-center justify-center text-slate-500 font-black text-sm">JS</div>
+                            <div>
+                                <p class="text-xs font-black text-slate-900 uppercase">John Smith</p>
+                                <p class="text-[10px] font-bold text-blue-600 uppercase">Event Director</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-4 p-3 hover:bg-slate-50 rounded-2xl transition-colors">
+                            <div class="h-12 w-12 bg-slate-100 rounded-full flex items-center justify-center text-slate-500 font-black text-sm">MC</div>
+                            <div>
+                                <p class="text-xs font-black text-slate-900 uppercase">Maria Clara</p>
+                                <p class="text-[10px] font-bold text-blue-600 uppercase">Sports Coordinator</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-4 p-3 hover:bg-slate-50 rounded-2xl transition-colors">
+                            <div class="h-12 w-12 bg-slate-100 rounded-full flex items-center justify-center text-slate-500 font-black text-sm">AT</div>
+                            <div>
+                                <p class="text-xs font-black text-slate-900 uppercase">Alan Turing</p>
+                                <p class="text-[10px] font-bold text-blue-600 uppercase">Tech & Stats Lead</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Contact Info -->
+                <section class="bg-blue-600 rounded-[2rem] p-6 text-white shadow-xl shadow-blue-100">
+                    <h4 class="text-xs font-black text-blue-100 uppercase tracking-widest mb-6">Need Assistance?</h4>
+                    <div class="space-y-4">
+                        <div class="flex items-center gap-4">
+                            <div class="h-10 w-10 bg-white/10 rounded-xl flex items-center justify-center">
+                                <i class="fas fa-envelope text-sm"></i>
+                            </div>
+                            <div>
+                                <p class="text-[10px] font-bold text-blue-200 uppercase">Email Us</p>
+                                <p class="text-xs font-black">support@intramurals2026.edu</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-4">
+                            <div class="h-10 w-10 bg-white/10 rounded-xl flex items-center justify-center">
+                                <i class="fas fa-location-dot text-sm"></i>
+                            </div>
+                            <div>
+                                <p class="text-[10px] font-bold text-blue-200 uppercase">Visit Office</p>
+                                <p class="text-xs font-black">Student Affairs Bldg, Room 204</p>
+                            </div>
+                        </div>
+                        <div class="pt-4">
+                            <button class="w-full py-3 bg-white text-blue-600 rounded-xl text-[10px] font-black uppercase hover:bg-blue-50 transition-colors">
+                                Submit a Query
+                            </button>
+                        </div>
+                    </div>
+                </section>
+
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Update Current Date
+        function updateDate() {
+            const el = document.getElementById('currentDate');
+            if (el) el.textContent = new Date().toLocaleDateString('en-US', { 
+                weekday: 'long', 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric' 
+            });
+        }
+
+        // Sidebar Controls
+        const setupSidebar = () => {
+            const overlay = document.getElementById('sidebarOverlay');
+            const sidebar = document.getElementById('sidebar');
+            const openBtn = document.getElementById('openSidebar');
+
+            openBtn.onclick = () => {
+                sidebar.classList.remove('-translate-x-full');
+                overlay.classList.remove('hidden');
+            };
+
+            overlay.onclick = () => {
+                sidebar.classList.add('-translate-x-full');
+                overlay.classList.add('hidden');
+            };
+        };
+
+        window.onload = () => {
+            updateDate();
+            setupSidebar();
+        };
+    </script>
+</body>
+
+</html>

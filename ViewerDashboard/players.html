@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Players | Intramurals 2026</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #f8fafc;
+        }
+
+        .sidebar-transition {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .nav-link:hover {
+            background: rgba(59, 130, 246, 0.05);
+            color: #2563eb;
+        }
+
+        .nav-link.active {
+            background: #2563eb;
+            color: white !important;
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .animate-fade-in {
+            animation: fadeIn 0.4s ease-out forwards;
+        }
+
+        .player-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 24px -10px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Hide scrollbar but keep functionality */
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+</head>
+
+<body class="overflow-x-hidden">
+
+    <!-- Mobile Sidebar Overlay -->
+    <div id="sidebarOverlay" class="fixed inset-0 bg-slate-900/50 z-40 hidden backdrop-blur-sm"></div>
+
+    <!-- Navigation Sidebar -->
+    <aside id="sidebar" class="fixed top-0 left-0 h-full w-64 bg-white border-r border-slate-200 z-50 transform -translate-x-full lg:translate-x-0 sidebar-transition shadow-xl lg:shadow-none">
+        <div class="p-6">
+            <div class="flex items-center gap-3 mb-8">
+                <div class="h-10 w-10 bg-blue-600 rounded-xl flex items-center justify-center text-white shadow-lg shadow-blue-200">
+                    <i class="fas fa-trophy"></i>
+                </div>
+                <div>
+                    <h1 class="font-extrabold text-slate-900 text-sm tracking-tight leading-none uppercase">Intramurals</h1>
+                    <span class="text-[10px] font-bold text-blue-600 uppercase tracking-widest">2026 Season</span>
+                </div>
+            </div>
+
+            <nav class="space-y-1">
+                <a href="home.html" class="nav-link flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-bold text-slate-500 transition-all">
+                    <i class="fas fa-house w-5"></i> Home
+                </a>
+                <a href="sports.html" class="nav-link flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-bold text-slate-500 transition-all">
+                    <i class="fas fa-volleyball w-5"></i> Sports
+                </a>
+                <a href="teams.html" class="nav-link flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-bold text-slate-500 transition-all">
+                    <i class="fas fa-users w-5"></i> Teams
+                </a>
+                <a href="players.html" class="nav-link active flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-bold text-slate-500 transition-all">
+                    <i class="fas fa-user-graduate w-5"></i> Players
+                </a>
+                <a href="leaderboard.html" class="nav-link flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-bold text-slate-500 transition-all">
+                    <i class="fas fa-ranking-star w-5"></i> Leaderboard
+                </a>
+                <a href="MVPawards.html" class="nav-link flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-bold text-slate-500 transition-all group">
+                    <i class="fas fa-medal w-5 group-hover:text-yellow-500 transition-colors"></i> MVP Awards
+                </a>
+                <a href="matches&results.html" class="nav-link flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-bold text-slate-500 transition-all">
+                    <i class="fas fa-calendar-check w-5"></i> Matches & Results
+                </a>
+                <div class="pt-4 mt-4 border-t border-slate-100">
+                    <a href="about.html" class="nav-link flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-bold text-slate-500 transition-all">
+                        <i class="fas fa-circle-info w-5"></i> About
+                    </a>
+                </div>
+            </nav>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="lg:ml-64 min-h-screen p-4 md:p-8">
+        <!-- Header -->
+        <header class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+            <div>
+                <h2 class="text-2xl font-black text-slate-900 uppercase tracking-tight">Players Directory</h2>
+                <p class="text-slate-500 text-xs font-bold uppercase tracking-wider">Meet the stars of Intramurals 2026</p>
+            </div>
+            <div class="flex items-center gap-3">
+                <div class="relative hidden md:block">
+                    <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+                    <input type="text" id="playerSearch" placeholder="Search athletes..." 
+                        class="pl-10 pr-4 py-2 bg-white border border-slate-200 rounded-xl text-xs font-bold focus:ring-2 focus:ring-blue-500 focus:outline-none w-64">
+                </div>
+                <button id="openSidebar" class="lg:hidden h-10 w-10 flex items-center justify-center bg-white border border-slate-200 rounded-xl">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
+        </header>
+
+        <!-- Player List Grid -->
+        <div id="playersGrid" class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
+            <!-- Loading States -->
+            <div class="h-48 bg-white rounded-[2rem] animate-pulse border border-slate-100"></div>
+            <div class="h-48 bg-white rounded-[2rem] animate-pulse border border-slate-100"></div>
+            <div class="h-48 bg-white rounded-[2rem] animate-pulse border border-slate-100"></div>
+        </div>
+    </main>
+
+    <!-- Player Profile Modal -->
+    <div id="playerModal" class="fixed inset-0 z-[100] hidden items-center justify-center p-4">
+        <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-md" id="closeModalBg"></div>
+        <div class="relative w-full max-w-2xl bg-white rounded-[2.5rem] shadow-2xl overflow-hidden animate-fade-in no-scrollbar max-h-[90vh] overflow-y-auto">
+            <!-- Modal Header / Cover -->
+            <div class="h-32 bg-gradient-to-r from-blue-600 to-indigo-700 relative">
+                <button id="closeModalBtn" class="absolute top-6 right-6 h-10 w-10 bg-white/20 hover:bg-white/30 rounded-full text-white flex items-center justify-center transition-colors">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <!-- Modal Body -->
+            <div class="px-8 pb-10 -mt-12">
+                <div class="flex flex-col md:flex-row md:items-end gap-6 mb-8">
+                    <div id="modalInitials" class="h-24 w-24 rounded-3xl bg-white shadow-xl flex items-center justify-center text-3xl font-black text-blue-600 border-4 border-white">
+                        ??
+                    </div>
+                    <div class="flex-1">
+                        <div class="flex items-center gap-2 mb-1">
+                            <span id="modalRank" class="px-2 py-0.5 bg-yellow-100 text-yellow-700 text-[10px] font-black rounded-lg uppercase">Rank #--</span>
+                            <span id="modalStatus" class="px-2 py-0.5 bg-green-100 text-green-700 text-[10px] font-black rounded-lg uppercase italic">Active</span>
+                        </div>
+                        <h3 id="modalName" class="text-3xl font-black text-slate-900 uppercase tracking-tight">Player Name</h3>
+                        <p id="modalTeam" class="text-slate-500 font-bold text-sm uppercase italic">Team Placeholder</p>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+                    <div class="p-4 bg-slate-50 rounded-2xl border border-slate-100">
+                        <p class="text-[10px] font-black text-slate-400 uppercase mb-1">Sport</p>
+                        <p id="modalSport" class="text-sm font-black text-slate-900 uppercase">Volleyball</p>
+                    </div>
+                    <div class="p-4 bg-blue-50 rounded-2xl border border-blue-100">
+                        <p class="text-[10px] font-black text-blue-400 uppercase mb-1">MVP Score</p>
+                        <p id="modalMvpScore" class="text-sm font-black text-blue-600">0.00</p>
+                    </div>
+                    <div class="p-4 bg-orange-50 rounded-2xl border border-orange-100">
+                        <p class="text-[10px] font-black text-orange-400 uppercase mb-1">Consistency</p>
+                        <p id="modalStats" class="text-sm font-black text-orange-600">--%</p>
+                    </div>
+                </div>
+
+                <div class="space-y-4">
+                    <h4 class="text-xs font-black text-slate-900 uppercase tracking-widest">Performance Insights</h4>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="p-5 bg-white border border-slate-100 rounded-2xl">
+                            <i class="fas fa-fire text-orange-500 mb-2"></i>
+                            <p class="text-[10px] font-bold text-slate-400 uppercase mb-1">Point Contribution</p>
+                            <div class="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden">
+                                <div id="pointBar" class="bg-orange-500 h-full w-[65%]"></div>
+                            </div>
+                        </div>
+                        <div class="p-5 bg-white border border-slate-100 rounded-2xl">
+                            <i class="fas fa-bolt text-blue-500 mb-2"></i>
+                            <p class="text-[10px] font-bold text-slate-400 uppercase mb-1">Win Rate</p>
+                            <div class="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden">
+                                <div id="winBar" class="bg-blue-500 h-full w-[80%]"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
+        import { getAuth, onAuthStateChanged, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+        import { getFirestore, collection, onSnapshot } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
+
+        // 🔥 Configuration from your reference
+        const firebaseConfig = {
+            apiKey: "AIzaSyD5Gkjk7tk48Hv9zgvdlSsdR8FH_nwtGRc",
+            authDomain: "intramurals-score-leaderboard.firebaseapp.com",
+            projectId: "intramurals-score-leaderboard",
+            storageBucket: "intramurals-score-leaderboard.firebasestorage.app",
+            messagingSenderId: "455345215033",
+            appId: "1:455345215033:web:66a387d0fa0fa4453e5fe8",
+            measurementId: "G-E0GM8X4K9L"
+        };
+
+        const currentAppId = 'intramurals-2026';
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        let state = {
+            players: [],
+            teams: [],
+            sports: [],
+            searchQuery: ''
+        };
+
+        window.onload = () => {
+            initAuth();
+            setupSidebar();
+            setupSearch();
+            setupModalHandlers();
+        };
+
+        const setupSidebar = () => {
+            const overlay = document.getElementById('sidebarOverlay');
+            const sidebar = document.getElementById('sidebar');
+            document.getElementById('openSidebar').onclick = () => {
+                sidebar.classList.remove('-translate-x-full');
+                overlay.classList.remove('hidden');
+            };
+            overlay.onclick = () => {
+                sidebar.classList.add('-translate-x-full');
+                overlay.classList.add('hidden');
+            };
+        };
+
+        const setupSearch = () => {
+            document.getElementById('playerSearch').oninput = (e) => {
+                state.searchQuery = e.target.value.toLowerCase();
+                renderPlayers();
+            };
+        };
+
+        const setupModalHandlers = () => {
+            const modal = document.getElementById('playerModal');
+            document.getElementById('closeModalBtn').onclick = () => modal.classList.add('hidden');
+            document.getElementById('closeModalBg').onclick = () => modal.classList.add('hidden');
+        };
+
+        const initAuth = async () => {
+            try {
+                await signInAnonymously(auth);
+                onAuthStateChanged(auth, (user) => {
+                    if (user) loadData();
+                });
+            } catch (error) {
+                console.error("Auth failed", error);
+            }
+        };
+
+        const loadData = () => {
+            const basePath = ['artifacts', currentAppId, 'public', 'data'];
+
+            onSnapshot(collection(db, ...basePath, 'teams'), (snap) => {
+                state.teams = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+                renderPlayers();
+            });
+
+            onSnapshot(collection(db, ...basePath, 'sports'), (snap) => {
+                state.sports = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+                renderPlayers();
+            });
+
+            onSnapshot(collection(db, ...basePath, 'players'), (snap) => {
+                // Calculate MVP scores and ranks based on stats field
+                let players = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+                
+                // Sort by stats descending to determine rank
+                players.sort((a, b) => (parseFloat(b.stats) || 0) - (parseFloat(a.stats) || 0));
+                
+                state.players = players.map((p, index) => ({
+                    ...p,
+                    rank: index + 1,
+                    mvpScore: (parseFloat(p.stats) * 1.25).toFixed(2) // Mock logic for MVP weighting
+                }));
+                
+                renderPlayers();
+            });
+        };
+
+        const openPlayerProfile = (id) => {
+            const player = state.players.find(p => p.id === id);
+            if (!player) return;
+
+            const team = state.teams.find(t => t.id === player.teamId);
+            
+            document.getElementById('modalName').textContent = player.fullName || player.name || 'Anonymous';
+            document.getElementById('modalTeam').textContent = team?.name || player.team || 'Unattached';
+            document.getElementById('modalSport').textContent = player.sport || 'General';
+            document.getElementById('modalMvpScore').textContent = player.mvpScore || '0.00';
+            document.getElementById('modalStats').textContent = `${player.stats || 0}%`;
+            document.getElementById('modalRank').textContent = `Rank #${player.rank}`;
+            document.getElementById('modalInitials').textContent = (player.fullName || player.name || '??').substring(0, 2).toUpperCase();
+            
+            // Randomize bars for visual flair since detailed match-by-match data varies
+            const pointVal = Math.floor(Math.random() * 40) + 60;
+            const winVal = Math.floor(Math.random() * 30) + 70;
+            document.getElementById('pointBar').style.width = `${pointVal}%`;
+            document.getElementById('winBar').style.width = `${winVal}%`;
+
+            document.getElementById('playerModal').classList.remove('hidden');
+            document.getElementById('playerModal').classList.add('flex');
+        };
+
+        const renderPlayers = () => {
+            const container = document.getElementById('playersGrid');
+            const filtered = state.players.filter(p => {
+                const nameMatch = (p.fullName || p.name || '').toLowerCase().includes(state.searchQuery);
+                const teamMatch = (p.team || '').toLowerCase().includes(state.searchQuery);
+                const sportMatch = (p.sport || '').toLowerCase().includes(state.searchQuery);
+                return nameMatch || teamMatch || sportMatch;
+            });
+
+            if (filtered.length === 0) {
+                container.innerHTML = `
+                    <div class="col-span-full py-20 text-center">
+                        <i class="fas fa-user-slash text-4xl text-slate-200 mb-4"></i>
+                        <p class="text-slate-400 font-bold uppercase text-xs tracking-widest">No players found</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = filtered.map((p, i) => {
+                const team = state.teams.find(t => t.id === p.teamId);
+                const initials = (p.fullName || p.name || '??').substring(0, 2).toUpperCase();
+                
+                return `
+                    <div onclick="window.viewPlayer('${p.id}')" 
+                        class="player-card bg-white p-6 rounded-[2rem] border border-slate-200 shadow-sm transition-all cursor-pointer animate-fade-in" 
+                        style="animation-delay: ${i * 0.05}s">
+                        
+                        <div class="flex justify-between items-start mb-6">
+                            <div class="h-14 w-14 bg-slate-50 rounded-2xl flex items-center justify-center text-lg font-black text-slate-400 border border-slate-100">
+                                ${initials}
+                            </div>
+                            <div class="text-right">
+                                <span class="px-3 py-1 bg-blue-50 text-blue-600 text-[10px] font-black rounded-full uppercase tracking-wider">
+                                    Rank #${p.rank}
+                                </span>
+                                <p class="mt-2 text-[10px] font-bold text-slate-400 uppercase tracking-tighter italic">MVP SCORE: ${p.mvpScore}</p>
+                            </div>
+                        </div>
+
+                        <div>
+                            <h3 class="text-lg font-black text-slate-900 uppercase tracking-tight truncate">${p.fullName || p.name}</h3>
+                            <div class="flex items-center gap-2 mt-1">
+                                <span class="text-[10px] font-bold text-blue-600 uppercase tracking-widest">${p.sport || 'Athletics'}</span>
+                                <span class="h-1 w-1 bg-slate-300 rounded-full"></span>
+                                <span class="text-[10px] font-bold text-slate-400 uppercase truncate max-w-[120px]">${team?.name || p.team || 'Independent'}</span>
+                            </div>
+                        </div>
+
+                        <div class="mt-6 pt-6 border-t border-slate-50 flex items-center justify-between">
+                            <div class="flex items-center gap-4">
+                                <div>
+                                    <p class="text-[8px] font-black text-slate-400 uppercase tracking-widest">Consistency</p>
+                                    <p class="text-xs font-black text-slate-800">${p.stats || 0}%</p>
+                                </div>
+                            </div>
+                            <button class="h-8 w-8 bg-slate-900 text-white rounded-lg flex items-center justify-center text-xs hover:bg-blue-600 transition-colors">
+                                <i class="fas fa-chevron-right"></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        };
+
+        // Attach to window for onclick access
+        window.viewPlayer = openPlayerProfile;
+
+    </script>
+</body>
+
+</html>

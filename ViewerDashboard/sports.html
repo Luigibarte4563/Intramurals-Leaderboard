@@ -216,294 +216,318 @@
     </main>
 
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
-        import { getAuth, onAuthStateChanged, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
-        import { getFirestore, collection, onSnapshot, query, where } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
+    import { getAuth, onAuthStateChanged, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+    import { getFirestore, collection, onSnapshot, query, where } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
 
-        // 🔥 Configuration (Using provided ref)
-        const firebaseConfig = {
-            apiKey: "AIzaSyD5Gkjk7tk48Hv9zgvdlSsdR8FH_nwtGRc",
-            authDomain: "intramurals-score-leaderboard.firebaseapp.com",
-            projectId: "intramurals-score-leaderboard",
-            storageBucket: "intramurals-score-leaderboard.firebasestorage.app",
-            messagingSenderId: "455345215033",
-            appId: "1:455345215033:web:66a387d0fa0fa4453e5fe8"
-        };
+    // 🔥 Configuration (Using provided ref)
+    const firebaseConfig = {
+        apiKey: "AIzaSyD5Gkjk7tk48Hv9zgvdlSsdR8FH_nwtGRc",
+        authDomain: "intramurals-score-leaderboard.firebaseapp.com",
+        projectId: "intramurals-score-leaderboard",
+        storageBucket: "intramurals-score-leaderboard.firebasestorage.app",
+        messagingSenderId: "455345215033",
+        appId: "1:455345215033:web:66a387d0fa0fa4453e5fe8"
+    };
 
-        const currentAppId = 'intramurals-2026';
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
+    const currentAppId = 'intramurals-2026';
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
 
-        let state = {
-            sports: [],
-            teams: [],
-            players: [],
-            matches: [],
-            currentFilter: 'all',
-            searchTerm: ''
-        };
+    let state = {
+        sports: [],
+        teams: [],
+        players: [],
+        matches: [],
+        currentFilter: 'all',
+        searchTerm: ''
+    };
 
-        const icons = {
-            'basketball': 'fa-basketball',
-            'volleyball': 'fa-volleyball',
-            'badminton': 'fa-shuttlecock',
-            'soccer': 'fa-futbol',
-            'football': 'fa-futbol',
-            'table tennis': 'fa-table-tennis-paddle-ball',
-            'chess': 'fa-chess',
-            'esports': 'fa-gamepad',
-            'athletics': 'fa-person-running',
-            'default': 'fa-trophy'
-        };
+    const icons = {
+        'basketball': 'fa-basketball',
+        'volleyball': 'fa-volleyball',
+        'badminton': 'fa-shuttlecock',
+        'soccer': 'fa-futbol',
+        'football': 'fa-futbol',
+        'table tennis': 'fa-table-tennis-paddle-ball',
+        'chess': 'fa-chess',
+        'esports': 'fa-gamepad',
+        'athletics': 'fa-person-running',
+        'default': 'fa-trophy'
+    };
 
-        window.onload = () => {
-            updateDate();
-            initAuth();
-            setupInteractions();
-        };
+    window.onload = () => {
+        updateDate();
+        initAuth();
+        setupInteractions();
+    };
 
-        const updateDate = () => {
-            const el = document.getElementById('currentDate');
-            if (el) el.textContent = new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
-        };
+    const updateDate = () => {
+        const el = document.getElementById('currentDate');
+        if (el) el.textContent = new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+    };
 
-        const setupInteractions = () => {
-            const overlay = document.getElementById('sidebarOverlay');
-            const sidebar = document.getElementById('sidebar');
-            
+    const setupInteractions = () => {
+        const overlay = document.getElementById('sidebarOverlay');
+        const sidebar = document.getElementById('sidebar');
+        
+        if (document.getElementById('openSidebar')) {
             document.getElementById('openSidebar').onclick = () => {
                 sidebar.classList.remove('-translate-x-full');
                 overlay.classList.remove('hidden');
             };
-            
+        }
+        
+        if (overlay) {
             overlay.onclick = () => {
                 sidebar.classList.add('-translate-x-full');
                 overlay.classList.add('hidden');
             };
+        }
 
-            document.getElementById('backToExplorer').onclick = () => {
+        const backBtn = document.getElementById('backToExplorer');
+        if (backBtn) {
+            backBtn.onclick = () => {
                 document.getElementById('detailView').classList.add('hidden');
                 document.getElementById('explorerView').classList.remove('hidden');
             };
+        }
 
-            document.querySelectorAll('.filter-btn').forEach(btn => {
-                btn.onclick = (e) => {
-                    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active', 'bg-blue-600', 'text-white'));
-                    document.querySelectorAll('.filter-btn').forEach(b => b.classList.add('bg-white', 'text-slate-500'));
-                    
-                    e.target.classList.remove('bg-white', 'text-slate-500');
-                    e.target.classList.add('active', 'bg-blue-600', 'text-white');
-                    state.currentFilter = e.target.dataset.filter;
-                    renderSports();
-                };
-            });
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+            btn.onclick = (e) => {
+                document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active', 'bg-blue-600', 'text-white'));
+                document.querySelectorAll('.filter-btn').forEach(b => b.classList.add('bg-white', 'text-slate-500'));
+                
+                e.target.classList.remove('bg-white', 'text-slate-500');
+                e.target.classList.add('active', 'bg-blue-600', 'text-white');
+                state.currentFilter = e.target.dataset.filter;
+                renderSports();
+            };
+        });
 
-            document.getElementById('sportSearch').oninput = (e) => {
+        const searchInput = document.getElementById('sportSearch');
+        if (searchInput) {
+            searchInput.oninput = (e) => {
                 state.searchTerm = e.target.value.toLowerCase();
                 renderSports();
             };
-        };
+        }
+    };
 
-        const initAuth = async () => {
-            try {
-                await signInAnonymously(auth);
-                onAuthStateChanged(auth, (user) => {
-                    if (user) loadData();
-                });
-            } catch (error) {
-                console.error("Auth failed", error);
+    const initAuth = async () => {
+        try {
+            await signInAnonymously(auth);
+            onAuthStateChanged(auth, (user) => {
+                if (user) loadData();
+            });
+        } catch (error) {
+            console.error("Auth failed", error);
+        }
+    };
+
+    const loadData = () => {
+        const basePath = ['artifacts', currentAppId, 'public', 'data'];
+
+        // SYNC TEAMS FIRST so they are available for other lookups
+        onSnapshot(collection(db, ...basePath, 'teams'), (snap) => {
+            state.teams = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+            renderSports();
+        });
+
+        onSnapshot(collection(db, ...basePath, 'sports'), (snap) => {
+            state.sports = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+            renderSports();
+        }, (err) => console.error("Firestore Error:", err));
+
+        onSnapshot(collection(db, ...basePath, 'players'), (snap) => {
+            state.players = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+            // If viewing a detail page when players update, refresh it
+            const detailView = document.getElementById('detailView');
+            if (detailView && !detailView.classList.contains('hidden')) {
+                // Find current sport by title or keep track of current sport ID
+                const currentName = document.getElementById('detailTitle').textContent;
+                const sport = state.sports.find(s => (s.name || s.sportName) === currentName);
+                if(sport) viewSportDetail(sport.id);
             }
-        };
+        });
 
-        const loadData = () => {
-            const basePath = ['artifacts', currentAppId, 'public', 'data'];
+        onSnapshot(collection(db, ...basePath, 'matches'), (snap) => {
+            state.matches = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+            renderSports();
+        });
+    };
 
-            onSnapshot(collection(db, ...basePath, 'sports'), (snap) => {
-                state.sports = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-                renderSports();
-            }, (err) => console.error("Firestore Error:", err));
+    const getSportIcon = (name) => {
+        const key = Object.keys(icons).find(k => name.toLowerCase().includes(k));
+        return icons[key] || icons['default'];
+    };
 
-            onSnapshot(collection(db, ...basePath, 'teams'), (snap) => {
-                state.teams = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-                renderSports();
-            });
+    const renderSports = () => {
+        const container = document.getElementById('sportsGrid');
+        if (!container) return;
 
-            onSnapshot(collection(db, ...basePath, 'players'), (snap) => {
-                state.players = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-            });
+        const filtered = state.sports.filter(s => {
+            const matchesSearch = (s.name || s.sportName || '').toLowerCase().includes(state.searchTerm);
+            const matchesFilter = state.currentFilter === 'all' || s.status?.toLowerCase() === state.currentFilter;
+            return matchesSearch && matchesFilter;
+        });
 
-            onSnapshot(collection(db, ...basePath, 'matches'), (snap) => {
-                state.matches = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-                renderSports();
-            });
-        };
+        if (filtered.length === 0) {
+            container.innerHTML = `<div class="col-span-full py-12 text-center text-slate-400 font-bold uppercase text-xs tracking-widest">No sports found</div>`;
+            return;
+        }
 
-        const getSportIcon = (name) => {
-            const key = Object.keys(icons).find(k => name.toLowerCase().includes(k));
-            return icons[key] || icons['default'];
-        };
-
-        const renderSports = () => {
-            const container = document.getElementById('sportsGrid');
-            const filtered = state.sports.filter(s => {
-                const matchesSearch = (s.name || s.sportName || '').toLowerCase().includes(state.searchTerm);
-                const matchesFilter = state.currentFilter === 'all' || s.status?.toLowerCase() === state.currentFilter;
-                return matchesSearch && matchesFilter;
-            });
-
-            if (filtered.length === 0) {
-                container.innerHTML = `<div class="col-span-full py-12 text-center text-slate-400 font-bold uppercase text-xs tracking-widest">No sports found</div>`;
-                return;
-            }
-
-            container.innerHTML = filtered.map(s => {
-                const isFinished = s.status?.toLowerCase() === 'finished';
-                const sportName = s.name || s.sportName || 'Unnamed Sport';
-                const iconClass = getSportIcon(sportName);
-                
-                return `
-                    <div onclick="window.viewSportDetail('${s.id}')" class="sport-card cursor-pointer group p-6 bg-white border border-slate-200 rounded-[2rem] transition-all animate-fade-in relative overflow-hidden">
-                        <div class="absolute -right-4 -top-4 text-7xl opacity-[0.03] group-hover:opacity-[0.08] transition-all">
-                            <i class="fas ${iconClass}"></i>
-                        </div>
-                        <div class="flex justify-between items-start mb-6">
-                            <div class="h-12 w-12 bg-slate-50 rounded-2xl flex items-center justify-center text-blue-600 group-hover:bg-blue-600 group-hover:text-white transition-all shadow-sm">
-                                <i class="fas ${iconClass} text-lg"></i>
-                            </div>
-                            <span class="px-3 py-1 ${isFinished ? 'bg-slate-100 text-slate-500' : 'bg-green-100 text-green-600'} text-[9px] font-black uppercase rounded-full tracking-wider">
-                                ${s.status || 'Ongoing'}
-                            </span>
-                        </div>
-                        <h4 class="text-lg font-black text-slate-900 uppercase tracking-tight mb-1 group-hover:text-blue-600 transition-colors">${sportName}</h4>
-                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Intramurals 2026</p>
-                        
-                        <div class="mt-6 flex items-center justify-between">
-                            <div class="flex -space-x-2">
-                                <div class="h-6 w-6 rounded-full border-2 border-white bg-slate-100 flex items-center justify-center text-[8px] font-bold text-slate-500">T</div>
-                                <div class="h-6 w-6 rounded-full border-2 border-white bg-slate-100 flex items-center justify-center text-[8px] font-bold text-slate-500">A</div>
-                            </div>
-                            <span class="text-[9px] font-black text-blue-600 uppercase">View Detail <i class="fas fa-chevron-right ml-1"></i></span>
-                        </div>
-                    </div>
-                `;
-            }).join('');
-        };
-
-        window.viewSportDetail = (sportId) => {
-            const sport = state.sports.find(s => s.id === sportId);
-            if (!sport) return;
-
-            document.getElementById('explorerView').classList.add('hidden');
-            document.getElementById('detailView').classList.remove('hidden');
-
-            const name = sport.name || sport.sportName;
-            document.getElementById('detailTitle').textContent = name;
-            document.getElementById('detailStatus').textContent = sport.status || 'Ongoing';
-            document.getElementById('detailIcon').innerHTML = `<i class="fas ${getSportIcon(name)}"></i>`;
+        container.innerHTML = filtered.map(s => {
+            const isFinished = s.status?.toLowerCase() === 'finished';
+            const sportName = s.name || s.sportName || 'Unnamed Sport';
+            const iconClass = getSportIcon(sportName);
             
-            const isFinished = sport.status?.toLowerCase() === 'finished';
-            const statusEl = document.getElementById('detailStatus');
-            statusEl.className = `px-3 py-1 ${isFinished ? 'bg-black/20' : 'bg-green-500/40'} backdrop-blur rounded-full text-[10px] font-black uppercase tracking-widest mb-3 inline-block`;
-
-            // Process Participating Teams
-            // In a real app, we might filter teams by sportId if they have a relationship
-            // For now, we'll show teams that have matches in this sport
-            const teamIds = new Set();
-            state.matches.filter(m => m.sportId === sportId).forEach(m => {
-                if(m.teamAId) teamIds.add(m.teamAId);
-                if(m.teamBId) teamIds.add(m.teamBId);
-            });
-
-            const teamsInSport = state.teams.filter(t => teamIds.has(t.id));
-            const teamsContainer = document.getElementById('participatingTeams');
-            
-            if (teamsInSport.length === 0) {
-                teamsContainer.innerHTML = `<div class="col-span-full py-8 text-[10px] font-bold text-slate-400 uppercase">No teams registered for this sport yet</div>`;
-            } else {
-                teamsContainer.innerHTML = teamsInSport.map(t => `
-                    <div class="p-4 bg-white border border-slate-100 rounded-2xl text-center hover:border-blue-200 transition-all shadow-sm">
-                        <div class="h-10 w-10 mx-auto bg-slate-50 rounded-xl flex items-center justify-center text-slate-400 font-black text-xs mb-3">
-                            ${(t.name || 'T').substring(0, 1)}
-                        </div>
-                        <p class="text-[10px] font-black text-slate-900 uppercase truncate">${t.name || 'Team'}</p>
-                        <p class="text-[8px] font-bold text-slate-400 uppercase truncate">${t.department || 'Academic'}</p>
+            return `
+                <div onclick="window.viewSportDetail('${s.id}')" class="sport-card cursor-pointer group p-6 bg-white border border-slate-200 rounded-[2rem] transition-all animate-fade-in relative overflow-hidden">
+                    <div class="absolute -right-4 -top-4 text-7xl opacity-[0.03] group-hover:opacity-[0.08] transition-all">
+                        <i class="fas ${iconClass}"></i>
                     </div>
-                `).join('');
-            }
-
-            // Leaderboard for this Sport
-            const leaderboard = calculateSportLeaderboard(sportId);
-            const leaderTable = document.getElementById('detailLeaderboard');
-            leaderTable.innerHTML = `
-                <table class="w-full text-left">
-                    <thead class="bg-slate-50 border-y border-slate-100">
-                        <tr>
-                            <th class="py-2 px-6 text-[8px] font-black text-slate-400 uppercase">Rank</th>
-                            <th class="py-2 px-2 text-[8px] font-black text-slate-400 uppercase">Team</th>
-                            <th class="py-2 px-6 text-right text-[8px] font-black text-slate-400 uppercase">W-L</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        ${leaderboard.length > 0 ? leaderboard.map((row, i) => `
-                            <tr class="hover:bg-slate-50 border-b border-slate-50 last:border-0">
-                                <td class="py-3 px-6">
-                                    <span class="h-5 w-5 flex items-center justify-center rounded-full font-black text-[9px] ${i === 0 ? 'bg-yellow-100 text-yellow-700' : 'text-slate-400'}">
-                                        ${i + 1}
-                                    </span>
-                                </td>
-                                <td class="py-3 px-2">
-                                    <p class="font-black text-slate-800 uppercase text-[10px] tracking-tight truncate">${row.name}</p>
-                                </td>
-                                <td class="py-3 px-6 text-right font-black text-blue-600 text-[10px]">
-                                    ${row.wins} - ${row.losses}
-                                </td>
-                            </tr>
-                        `).join('') : `<tr><td colspan="3" class="p-8 text-center text-[10px] font-bold text-slate-400 uppercase">Awaiting Matches</td></tr>`}
-                    </tbody>
-                </table>
+                    <div class="flex justify-between items-start mb-6">
+                        <div class="h-12 w-12 bg-slate-50 rounded-2xl flex items-center justify-center text-blue-600 group-hover:bg-blue-600 group-hover:text-white transition-all shadow-sm">
+                            <i class="fas ${iconClass} text-lg"></i>
+                        </div>
+                        <span class="px-3 py-1 ${isFinished ? 'bg-slate-100 text-slate-500' : 'bg-green-100 text-green-600'} text-[9px] font-black uppercase rounded-full tracking-wider">
+                            ${s.status || 'Ongoing'}
+                        </span>
+                    </div>
+                    <h4 class="text-lg font-black text-slate-900 uppercase tracking-tight mb-1 group-hover:text-blue-600 transition-colors">${sportName}</h4>
+                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Intramurals 2026</p>
+                    
+                    <div class="mt-6 flex items-center justify-between">
+                        <div class="flex -space-x-2">
+                            <div class="h-6 w-6 rounded-full border-2 border-white bg-slate-100 flex items-center justify-center text-[8px] font-bold text-slate-500">T</div>
+                            <div class="h-6 w-6 rounded-full border-2 border-white bg-slate-100 flex items-center justify-center text-[8px] font-bold text-slate-500">A</div>
+                        </div>
+                        <span class="text-[9px] font-black text-blue-600 uppercase">View Detail <i class="fas fa-chevron-right ml-1"></i></span>
+                    </div>
+                </div>
             `;
+        }).join('');
+    };
 
-            // MVP for this Sport
-            const topPlayer = state.players.filter(p => (p.sport || '').toLowerCase() === (name || '').toLowerCase())
-                                .sort((a,b) => (b.stats || 0) - (a.stats || 0))[0];
-            
-            if (topPlayer) {
-                document.getElementById('detailMvpName').textContent = topPlayer.fullName || topPlayer.name;
-                document.getElementById('detailMvpTeam').textContent = state.teams.find(t => t.id === topPlayer.teamId)?.name || 'Unknown Team';
-                document.getElementById('detailMvpStats').textContent = `${topPlayer.stats || 0} Performance Score`;
-                document.getElementById('detailMvpInitials').textContent = (topPlayer.fullName || '??').substring(0, 2).toUpperCase();
-            } else {
-                document.getElementById('detailMvpName').textContent = "Not Determined";
-                document.getElementById('detailMvpTeam').textContent = "Stay tuned";
-                document.getElementById('detailMvpStats').textContent = "Calculated after matches";
-                document.getElementById('detailMvpInitials').textContent = "?";
+    window.viewSportDetail = (sportId) => {
+        const sport = state.sports.find(s => s.id === sportId);
+        if (!sport) return;
+
+        document.getElementById('explorerView').classList.add('hidden');
+        document.getElementById('detailView').classList.remove('hidden');
+
+        const name = sport.name || sport.sportName;
+        document.getElementById('detailTitle').textContent = name;
+        document.getElementById('detailStatus').textContent = sport.status || 'Ongoing';
+        document.getElementById('detailIcon').innerHTML = `<i class="fas ${getSportIcon(name)}"></i>`;
+        
+        const isFinished = sport.status?.toLowerCase() === 'finished';
+        const statusEl = document.getElementById('detailStatus');
+        statusEl.className = `px-3 py-1 ${isFinished ? 'bg-black/20' : 'bg-green-500/40'} backdrop-blur rounded-full text-[10px] font-black uppercase tracking-widest mb-3 inline-block`;
+
+        // Process Participating Teams
+        const teamIds = new Set();
+        state.matches.filter(m => m.sportId === sportId).forEach(m => {
+            if(m.teamAId) teamIds.add(m.teamAId);
+            if(m.teamBId) teamIds.add(m.teamBId);
+        });
+
+        const teamsInSport = state.teams.filter(t => teamIds.has(t.id));
+        const teamsContainer = document.getElementById('participatingTeams');
+        
+        if (teamsInSport.length === 0) {
+            teamsContainer.innerHTML = `<div class="col-span-full py-8 text-[10px] font-bold text-slate-400 uppercase">No teams registered for this sport yet</div>`;
+        } else {
+            teamsContainer.innerHTML = teamsInSport.map(t => `
+                <div class="p-4 bg-white border border-slate-100 rounded-2xl text-center hover:border-blue-200 transition-all shadow-sm">
+                    <div class="h-10 w-10 mx-auto bg-slate-50 rounded-xl flex items-center justify-center text-slate-400 font-black text-xs mb-3">
+                        ${(t.name || 'T').substring(0, 1)}
+                    </div>
+                    <p class="text-[10px] font-black text-slate-900 uppercase truncate">${t.name || t.teamName || 'Team'}</p>
+                    <p class="text-[8px] font-bold text-slate-400 uppercase truncate">${t.department || 'Academic'}</p>
+                </div>
+            `).join('');
+        }
+
+        // Leaderboard for this Sport
+        const leaderboard = calculateSportLeaderboard(sportId);
+        const leaderTable = document.getElementById('detailLeaderboard');
+        leaderTable.innerHTML = `
+            <table class="w-full text-left">
+                <thead class="bg-slate-50 border-y border-slate-100">
+                    <tr>
+                        <th class="py-2 px-6 text-[8px] font-black text-slate-400 uppercase">Rank</th>
+                        <th class="py-2 px-2 text-[8px] font-black text-slate-400 uppercase">Team</th>
+                        <th class="py-2 px-6 text-right text-[8px] font-black text-slate-400 uppercase">W-L</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${leaderboard.length > 0 ? leaderboard.map((row, i) => `
+                        <tr class="hover:bg-slate-50 border-b border-slate-50 last:border-0">
+                            <td class="py-3 px-6">
+                                <span class="h-5 w-5 flex items-center justify-center rounded-full font-black text-[9px] ${i === 0 ? 'bg-yellow-100 text-yellow-700' : 'text-slate-400'}">
+                                    ${i + 1}
+                                </span>
+                            </td>
+                            <td class="py-3 px-2">
+                                <p class="font-black text-slate-800 uppercase text-[10px] tracking-tight truncate">${row.name}</p>
+                            </td>
+                            <td class="py-3 px-6 text-right font-black text-blue-600 text-[10px]">
+                                ${row.wins} - ${row.losses}
+                            </td>
+                        </tr>
+                    `).join('') : `<tr><td colspan="3" class="p-8 text-center text-[10px] font-bold text-slate-400 uppercase">Awaiting Matches</td></tr>`}
+                </tbody>
+            </table>
+        `;
+
+        // MVP LOGIC FIX: Resolve team from teamId
+        const topPlayer = state.players
+            .filter(p => (p.sport || '').toLowerCase() === (name || '').toLowerCase())
+            .sort((a,b) => (parseFloat(b.stats) || 0) - (parseFloat(a.stats) || 0))[0];
+        
+        if (topPlayer) {
+            // Find team from state using teamId
+            const playerTeam = state.teams.find(t => t.id === topPlayer.teamId);
+            const playerTeamName = playerTeam ? (playerTeam.name || playerTeam.teamName) : (topPlayer.team || 'Independent');
+
+            document.getElementById('detailMvpName').textContent = topPlayer.fullName || topPlayer.name;
+            document.getElementById('detailMvpTeam').textContent = playerTeamName;
+            document.getElementById('detailMvpStats').textContent = `${topPlayer.stats || 0}% Performance Score`;
+            document.getElementById('detailMvpInitials').textContent = (topPlayer.fullName || topPlayer.name || '??').substring(0, 2).toUpperCase();
+        } else {
+            document.getElementById('detailMvpName').textContent = "Not Determined";
+            document.getElementById('detailMvpTeam').textContent = "Stay tuned";
+            document.getElementById('detailMvpStats').textContent = "Calculated after matches";
+            document.getElementById('detailMvpInitials').textContent = "?";
+        }
+    };
+
+    const calculateSportLeaderboard = (sportId) => {
+        const stats = {};
+        const sportMatches = state.matches.filter(m => m.sportId === sportId && m.status === 'completed');
+        
+        sportMatches.forEach(m => {
+            if (!stats[m.teamAId]) stats[m.teamAId] = { wins: 0, losses: 0, name: state.teams.find(t => t.id === m.teamAId)?.name || state.teams.find(t => t.id === m.teamAId)?.teamName || 'Team A' };
+            if (!stats[m.teamBId]) stats[m.teamBId] = { wins: 0, losses: 0, name: state.teams.find(t => t.id === m.teamBId)?.name || state.teams.find(t => t.id === m.teamBId)?.teamName || 'Team B' };
+
+            const sA = parseInt(m.scoreA || 0);
+            const sB = parseInt(m.scoreB || 0);
+
+            if (sA > sB) {
+                stats[m.teamAId].wins++;
+                stats[m.teamBId].losses++;
+            } else if (sB > sA) {
+                stats[m.teamBId].wins++;
+                stats[m.teamAId].losses++;
             }
-        };
+        });
 
-        const calculateSportLeaderboard = (sportId) => {
-            const stats = {};
-            const sportMatches = state.matches.filter(m => m.sportId === sportId && m.status === 'completed');
-            
-            sportMatches.forEach(m => {
-                if (!stats[m.teamAId]) stats[m.teamAId] = { wins: 0, losses: 0, name: state.teams.find(t => t.id === m.teamAId)?.name || 'Team A' };
-                if (!stats[m.teamBId]) stats[m.teamBId] = { wins: 0, losses: 0, name: state.teams.find(t => t.id === m.teamBId)?.name || 'Team B' };
-
-                const sA = parseInt(m.scoreA || 0);
-                const sB = parseInt(m.scoreB || 0);
-
-                if (sA > sB) {
-                    stats[m.teamAId].wins++;
-                    stats[m.teamBId].losses++;
-                } else if (sB > sA) {
-                    stats[m.teamBId].wins++;
-                    stats[m.teamAId].losses++;
-                }
-            });
-
-            return Object.values(stats).sort((a,b) => b.wins - a.wins);
-        };
-    </script>
+        return Object.values(stats).sort((a,b) => b.wins - a.wins);
+    };
+</script>
 </body>
 
 </html>
