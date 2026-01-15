@@ -429,8 +429,6 @@
     function updateAdminUI(user) {
         const email = user.email || "Admin@guest.com";
         const namePart = email.split('@')[0];
-        
-        // Target elements from both script versions
         const nameEls = ['adminName', 'adminDisplayName'];
         const emailEls = ['activeEmail', 'adminEmail'];
         const avatarEls = ['adminInitials', 'adminAvatar'];
@@ -446,29 +444,22 @@
     function startDataSync() {
         const basePath = ['artifacts', currentAppId, 'public', 'data'];
 
-        // 1. Sync Sports
         onSnapshot(collection(db, ...basePath, 'sports'), (snap) => {
             sportsData = snap.docs.map(d => ({ id: d.id, ...d.data() }));
             populateSportFilters();
             updateAllLeaderboards();
         });
 
-        // 2. Sync Teams
         onSnapshot(collection(db, ...basePath, 'teams'), (snap) => {
             teamsData = snap.docs.map(d => ({ id: d.id, ...d.data() }));
             updateAllLeaderboards();
             renderMatches(); 
         });
 
-        // 3. Sync Players
         onSnapshot(collection(db, ...basePath, 'players'), (snap) => {
             playersData = snap.docs.map(d => {
                 const data = d.data();
-                return { 
-                    id: d.id, 
-                    name: data.fullName || data.name || "Unknown Athlete", 
-                    ...data 
-                };
+                return { id: d.id, name: data.fullName || data.name || "Unknown Athlete", ...data };
             });
             updateAllLeaderboards();
             if(document.getElementById('playerList')) renderPlayerTable();
@@ -477,16 +468,66 @@
             }
         });
 
-        // 4. Sync Matches
         onSnapshot(collection(db, ...basePath, 'matches'), (snap) => {
             matchesData = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+            updateAllLeaderboards(); // Points depend on match results
             renderMatches();
         });
     }
 
-    // --- Navigation Logic (Fixes ReferenceError: switchTab) ---
+    // --- Points Calculation Engine ---
+    function calculateLiveStats() {
+        // Reset temporary stats for all teams based on current teamsData
+        const statsMap = {};
+        teamsData.forEach(team => {
+            statsMap[team.id] = {
+                wins: 0,
+                losses: 0,
+                draws: 0,
+                totalPoints: 0,
+                sportPoints: {}
+            };
+        });
+
+        matchesData.forEach(match => {
+            if (match.status !== 'completed') return;
+
+            const { teamAId, teamBId, scoreA, scoreB, sportId } = match;
+            if (!statsMap[teamAId] || !statsMap[teamBId]) return;
+
+            // Init sport-specific points if missing
+            if (!statsMap[teamAId].sportPoints[sportId]) statsMap[teamAId].sportPoints[sportId] = 0;
+            if (!statsMap[teamBId].sportPoints[sportId]) statsMap[teamBId].sportPoints[sportId] = 0;
+
+            if (scoreA > scoreB) {
+                statsMap[teamAId].wins++;
+                statsMap[teamAId].totalPoints += 3;
+                statsMap[teamAId].sportPoints[sportId] += 3;
+                statsMap[teamBId].losses++;
+            } else if (scoreB > scoreA) {
+                statsMap[teamBId].wins++;
+                statsMap[teamBId].totalPoints += 3;
+                statsMap[teamBId].sportPoints[sportId] += 3;
+                statsMap[teamAId].losses++;
+            } else {
+                statsMap[teamAId].draws++;
+                statsMap[teamBId].draws++;
+                statsMap[teamAId].totalPoints += 1;
+                statsMap[teamBId].totalPoints += 1;
+                statsMap[teamAId].sportPoints[sportId] += 1;
+                statsMap[teamBId].sportPoints[sportId] += 1;
+            }
+        });
+
+        // Merge calculated stats back into teamsData
+        teamsData = teamsData.map(team => ({
+            ...team,
+            ...(statsMap[team.id] || {})
+        }));
+    }
+
+    // --- Navigation Logic ---
     window.switchTab = (tabId) => {
-        // Toggle Button Classes
         document.querySelectorAll('.tab-btn').forEach(btn => {
             btn.classList.remove('bg-blue-600', 'text-white');
             btn.classList.add('text-slate-500', 'hover:bg-slate-50');
@@ -496,8 +537,6 @@
             activeBtn.classList.remove('text-slate-500', 'hover:bg-slate-50');
             activeBtn.classList.add('bg-blue-600', 'text-white');
         }
-
-        // Toggle Section Visibility
         document.querySelectorAll('.leaderboard-section').forEach(sec => sec.classList.add('hidden'));
         const activeSec = document.getElementById(`section-${tabId}`);
         if (activeSec) activeSec.classList.remove('hidden');
@@ -555,7 +594,6 @@
     function renderPlayerTable() {
         const playerList = document.getElementById('playerList');
         const term = (document.getElementById('playerSearch')?.value || "").toLowerCase();
-        
         const filtered = playersData.filter(p => 
             p.name.toLowerCase().includes(term) || 
             (p.studentId || "").toLowerCase().includes(term) ||
@@ -599,6 +637,7 @@
 
     // --- Leaderboard Logic ---
     function updateAllLeaderboards() {
+        calculateLiveStats(); // Calculate fresh points before rendering
         renderOverallTeams();
         renderTeamsPerSport();
         renderPlayersPerSport();
@@ -672,7 +711,7 @@
             }).join('');
     }
 
-    // --- Global Helpers & Modals ---
+    // --- Helpers ---
     function formatDate(dateStr) {
         if(!dateStr) return "TBD";
         return new Date(dateStr).toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
@@ -682,7 +721,6 @@
         const match = matchesData.find(m => m.id === id);
         if (!match) return;
         editingMatchId = id;
-        
         const teamA = teamsData.find(t => t.id === match.teamAId) || { name: 'Team A' };
         const teamB = teamsData.find(t => t.id === match.teamBId) || { name: 'Team B' };
 
@@ -699,12 +737,10 @@
         if (!confirm("Are you sure you want to remove this athlete?")) return;
         try {
             await deleteDoc(doc(db, 'artifacts', currentAppId, 'public', 'data', 'players', id));
-        } catch (e) {
-            console.error("Delete failed", e);
-        }
+        } catch (e) { console.error("Delete failed", e); }
     };
 
-    // --- Event Listeners ---
+    // --- Events ---
     document.getElementById('logoutBtn').onclick = () => signOut(auth).then(() => window.location.href = 'index.html');
     sportTeamFilter?.addEventListener('change', renderTeamsPerSport);
     sportPlayerFilter?.addEventListener('change', renderPlayersPerSport);
@@ -725,8 +761,7 @@
         profileDropdown.classList.toggle('show');
     };
     window.onclick = () => profileDropdown.classList.remove('show');
-
-</script>
+</script>   
 </body>
 
 </html>
