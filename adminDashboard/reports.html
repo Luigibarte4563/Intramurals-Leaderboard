@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -78,34 +79,37 @@
             border-top: 4px solid var(--primary-blue);
         }
     </style>
-</head>
-<body class="min-h-screen overflow-x-hidden">
 
-    <!-- Auth Loading Screen -->
-    <div id="authScreen">
-        <div class="spinner mb-4"></div>
+<body class="min-h-screen bg-slate-50 overflow-x-hidden">
+
+    <div id="authScreen" class="fixed inset-0 bg-white flex flex-col items-center justify-center z-[9999]">
+        <div class="h-12 w-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mb-4"></div>
         <p class="text-xs font-black uppercase tracking-widest text-slate-400">Loading Reports Engine...</p>
     </div>
 
-    <!-- Sidebar Overlay -->
-    <div id="sidebarOverlay" class="fixed inset-0 lg:hidden bg-black/50 z-[999] hidden"></div>
+    <div id="sidebarOverlay" class="fixed inset-0 lg:hidden bg-black/60 z-[999] hidden"></div>
 
     <div id="mainWrapper" class="flex min-h-screen">
-        
-        <!-- Sidebar Navigation -->
-        <aside id="sidebar" class="sidebar fixed inset-y-0 left-0 w-64 flex-shrink-0 text-white flex flex-col sidebar-closed lg:relative lg:translate-x-0 no-print">
-            <div class="p-6 flex items-center justify-between border-b border-slate-700">
-                <div class="flex items-center gap-3">
-                    <div class="h-8 w-8 bg-blue-600 rounded flex items-center justify-center font-black text-xs">UDD</div>
-                    <span class="font-black tracking-tighter text-xl italic uppercase">Intra<span class="text-yellow-400">2026</span></span>
-                </div>
-                <button id="closeSidebar" class="lg:hidden text-slate-400 hover:text-white">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-                </button>
-            </div>
 
-            <nav class="flex-1 mt-4 overflow-y-auto">
-                <a href="dashboard.html" class="nav-item flex items-center gap-3 px-6 py-4">
+        <aside id="sidebar"
+        class="sidebar fixed inset-y-0 left-0 w-64 flex flex-col sidebar-closed lg:relative lg:translate-x-0 shadow-2xl">
+        <div class="p-6 flex items-center justify-between border-b border-slate-800">
+            <div class="flex items-center gap-3">
+                <div class="h-8 w-8 bg-blue-600 rounded flex items-center justify-center font-black text-xs text-white">
+                    UDD</div>
+                <span class="font-black tracking-tighter text-xl italic uppercase text-white">Intra<span
+                        class="text-yellow-400">2026</span></span>
+            </div>
+            <button id="closeSidebar" class="lg:hidden text-slate-400 hover:text-white">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12">
+                    </path>
+                </svg>
+            </button>
+        </div>
+
+        <nav class="flex-1 mt-4 overflow-y-auto">
+                <a href="#" class="nav-item flex items-center gap-3 px-6 py-4">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a11 11 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
                     <span class="text-sm font-bold uppercase tracking-wider">Dashboard</span>
                 </a>
@@ -133,161 +137,156 @@
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"></path></svg>
                     <span class="text-sm font-bold uppercase tracking-wider">MVP Management</span>
                 </a>
-                <a href="#" class="nav-item active flex items-center gap-3 px-6 py-4">
+                <a href="reports.html" class="nav-item active flex items-center gap-3 px-6 py-4">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
-                    <span class="text-sm font-bold uppercase tracking-wider">Reports</span>
+                    <span class="text-xs font-bold uppercase tracking-wider">Reports</span>
                 </a>
                 <a href="settings.html" class="nav-item flex items-center gap-3 px-6 py-4 border-t border-slate-700 mt-2">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
                     <span class="text-sm font-bold uppercase tracking-wider">Settings</span>
                 </a>
             </nav>
-        </aside>
+    </aside>
 
-        <!-- Main Content -->
         <main class="flex-1 flex flex-col h-screen overflow-hidden">
-            
-            <!-- Header -->
-            <header class="bg-white min-h-[64px] border-b flex items-center justify-between px-4 lg:px-8 relative z-50 no-print">
-                <div class="flex items-center gap-4">
-                    <button id="openSidebar" class="lg:hidden p-2 hover:bg-slate-100 rounded-lg">
-                        <svg class="w-6 h-6 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
+
+            <header
+                class="bg-white min-h-[64px] border-b flex items-center justify-between px-4 lg:px-8 relative z-[50] no-print">
+                <div class="flex items-center gap-3">
+                    <button id="openSidebar" class="lg:hidden p-2 hover:bg-slate-100 rounded-lg text-slate-600">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M4 6h16M4 12h16m-7 6h7"></path>
+                        </svg>
                     </button>
-                    <h2 class="text-sm lg:text-xl font-black text-slate-800 uppercase italic tracking-tight truncate">Reports & Documentation</h2>
+                    <h2
+                        class="text-xs sm:text-sm lg:text-xl font-black text-slate-800 uppercase italic tracking-tight truncate max-w-[150px] sm:max-w-none">
+                        Reports & Documentation</h2>
                 </div>
-                
-                <!-- Profile Section -->
+
                 <div class="flex items-center gap-4">
                     <div class="relative">
-                        <button id="profileToggle" class="flex items-center gap-2 hover:bg-slate-50 p-1 lg:p-2 rounded-lg transition-all focus:outline-none">
-                            <div class="text-right hidden sm:block">
-                                <p id="adminName" class="text-[10px] lg:text-xs font-black text-slate-900 uppercase">Admin</p>
+                        <button id="profileToggle"
+                            class="flex items-center gap-2 hover:bg-slate-50 p-1 lg:p-2 rounded-lg transition-all focus:outline-none">
+                            <div class="text-right hidden md:block">
+                                <p id="adminName" class="text-[10px] lg:text-xs font-black text-slate-900 uppercase">
+                                    Admin</p>
                                 <p class="text-[8px] lg:text-[10px] text-slate-500 font-bold uppercase">Super Admin</p>
                             </div>
-                            <div id="adminInitials" class="h-8 w-8 lg:h-10 lg:w-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 font-bold border-2 border-blue-200 text-xs lg:text-base">AD</div>
+                            <div id="adminInitials"
+                                class="h-8 w-8 lg:h-10 lg:w-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 font-bold border-2 border-blue-200 text-xs">
+                                AD</div>
                         </button>
-                        
-                        <div id="profileDropdown" class="profile-dropdown absolute right-0 mt-2 w-48 lg:w-56 bg-white rounded-xl shadow-xl border border-slate-100 z-[1001]">
+
+                        <div id="profileDropdown"
+                            class="profile-dropdown absolute right-0 mt-2 w-48 lg:w-56 bg-white rounded-xl shadow-2xl border border-slate-100 z-[1001]">
                             <div class="py-2">
-                                <button id="changePassBtn" class="w-full text-left px-4 py-3 text-sm text-slate-700 hover:bg-blue-50 font-semibold transition-colors">
-                                    Change Password
-                                </button>
+                                <button
+                                    class="w-full text-left px-4 py-3 text-sm text-slate-700 hover:bg-blue-50 font-semibold transition-colors">Change
+                                    Password</button>
                                 <div class="h-px bg-slate-100 my-1 mx-2"></div>
-                                <button id="logoutBtn" class="w-full text-left px-4 py-3 text-sm text-red-600 hover:bg-red-50 font-black transition-colors">
-                                    Log Out
-                                </button>
+                                <button id="logoutBtn"
+                                    class="w-full text-left px-4 py-3 text-sm text-red-600 hover:bg-red-50 font-black transition-colors">Log
+                                    Out</button>
                             </div>
                         </div>
                     </div>
                 </div>
             </header>
 
-            <!-- Scrollable Content -->
             <div class="flex-1 overflow-y-auto p-4 lg:p-8">
-                
-                <!-- Report Tabs -->
-                <div class="no-print flex flex-wrap gap-2 mb-8 bg-slate-200 p-1 rounded-xl w-fit">
-                    <button onclick="switchTab('rankings')" class="tab-btn active bg-white shadow-sm px-6 py-2 rounded-lg font-black text-[10px] lg:text-xs uppercase tracking-widest text-blue-600">Final Rankings</button>
-                    <button onclick="switchTab('mvp')" class="tab-btn px-6 py-2 rounded-lg font-black text-[10px] lg:text-xs uppercase tracking-widest text-slate-500 hover:bg-slate-300">MVP List</button>
-                    <button onclick="switchTab('matches')" class="tab-btn px-6 py-2 rounded-lg font-black text-[10px] lg:text-xs uppercase tracking-widest text-slate-500 hover:bg-slate-300">Match Summaries</button>
+
+                <div
+                    class="no-print flex overflow-x-auto no-scrollbar gap-2 mb-6 bg-slate-200 p-1 rounded-xl w-full sm:w-fit whitespace-nowrap">
+                    <button onclick="switchTab('rankings')"
+                        class="tab-btn active bg-white shadow-sm px-4 lg:px-6 py-2 rounded-lg font-black text-[10px] lg:text-xs uppercase tracking-widest text-blue-600">Final
+                        Rankings</button>
+                    <button onclick="switchTab('mvp')"
+                        class="tab-btn px-4 lg:px-6 py-2 rounded-lg font-black text-[10px] lg:text-xs uppercase tracking-widest text-slate-500 hover:bg-slate-300">MVP
+                        List</button>
+                    <button onclick="switchTab('matches')"
+                        class="tab-btn px-4 lg:px-6 py-2 rounded-lg font-black text-[10px] lg:text-xs uppercase tracking-widest text-slate-500 hover:bg-slate-300">Match
+                        Summaries</button>
                 </div>
 
-                <!-- Action Bar -->
-                <div class="no-print flex justify-between items-center mb-6">
+                <div class="no-print flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
                     <div>
-                        <h3 id="reportTitle" class="text-2xl font-black text-slate-900 uppercase italic">General Rankings Report</h3>
-                        <p class="text-slate-500 text-sm font-medium">Generated on <span id="currentDate">--</span></p>
+                        <h3 id="reportTitle" class="text-xl lg:text-2xl font-black text-slate-900 uppercase italic">
+                            General Rankings Report</h3>
+                        <p class="text-slate-500 text-[10px] lg:text-sm font-medium">Generated on <span
+                                id="currentDate">--</span></p>
                     </div>
-                    <div class="flex gap-2">
-                        <button onclick="window.print()" class="bg-slate-900 text-white px-4 py-2 rounded-lg font-black uppercase text-[10px] flex items-center gap-2 hover:bg-slate-800">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
+                    <div class="flex gap-2 w-full md:w-auto">
+                        <button onclick="window.print()"
+                            class="flex-1 md:flex-none bg-slate-900 text-white px-4 py-2 rounded-lg font-black uppercase text-[10px] flex items-center justify-center gap-2">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path
+                                    d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z">
+                                </path>
+                            </svg>
                             Print view
                         </button>
-                        <div class="relative group">
-                            <button class="bg-blue-600 text-white px-4 py-2 rounded-lg font-black uppercase text-[10px] flex items-center gap-2 hover:bg-blue-700">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a2 2 0 002 2h12a2 2 0 002-2v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                        <div class="relative group flex-1 md:flex-none">
+                            <button
+                                class="w-full bg-blue-600 text-white px-4 py-2 rounded-lg font-black uppercase text-[10px] flex items-center justify-center gap-2">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path d="M4 16v1a2 2 0 002 2h12a2 2 0 002-2v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                                </svg>
                                 Export
                             </button>
-                            <div class="hidden group-hover:block absolute right-0 mt-1 w-32 bg-white shadow-xl rounded-lg border border-slate-100 overflow-hidden z-10">
-                                <button onclick="simulateExport('PDF')" class="w-full px-4 py-2 text-left text-[10px] font-bold hover:bg-slate-50">To PDF</button>
-                                <button onclick="simulateExport('Excel')" class="w-full px-4 py-2 text-left text-[10px] font-bold hover:bg-slate-50 border-t border-slate-100">To Excel</button>
+                            <div
+                                class="hidden group-hover:block absolute right-0 mt-1 w-full md:w-32 bg-white shadow-xl rounded-lg border border-slate-100 overflow-hidden z-[60]">
+                                <button onclick="simulateExport('PDF')"
+                                    class="w-full px-4 py-3 text-left text-[10px] font-bold hover:bg-slate-50">To
+                                    PDF</button>
+                                <button onclick="simulateExport('Excel')"
+                                    class="w-full px-4 py-3 text-left text-[10px] font-bold hover:bg-slate-50 border-t border-slate-100">To
+                                    Excel</button>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Printable Report Area -->
-                <div id="reportContent" class="report-container bg-white rounded-2xl shadow-sm border border-slate-100 p-8 min-h-[600px] report-card">
-                    <!-- Print Header (Hidden on screen) -->
-                    <div class="hidden print-only mb-8 border-b-2 border-slate-900 pb-4">
-                        <div class="flex justify-between items-center">
-                            <div class="flex items-center gap-3">
-                                <div class="h-10 w-10 bg-blue-600 rounded flex items-center justify-center font-black text-white">UDD</div>
-                                <div>
-                                    <h1 class="font-black text-xl uppercase tracking-tighter">Intramurals 2026</h1>
-                                    <p class="text-[10px] uppercase font-bold text-slate-500 tracking-widest">Official Competition Records</p>
-                                </div>
-                            </div>
-                            <div class="text-right">
-                                <h2 id="printReportTitle" class="text-lg font-black uppercase italic">Final Rankings Report</h2>
-                                <p class="text-[10px] text-slate-500">Date Issued: <span class="current-date-full"></span></p>
-                            </div>
-                        </div>
-                    </div>
+                <div id="reportContent"
+                    class="report-container bg-white rounded-2xl shadow-sm border border-slate-100 p-4 lg:p-8 min-h-[600px] report-card">
 
-                    <!-- Rankings Section -->
                     <div id="tab-rankings" class="tab-content">
-                        <table class="w-full text-left">
-                            <thead>
-                                <tr class="border-b-2 border-slate-100 uppercase text-[10px] font-black text-slate-400 tracking-widest">
-                                    <th class="py-4 px-2">Rank</th>
-                                    <th class="py-4">Department / Team</th>
-                                    <th class="py-4">Gold</th>
-                                    <th class="py-4">Silver</th>
-                                    <th class="py-4">Bronze</th>
-                                    <th class="py-4 text-right">Total Points</th>
-                                </tr>
-                            </thead>
-                            <tbody id="rankingsTableBody">
-                                <!-- Data injected via JS -->
-                            </tbody>
-                        </table>
+                        <div class="overflow-x-auto -mx-4 lg:mx-0">
+                            <div class="inline-block min-w-full align-middle px-4 lg:px-0">
+                                <table class="min-w-full text-left">
+                                    <thead>
+                                        <tr
+                                            class="border-b-2 border-slate-100 uppercase text-[10px] font-black text-slate-400 tracking-widest">
+                                            <th class="py-4 px-2">Rank</th>
+                                            <th class="py-4 px-2">Team</th>
+                                            <th class="py-4 px-2">Gold</th>
+                                            <th class="py-4 px-2">Silver</th>
+                                            <th class="py-4 px-2">Bronze</th>
+                                            <th class="py-4 px-2 text-right">Points</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="rankingsTableBody">
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
                     </div>
 
-                    <!-- MVP Section -->
                     <div id="tab-mvp" class="tab-content hidden">
-                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="mvpGridBody">
-                            <!-- Data injected via JS -->
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6" id="mvpGridBody">
                         </div>
                     </div>
 
-                    <!-- Matches Section -->
                     <div id="tab-matches" class="tab-content hidden">
-                        <div class="space-y-4" id="matchesListBody">
-                            <!-- Data injected via JS -->
-                        </div>
-                    </div>
-
-                    <!-- Print Footer -->
-                    <div class="hidden print-only mt-12 pt-8 border-t border-slate-100">
-                        <div class="flex justify-between">
-                            <div>
-                                <p class="text-[8px] uppercase font-black text-slate-400">Authorized Signature</p>
-                                <div class="mt-8 border-b border-slate-900 w-48"></div>
-                                <p class="text-[10px] font-bold mt-2 italic text-slate-700">Committee Chairperson</p>
-                            </div>
-                            <div class="text-right text-[8px] text-slate-400 uppercase font-black">
-                                Page 1 of 1 <br>
-                                INTRA-2026-REPORT-REF: <span id="reportId">---</span>
-                            </div>
+                        <div class="space-y-3" id="matchesListBody">
                         </div>
                     </div>
                 </div>
-
             </div>
 
-            <footer class="no-print h-12 bg-slate-900 text-white flex flex-col sm:flex-row items-center justify-center sm:justify-between px-8 text-[8px] lg:text-[10px] font-black uppercase tracking-[0.2em] gap-2 py-2">
-                <span class="text-center">Intramurals 2026 Admin Portal</span>
+            <footer
+                class="no-print bg-slate-900 text-white flex flex-col sm:flex-row items-center justify-between px-8 text-[8px] lg:text-[10px] font-black uppercase tracking-[0.2em] py-4 gap-2">
+                <span>Intramurals 2026 Admin Portal</span>
                 <div class="flex items-center gap-2">
                     <span class="h-2 w-2 bg-green-500 rounded-full animate-pulse"></span>
                     <span>System Online</span>
@@ -297,128 +296,184 @@
     </div>
 
     <!-- Notifications Toast -->
-    <div id="toast" class="fixed bottom-20 left-1/2 -translate-x-1/2 bg-slate-900 text-white px-6 py-3 rounded-full font-black uppercase text-[10px] tracking-widest shadow-2xl opacity-0 transition-all pointer-events-none z-[2000]">
+    <div id="toast"
+        class="fixed bottom-20 left-1/2 -translate-x-1/2 bg-slate-900 text-white px-6 py-3 rounded-full font-black uppercase text-[10px] tracking-widest shadow-2xl opacity-0 transition-all pointer-events-none z-[2000]">
         Exporting to Excel...
     </div>
 
-<script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
-    import { 
-        getAuth, 
-        onAuthStateChanged, 
-        signOut 
-    } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
-    import { 
-        getFirestore, 
-        collection, 
-        onSnapshot,
-        query,
-        orderBy,
-        doc
-    } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
+        import {
+            getAuth,
+            onAuthStateChanged,
+            signOut
+        } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+        import {
+            getFirestore,
+            collection,
+            onSnapshot,
+            query,
+            orderBy,
+            doc
+        } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
 
-    // 🔥 Firebase Config
-    const firebaseConfig = {
-        apiKey: "AIzaSyD5Gkjk7tk48Hv9zgvdlSsdR8FH_nwtGRc",
-        authDomain: "intramurals-score-leaderboard.firebaseapp.com",
-        projectId: "intramurals-score-leaderboard",
-        storageBucket: "intramurals-score-leaderboard.firebasestorage.app",
-        messagingSenderId: "455345215033",
-        appId: "1:455345215033:web:66a387d0fa0fa4453e5fe8",
-        measurementId: "G-E0GM8X4K9L"
-    };
+        // 🔥 Firebase Config
+        const firebaseConfig = {
+            apiKey: "AIzaSyD5Gkjk7tk48Hv9zgvdlSsdR8FH_nwtGRc",
+            authDomain: "intramurals-score-leaderboard.firebaseapp.com",
+            projectId: "intramurals-score-leaderboard",
+            storageBucket: "intramurals-score-leaderboard.firebasestorage.app",
+            messagingSenderId: "455345215033",
+            appId: "1:455345215033:web:66a387d0fa0fa4453e5fe8",
+            measurementId: "G-E0GM8X4K9L"
+        };
 
-    const currentAppId = 'intramurals-2026';
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getFirestore(app);
+        const currentAppId = 'intramurals-2026';
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
 
-    // 🔹 STATE MANAGEMENT (The "Bridge" between collections)
-    let globalTeams = [];
-    let globalSports = [];
-    let globalMatches = [];
-    let globalPlayers = [];
+        // 🔹 STATE MANAGEMENT
+        let globalTeams = [];
+        let globalSports = [];
+        let globalMatches = [];
+        let globalPlayers = [];
 
-    // 🔹 UI ELEMENTS
-    const authScreen = document.getElementById('authScreen');
-    const mainWrapper = document.getElementById('mainWrapper');
-    const rankingsTable = document.getElementById('rankingsTableBody');
-    const mvpGrid = document.getElementById('mvpGridBody');
-    const matchesList = document.getElementById('matchesListBody');
+        // 🔹 UI ELEMENTS
+        const authScreen = document.getElementById('authScreen');
+        const mainWrapper = document.getElementById('mainWrapper');
+        const rankingsTable = document.getElementById('rankingsTableBody');
+        const mvpGrid = document.getElementById('mvpGridBody');
+        const matchesList = document.getElementById('matchesListBody');
 
-    // 🔹 AUTHENTICATION
-    onAuthStateChanged(auth, (user) => {
-        if (user) {
-            const email = user.email || "Admin";
-            const namePart = email.split('@')[0] || "User";
-            
-            if(document.getElementById('adminName')) document.getElementById('adminName').textContent = namePart;
-            if(document.getElementById('adminInitials')) document.getElementById('adminInitials').textContent = namePart.substring(0, 2).toUpperCase();
-            
-            if(authScreen) authScreen.style.display = 'none';
-            if(mainWrapper) mainWrapper.style.display = 'flex';
-            
-            loadData();
-        } else {
-            // Redirect if not logged in
-            window.location.replace('../index.html');
-        }
-    });
-
-    // 🔹 DATA LOADING
-    function loadData() {
-        // Setup Date/ID Display
-        const now = new Date();
-        const dateStr = now.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
-        if(document.getElementById('currentDate')) document.getElementById('currentDate').textContent = dateStr;
-        document.querySelectorAll('.current-date-full').forEach(el => el.textContent = now.toLocaleString());
-        if(document.getElementById('reportId')) document.getElementById('reportId').textContent = Math.random().toString(36).substring(2, 10).toUpperCase();
-
-        // 1. Sync Sports (Dictionary)
-        const sportsRef = collection(db, 'artifacts', currentAppId, 'public', 'data', 'sports');
-        onSnapshot(sportsRef, (snap) => {
-            globalSports = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-            refreshUI(); 
+        // 🔹 AUTHENTICATION
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                const email = user.email || "Admin";
+                const namePart = email.split('@')[0] || "User";
+                if (document.getElementById('adminName')) document.getElementById('adminName').textContent = namePart;
+                if (document.getElementById('adminInitials')) document.getElementById('adminInitials').textContent = namePart.substring(0, 2).toUpperCase();
+                if (authScreen) authScreen.style.display = 'none';
+                if (mainWrapper) mainWrapper.style.display = 'flex';
+                loadData();
+            } else {
+                window.location.replace('../index.html');
+            }
         });
 
-        // 2. Sync Teams (Rankings)
-        const teamsRef = collection(db, 'artifacts', currentAppId, 'public', 'data', 'teams');
-        onSnapshot(teamsRef, (snapshot) => {
-            globalTeams = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-            globalTeams.sort((a, b) => (b.totalPoints || 0) - (a.totalPoints || 0));
+        // 🔹 DATA LOADING
+        function loadData() {
+            const now = new Date();
+            const dateStr = now.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+            if (document.getElementById('currentDate')) document.getElementById('currentDate').textContent = dateStr;
+            document.querySelectorAll('.current-date-full').forEach(el => el.textContent = now.toLocaleString());
+            if (document.getElementById('reportId')) document.getElementById('reportId').textContent = Math.random().toString(36).substring(2, 10).toUpperCase();
+
+            const basePath = ['artifacts', currentAppId, 'public', 'data'];
+
+            // 1. Sync Sports
+            onSnapshot(collection(db, ...basePath, 'sports'), (snap) => {
+                globalSports = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+                refreshUI();
+            });
+
+            // 2. Sync Teams
+            onSnapshot(collection(db, ...basePath, 'teams'), (snap) => {
+                globalTeams = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+                refreshUI();
+            });
+
+            // 3. Sync Players
+            onSnapshot(collection(db, ...basePath, 'players'), (snap) => {
+                globalPlayers = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+                refreshUI();
+            });
+
+            // 4. Sync Matches
+            onSnapshot(collection(db, ...basePath, 'matches'), (snap) => {
+                globalMatches = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+                refreshUI();
+            });
+        }
+
+        // 🔹 MEDAL CALCULATION ENGINE
+        function processLeaderboard() {
+            // Initialize calculation object for each team
+            const calc = {};
+            globalTeams.forEach(t => {
+                calc[t.id] = { gold: 0, silver: 0, bronze: 0, points: 0 };
+            });
+
+            // Group matches by sportId
+            const sportsGroups = {};
+            globalMatches.forEach(m => {
+                if (m.status !== 'completed') return;
+                if (!sportsGroups[m.sportId]) sportsGroups[m.sportId] = [];
+                sportsGroups[m.sportId].push(m);
+            });
+
+            // Rank teams within each sport to assign medals
+            Object.keys(sportsGroups).forEach(sId => {
+                const sportTally = {};
+                sportsGroups[sId].forEach(match => {
+                    const sA = parseInt(match.scoreA || 0);
+                    const sB = parseInt(match.scoreB || 0);
+                    if (!sportTally[match.teamAId]) sportTally[match.teamAId] = 0;
+                    if (!sportTally[match.teamBId]) sportTally[match.teamBId] = 0;
+
+                    if (sA > sB) sportTally[match.teamAId] += 3;
+                    else if (sB > sA) sportTally[match.teamBId] += 3;
+                    else {
+                        sportTally[match.teamAId] += 1;
+                        sportTally[match.teamBId] += 1;
+                    }
+                });
+
+                // Sort teams in this sport by points
+                const sportRanking = Object.entries(sportTally)
+                    .sort(([, a], [, b]) => b - a);
+
+                // Award Medals based on top 3 in the sport
+                if (sportRanking[0] && calc[sportRanking[0][0]]) calc[sportRanking[0][0]].gold++;
+                if (sportRanking[1] && calc[sportRanking[1][0]]) calc[sportRanking[1][0]].silver++;
+                if (sportRanking[2] && calc[sportRanking[2][0]]) calc[sportRanking[2][0]].bronze++;
+            });
+
+            // Apply results and calculate Overall Score (Gold=5, Silver=3, Bronze=1)
+            globalTeams = globalTeams.map(team => {
+                const results = calc[team.id] || { gold: 0, silver: 0, bronze: 0 };
+                return {
+                    ...team,
+                    gold: results.gold,
+                    silver: results.silver,
+                    bronze: results.bronze,
+                    totalPoints: (results.gold * 5) + (results.silver * 3) + (results.bronze * 1)
+                };
+            });
+
+            // Final Sort: Overall points, then Golds as tie-breaker
+            globalTeams.sort((a, b) => (b.totalPoints - a.totalPoints) || (b.gold - a.gold));
+        }
+
+        // 🔹 CENTRAL UI REFRESH
+        function refreshUI() {
+            processLeaderboard(); // Run engine
             renderRankings(globalTeams);
-            refreshUI();
-        });
 
-        // 3. Sync Players (MVPs)
-        const playersRef = collection(db, 'artifacts', currentAppId, 'public', 'data', 'players');
-        onSnapshot(playersRef, (snapshot) => {
-            globalPlayers = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-            const sortedPlayers = [...globalPlayers].sort((a, b) => (b.stats || 0) - (a.stats || 0));
-            renderMVPs(sortedPlayers.slice(0, 9)); 
-        });
+            if (globalPlayers.length > 0) {
+                const sorted = [...globalPlayers].sort((a, b) => (b.stats || 0) - (a.stats || 0));
+                renderMVPs(sorted.slice(0, 9));
+            }
 
-        // 4. Sync Matches
-        const matchesRef = collection(db, 'artifacts', currentAppId, 'public', 'data', 'matches');
-        onSnapshot(matchesRef, (snapshot) => {
-            globalMatches = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-            renderMatches(globalMatches.slice(0, 10));
-        });
-    }
-
-    // Helper to refresh lists when dependent data (like names) arrives
-    function refreshUI() {
-        if (globalMatches.length > 0) renderMatches(globalMatches.slice(0, 10));
-        if (globalPlayers.length > 0) {
-            const sorted = [...globalPlayers].sort((a, b) => (b.stats || 0) - (a.stats || 0));
-            renderMVPs(sorted.slice(0, 9));
+            if (globalMatches.length > 0) {
+                renderMatches(globalMatches.slice(0, 10));
+            }
         }
-    }
 
-    // 🔹 RENDER FUNCTIONS
-    function renderRankings(teams) {
-        if (!rankingsTable) return;
-        rankingsTable.innerHTML = teams.map((team, index) => `
+        // 🔹 RENDER FUNCTIONS
+        function renderRankings(teams) {
+            if (!rankingsTable) return;
+            rankingsTable.innerHTML = teams.map((team, index) => `
             <tr class="border-b border-slate-50 hover:bg-slate-50 transition-colors">
                 <td class="py-4 px-2">
                     <span class="h-6 w-6 flex items-center justify-center rounded-full font-black text-xs ${index === 0 ? 'bg-yellow-100 text-yellow-700' : index === 1 ? 'bg-slate-100 text-slate-700' : index === 2 ? 'bg-orange-100 text-orange-700' : 'text-slate-400'}">
@@ -433,19 +488,20 @@
                 <td class="py-4 text-xs font-bold text-slate-500">${team.silver || 0}</td>
                 <td class="py-4 text-xs font-bold text-orange-600">${team.bronze || 0}</td>
                 <td class="py-4 text-right">
-                    <span class="px-3 py-1 bg-blue-50 text-blue-700 rounded-full font-black text-xs">${team.totalPoints || 0} pts</span>
+                    <span class="px-3 py-1 bg-blue-600 text-white rounded-full font-black text-[10px] italic">
+                        ${team.totalPoints || 0} TOTAL
+                    </span>
                 </td>
             </tr>
         `).join('') || '<tr><td colspan="6" class="p-8 text-center text-slate-400 font-bold">No ranking data available.</td></tr>';
-    }
+        }
 
-    function renderMVPs(players) {
-        if (!mvpGrid) return;
-        mvpGrid.innerHTML = players.map(player => {
-            const teamObj = globalTeams.find(t => t.id === player.teamId);
-            const teamName = teamObj ? (teamObj.name || teamObj.teamName) : (player.team || 'N/A');
-            
-            return `
+        function renderMVPs(players) {
+            if (!mvpGrid) return;
+            mvpGrid.innerHTML = players.map(player => {
+                const teamObj = globalTeams.find(t => t.id === player.teamId);
+                const teamName = teamObj ? (teamObj.name || teamObj.teamName) : (player.team || 'N/A');
+                return `
             <div class="p-4 border border-slate-100 rounded-xl hover:shadow-md transition-all bg-white">
                 <div class="flex items-center gap-4">
                     <div class="h-10 w-10 bg-slate-900 rounded-lg flex items-center justify-center text-white font-black uppercase text-xs">
@@ -461,23 +517,21 @@
                     <div class="px-2 py-1 bg-orange-50 text-orange-600 rounded text-[9px] font-black">${player.stats || 0} PTS</div>
                 </div>
             </div>`;
-        }).join('') || '<p class="col-span-full p-8 text-center text-slate-400 font-bold">No athlete data available.</p>';
-    }
+            }).join('') || '<p class="col-span-full p-8 text-center text-slate-400 font-bold">No athlete data available.</p>';
+        }
 
-    function renderMatches(matches) {
-        if (!matchesList) return;
-        matchesList.innerHTML = matches.map(match => {
-            // Find Names based on IDs
-            const teamA = globalTeams.find(t => t.id === match.teamAId);
-            const teamB = globalTeams.find(t => t.id === match.teamBId);
-            const sport = globalSports.find(s => s.id === match.sportId);
+        function renderMatches(matches) {
+            if (!matchesList) return;
+            matchesList.innerHTML = matches.map(match => {
+                const teamA = globalTeams.find(t => t.id === match.teamAId);
+                const teamB = globalTeams.find(t => t.id === match.teamBId);
+                const sport = globalSports.find(s => s.id === match.sportId);
+                const nameA = teamA ? (teamA.name || teamA.teamName) : 'Team A';
+                const nameB = teamB ? (teamB.name || teamB.teamName) : 'Team B';
+                const sportName = sport ? (sport.name || sport.sportName) : 'Game';
 
-            const nameA = teamA ? (teamA.name || teamA.teamName) : 'Team A';
-            const nameB = teamB ? (teamB.name || teamB.teamName) : 'Team B';
-            const sportName = sport ? (sport.name || sport.sportName) : 'Game';
-
-            return `
-            <div class="p-4 bg-slate-50 rounded-xl border border-slate-100 flex justify-between items-center">
+                return `
+            <div class="p-4 bg-slate-50 rounded-xl border border-slate-100 flex justify-between items-center mb-2">
                 <div class="flex items-center gap-4">
                     <span class="text-[8px] font-black uppercase tracking-widest bg-white border border-slate-200 px-2 py-1 rounded text-slate-500">${sportName}</span>
                     <p class="text-[10px] font-black uppercase text-slate-800 italic">
@@ -489,85 +543,53 @@
                     <p class="text-[8px] font-bold text-slate-400 uppercase">${match.status || 'Scheduled'}</p>
                 </div>
             </div>`;
-        }).join('') || '<p class="p-8 text-center text-slate-400 font-bold">No match summaries recorded yet.</p>';
-    }
-
-    // 🔹 UI INTERACTIVITY
-    window.switchTab = (tab) => {
-        document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
-        document.querySelectorAll('.tab-btn').forEach(btn => {
-            btn.classList.remove('active', 'bg-white', 'shadow-sm', 'text-blue-600');
-            btn.classList.add('text-slate-500');
-        });
-
-        document.getElementById(`tab-${tab}`).classList.remove('hidden');
-        if(event && event.currentTarget) {
-            const activeBtn = event.currentTarget;
-            activeBtn.classList.add('active', 'bg-white', 'shadow-sm', 'text-blue-600');
-            activeBtn.classList.remove('text-slate-500');
+            }).join('') || '<p class="p-8 text-center text-slate-400 font-bold">No match summaries recorded yet.</p>';
         }
 
-        const titles = {
-            'rankings': 'Final Rankings Report',
-            'mvp': 'MVP Contenders Record',
-            'matches': 'Comprehensive Match Summaries'
+        // 🔹 UI INTERACTIVITY (Navigation & Sidebar)
+        window.switchTab = (tab) => {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active', 'bg-white', 'shadow-sm', 'text-blue-600');
+                btn.classList.add('text-slate-500');
+            });
+            document.getElementById(`tab-${tab}`).classList.remove('hidden');
+            if (event && event.currentTarget) {
+                event.currentTarget.classList.add('active', 'bg-white', 'shadow-sm', 'text-blue-600');
+                event.currentTarget.classList.remove('text-slate-500');
+            }
+            const titles = { 'rankings': 'Final Rankings Report', 'mvp': 'MVP Contenders Record', 'matches': 'Comprehensive Match Summaries' };
+            document.getElementById('reportTitle').textContent = titles[tab];
+            document.getElementById('printReportTitle').textContent = titles[tab];
         };
-        document.getElementById('reportTitle').textContent = titles[tab];
-        document.getElementById('printReportTitle').textContent = titles[tab];
-    };
 
-    window.simulateExport = (type) => {
-        const toast = document.getElementById('toast');
-        if(!toast) return;
-        toast.textContent = `Generating ${type} file... please wait.`;
-        toast.classList.remove('opacity-0', 'pointer-events-none');
-        
-        setTimeout(() => {
-            toast.textContent = `${type} Report exported successfully!`;
-            setTimeout(() => {
-                toast.classList.add('opacity-0', 'pointer-events-none');
-            }, 2000);
-        }, 1500);
-    };
+        window.simulateExport = (type) => {
+            const toast = document.getElementById('toast');
+            if (!toast) return;
+            toast.textContent = `Generating ${type} file... please wait.`;
+            toast.classList.remove('opacity-0', 'pointer-events-none');
+            setTimeout(() => toast.classList.add('opacity-0', 'pointer-events-none'), 2000);
+        };
 
-    // Sidebar & Profile Handlers
-    const profileToggle = document.getElementById('profileToggle');
-    if(profileToggle) {
-        profileToggle.addEventListener('click', (e) => {
+        // Sidebar & Profile Handlers
+        document.getElementById('profileToggle')?.addEventListener('click', (e) => {
             e.stopPropagation();
             document.getElementById('profileDropdown').classList.toggle('show');
         });
-    }
-
-    document.addEventListener('click', () => {
-        const dropdown = document.getElementById('profileDropdown');
-        if(dropdown) dropdown.classList.remove('show');
-    });
-
-    const sidebar = document.getElementById('sidebar');
-    const overlay = document.getElementById('sidebarOverlay');
-    const openBtn = document.getElementById('openSidebar');
-    const closeBtn = document.getElementById('closeSidebar');
-    
-    if(openBtn) openBtn.addEventListener('click', () => {
-        sidebar.classList.replace('sidebar-closed', 'sidebar-open');
-        overlay.classList.remove('hidden');
-    });
-
-    if(closeBtn) closeBtn.addEventListener('click', () => {
-        sidebar.classList.replace('sidebar-open', 'sidebar-closed');
-        overlay.classList.add('hidden');
-    });
-
-    // Logout
-    const logoutBtn = document.getElementById('logoutBtn');
-    if(logoutBtn) {
-        logoutBtn.addEventListener('click', async () => {
+        document.addEventListener('click', () => document.getElementById('profileDropdown')?.classList.remove('show'));
+        document.getElementById('openSidebar')?.addEventListener('click', () => {
+            document.getElementById('sidebar').classList.replace('sidebar-closed', 'sidebar-open');
+            document.getElementById('sidebarOverlay').classList.remove('hidden');
+        });
+        document.getElementById('closeSidebar')?.addEventListener('click', () => {
+            document.getElementById('sidebar').classList.replace('sidebar-open', 'sidebar-closed');
+            document.getElementById('sidebarOverlay').classList.add('hidden');
+        });
+        document.getElementById('logoutBtn')?.addEventListener('click', async () => {
             await signOut(auth);
             location.reload();
         });
-    }
-
-</script>
+    </script>
 </body>
+
 </html>
