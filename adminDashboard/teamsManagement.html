@@ -383,7 +383,7 @@
             onSnapshot, query, getDocs, where
         } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
 
-        // 🔥 Configuration from your reference
+        // 🔥 Configuration
         const firebaseConfig = {
             apiKey: "AIzaSyD5Gkjk7tk48Hv9zgvdlSsdR8FH_nwtGRc",
             authDomain: "intramurals-score-leaderboard.firebaseapp.com",
@@ -401,14 +401,14 @@
         // Global State
         let sportsList = [];
         let teamsList = [];
+        // Default color variable (Slate/Gray)
+        const DEFAULT_GRAY = '#64748b';
 
         // Auth Logic
         onAuthStateChanged(auth, async (user) => {
             if (user) {
                 setupUI(user);
             } else {
-                // For demo/dev purposes, auto-signin if not logged in
-                // In production, you'd redirect to login: window.location.replace('../index.html');
                 await signInAnonymously(auth);
             }
         });
@@ -463,7 +463,7 @@
 
             grid.innerHTML = teamsList.map(team => `
                 <div class="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden hover:shadow-md transition-all group">
-                    <div class="h-2 w-full" style="background-color: ${team.color || '#1e3a8a'}"></div>
+                    <div class="h-2 w-full" style="background-color: ${team.color || DEFAULT_GRAY}"></div>
                     <div class="p-6">
                         <div class="flex justify-between items-start mb-4">
                             <div>
@@ -498,7 +498,7 @@
             const teamId = document.getElementById('editTeamId').value;
             const teamData = {
                 name: document.getElementById('teamName').value,
-                color: document.getElementById('teamColor').value,
+                color: document.getElementById('teamColor').value || DEFAULT_GRAY,
                 sport: document.getElementById('teamSport').value,
                 updatedAt: new Date().toISOString()
             };
@@ -537,7 +537,6 @@
             document.getElementById('rosterSportName').textContent = team.sport;
 
             const playersRef = collection(db, 'artifacts', currentAppId, 'public', 'data', 'players');
-            // Rule 2: Simulating filter in JS memory
             const snapshot = await getDocs(playersRef);
             const teamPlayers = snapshot.docs
                 .map(d => d.data())
@@ -581,11 +580,13 @@
                 const team = teamsList.find(t => t.id === id);
                 document.getElementById('editTeamId').value = team.id;
                 document.getElementById('teamName').value = team.name;
-                document.getElementById('teamColor').value = team.color || '#1e3a8a';
+                document.getElementById('teamColor').value = team.color || DEFAULT_GRAY;
                 document.getElementById('teamSport').value = team.sport;
             } else {
                 form.reset();
                 document.getElementById('editTeamId').value = '';
+                // Set default gray for new teams
+                document.getElementById('teamColor').value = DEFAULT_GRAY;
             }
             modal.classList.add('active');
         };
