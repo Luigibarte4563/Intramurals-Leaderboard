@@ -1,187 +1,328 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Settings | Intramurals Admin</title>
+    <title>Settings | Intramurals 2026</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
     <style>
         :root {
             --primary-blue: #1e3a8a;
             --accent-gold: #facc15;
             --sidebar-bg: #0f172a;
         }
-        body { background-color: #f8fafc; font-family: 'Inter', sans-serif; }
-        .sidebar { background-color: var(--sidebar-bg); transition: transform 0.3s ease; z-index: 1000; }
-        .sidebar-closed { transform: translateX(-100%); }
-        .nav-item { color: #94a3b8; transition: all 0.2s; border-left: 4px solid transparent; }
-        .nav-item:hover, .nav-item.active { color: white; background: rgba(255,255,255,0.05); border-left-color: var(--accent-gold); }
-        .profile-dropdown { display: none; }
-        .profile-dropdown.show { display: block; }
-        #authScreen { position: fixed; inset: 0; background: white; z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-        .spinner { width: 40px; height: 40px; border: 4px solid #f3f3f3; border-top: 4px solid var(--primary-blue); border-radius: 50%; animation: spin 1s linear infinite; }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+
+        body {
+            background-color: #f8fafc;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .sidebar {
+            background-color: var(--sidebar-bg);
+            transition: transform 0.3s ease-in-out;
+            z-index: 1000;
+        }
+
+        .sidebar-closed {
+            transform: translateX(-100%);
+        }
+
+        .nav-item {
+            color: #94a3b8;
+            transition: all 0.2s ease;
+            border-left: 4px solid transparent;
+        }
+
+        .nav-item:hover,
+        .nav-item.active {
+            color: white;
+            background-color: rgba(255, 255, 255, 0.1);
+            border-left: 4px solid var(--accent-gold);
+        }
+
+        .profile-dropdown {
+            display: none;
+        }
+
+        .profile-dropdown.show {
+            display: block;
+        }
+
+        .settings-card {
+            border-top: 4px solid var(--primary-blue);
+        }
+
+        #authOverlay {
+            position: fixed;
+            inset: 0;
+            background: white;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid var(--primary-blue);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .toggle-checkbox:checked {
+            right: 0;
+            border-color: #4c1d95;
+            background-color: #4c1d95;
+        }
+        
+        .toggle-checkbox:checked + .toggle-label {
+            background-color: #1e3a8a;
+        }
     </style>
 </head>
-<body class="min-h-screen">
 
-    <div id="authScreen">
+<body class="min-h-screen flex overflow-hidden">
+
+    <!-- Auth Guard Overlay -->
+    <div id="authOverlay">
         <div class="spinner mb-4"></div>
-        <p class="text-xs font-black uppercase tracking-widest text-slate-400">Loading Settings...</p>
+        <p class="text-[10px] font-black uppercase tracking-widest text-slate-400">Loading System Configurations...</p>
     </div>
 
-    <div id="mainWrapper" class="hidden flex min-h-screen">
-        <!-- Sidebar -->
-        <aside id="sidebar" class="sidebar fixed inset-y-0 left-0 w-64 lg:relative lg:translate-x-0 sidebar-closed flex flex-col text-white">
-            <div class="p-6 flex items-center justify-between border-b border-slate-700">
-                <div class="flex items-center gap-3">
-                    <div class="h-8 w-8 bg-blue-600 rounded flex items-center justify-center font-black text-xs text-white">UDD</div>
-                    <span class="font-black tracking-tighter text-xl italic uppercase">Intra<span class="text-yellow-400">2026</span></span>
-                </div>
-            </div>
-            <nav class="flex-1 mt-4 overflow-y-auto">
-                <a href="#" class="nav-item flex items-center gap-3 px-6 py-4">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a11 11 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
-                    <span class="text-sm font-bold uppercase tracking-wider">Dashboard</span>
-                </a>
-                <a href="sportsManagement.html" class="nav-item flex items-center gap-3 px-6 py-4">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
-                    <span class="text-sm font-bold uppercase tracking-wider">Sports Management</span>
-                </a>
-                <a href="teamsManagement.html" class="nav-item flex items-center gap-3 px-6 py-4">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
-                    <span class="text-sm font-bold uppercase tracking-wider">Teams Management</span>
-                </a>
-                <a href="playersManagement.html" class="nav-item flex items-center gap-3 px-6 py-4">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
-                    <span class="text-sm font-bold uppercase tracking-wider">Players Management</span>
-                </a>
-                <a href="Matches&Results.html" class="nav-item flex items-center gap-3 px-6 py-4">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-                    <span class="text-sm font-bold uppercase tracking-wider">Matches & Results</span>
-                </a>
-                <a href="Leaderboard.html" class="nav-item active flex items-center gap-3 px-6 py-4">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2v2m4.618 1.187l1.618 3.236L21 15.382m-7.382-4.195L13 8.187l-1.618 3.236L8 15.382m7.382-4.195L21 8.187V11a2 2 0 01-2 2h-5a2 2 0 01-2-2V9.187z"></path></svg>
-                    <span class="text-sm font-bold uppercase tracking-wider">Leaderboard</span>
-                </a>
-                <a href="MVP_Management.html" class="nav-item flex items-center gap-3 px-6 py-4">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"></path></svg>
-                    <span class="text-sm font-bold uppercase tracking-wider">MVP Management</span>
-                </a>
-                <a href="reports.html" class="nav-item flex items-center gap-3 px-6 py-4">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
-                    <span class="text-xs font-bold uppercase tracking-wider">Reports</span>
-                </a>
-                <a href="settings.html" class="nav-item flex items-center gap-3 px-6 py-4 border-t border-slate-700 mt-2">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
-                    <span class="text-sm font-bold uppercase tracking-wider">Settings</span>
-                </a>
-            </nav>
-        </aside>
+    <!-- Sidebar Overlay (Mobile) -->
+    <div id="sidebarOverlay" class="fixed inset-0 bg-black/50 z-[999] hidden lg:hidden"></div>
 
-        <!-- Main Content -->
-        <main class="flex-1 flex flex-col h-screen overflow-hidden">
-            <header class="bg-white h-16 border-b flex items-center justify-between px-8 relative z-50">
-                <h2 class="font-black text-slate-800 uppercase italic tracking-tight">System Settings</h2>
-                
+    <!-- Sidebar -->
+    <aside id="sidebar" class="sidebar fixed inset-y-0 left-0 w-64 flex flex-col sidebar-closed lg:relative lg:translate-x-0 shadow-2xl">
+        <div class="p-6 flex items-center justify-between border-b border-slate-800">
+            <div class="flex items-center gap-3">
+                <div class="h-8 w-8 bg-blue-600 rounded flex items-center justify-center font-black text-xs text-white">UDD</div>
+                <span id="sidebarBrand" class="font-black tracking-tighter text-xl italic uppercase text-white">Intra<span class="text-yellow-400">2026</span></span>
+            </div>
+            <button id="closeSidebar" class="lg:hidden text-slate-400 hover:text-white">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+        </div>
+
+        <nav class="flex-1 mt-4 overflow-y-auto">
+            <a href="dashboard.html" class="nav-item flex items-center gap-3 px-6 py-4">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a11 11 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
+                <span class="text-sm font-bold uppercase tracking-wider">Dashboard</span>
+            </a>
+            <a href="sportsManagement.html" class="nav-item flex items-center gap-3 px-6 py-4">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                <span class="text-sm font-bold uppercase tracking-wider">Sports Management</span>
+            </a>
+            <a href="teamsManagement.html" class="nav-item flex items-center gap-3 px-6 py-4">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+                <span class="text-sm font-bold uppercase tracking-wider">Teams Management</span>
+            </a>
+            <a href="playersManagement.html" class="nav-item flex items-center gap-3 px-6 py-4">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
+                <span class="text-sm font-bold uppercase tracking-wider">Players Management</span>
+            </a>
+            <a href="matchesResults.html" class="nav-item flex items-center gap-3 px-6 py-4">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                <span class="text-sm font-bold uppercase tracking-wider">Matches & Results</span>
+            </a>
+            <a href="leaderboard.html" class="nav-item flex items-center gap-3 px-6 py-4">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2v2m4.618 1.187l1.618 3.236L21 15.382m-7.382-4.195L13 8.187l-1.618 3.236L8 15.382m7.382-4.195L21 8.187V11a2 2 0 01-2 2h-5a2 2 0 01-2-2V9.187z"></path></svg>
+                <span class="text-sm font-bold uppercase tracking-wider">Leaderboard</span>
+            </a>
+            <a href="mvpManagement.html" class="nav-item flex items-center gap-3 px-6 py-4">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"></path></svg>
+                <span class="text-sm font-bold uppercase tracking-wider">MVP Management</span>
+            </a>
+            <a href="reports.html" class="nav-item flex items-center gap-3 px-6 py-4">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                <span class="text-sm font-bold uppercase tracking-wider">Reports</span>
+            </a>
+            <a href="settings.html" class="nav-item active flex items-center gap-3 px-6 py-4 border-t border-slate-700 mt-2">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                <span class="text-sm font-bold uppercase tracking-wider">Settings</span>
+            </a>
+        </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="flex-1 flex flex-col h-screen overflow-hidden">
+        <header class="bg-white h-16 border-b flex items-center justify-between px-4 lg:px-8 relative z-50 shadow-sm">
+            <div class="flex items-center gap-4">
+                <button id="openSidebar" class="lg:hidden p-2 hover:bg-slate-100 rounded-lg">
+                    <svg class="w-6 h-6 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
+                </button>
+                <h2 class="text-sm lg:text-xl font-black text-slate-800 uppercase italic tracking-tighter">System <span class="text-blue-600">Settings</span></h2>
+            </div>
+
+            <div class="flex items-center gap-4">
                 <div class="relative">
-                    <button id="profileToggle" class="flex items-center gap-3 hover:bg-slate-50 p-2 rounded-xl transition-all">
+                    <button id="profileToggle" class="flex items-center gap-2 hover:bg-slate-50 p-1 lg:p-2 rounded-lg transition-all focus:outline-none">
                         <div class="text-right hidden sm:block">
-                            <p id="adminNameDisplay" class="text-[10px] font-black text-slate-900 uppercase">Admin</p>
-                            <p class="text-[8px] text-slate-500 font-bold uppercase">Super Admin</p>
+                            <p id="adminName" class="text-[10px] font-black text-slate-900 uppercase">---</p>
+                            <p class="text-[8px] text-slate-500 font-bold uppercase tracking-widest">Super Admin</p>
                         </div>
-                        <div id="adminInitial" class="h-9 w-9 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold text-sm">A</div>
+                        <div id="adminInitials" class="h-8 w-8 lg:h-10 lg:w-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 font-black border-2 border-blue-200 text-xs shadow-inner">??</div>
                     </button>
-                    <div id="profileDropdown" class="profile-dropdown absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-2xl border border-slate-100 py-2">
-                        <button class="w-full text-left px-4 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50">Change Password</button>
-                        <div class="h-px bg-slate-100 my-1 mx-2"></div>
-                        <button id="logoutBtn" class="w-full text-left px-4 py-2 text-xs font-black text-red-600 hover:bg-red-50">Log Out</button>
+
+                    <div id="profileDropdown" class="profile-dropdown absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-2xl border border-slate-100 z-[1001] overflow-hidden">
+                        <div class="bg-slate-50 p-4 border-b">
+                            <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Account</p>
+                            <p id="activeEmail" class="text-xs font-bold text-slate-700 truncate">---</p>
+                        </div>
+                        <div class="py-1">
+                            <button id="changePassBtn" class="w-full text-left px-4 py-3 text-xs text-slate-700 hover:bg-blue-50 font-black uppercase tracking-widest transition-colors">Change Password</button>
+                            <button id="logoutBtn" class="w-full text-left px-4 py-3 text-xs text-red-600 hover:bg-red-50 font-black uppercase tracking-widest transition-colors">Log Out</button>
+                        </div>
                     </div>
                 </div>
-            </header>
+            </div>
+        </header>
 
-            <div class="flex-1 overflow-y-auto p-8 custom-scrollbar">
-                <div class="max-w-4xl mx-auto space-y-8">
+        <!-- Content Area -->
+        <div class="flex-1 overflow-y-auto p-4 lg:p-8">
+            <div class="max-w-4xl mx-auto space-y-8">
+                
+                <div class="flex justify-between items-end">
+                    <div>
+                        <h1 class="text-2xl font-black text-slate-900 uppercase italic tracking-tighter">Configuration Panel</h1>
+                        <p class="text-xs text-slate-500 font-medium uppercase tracking-wider">Manage intramurals identity and core system tools.</p>
+                    </div>
+                    <div id="saveStatus" class="hidden flex items-center gap-2 bg-green-100 text-green-700 px-3 py-1.5 rounded-full text-[9px] font-black uppercase tracking-widest animate-bounce">
+                        <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"></path></svg>
+                        Settings Saved
+                    </div>
+                </div>
+
+                <!-- Main Settings Grid -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     
-                    <!-- Section: General Config -->
-                    <section class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-                        <div class="px-6 py-4 border-b border-slate-100 bg-slate-50/50 flex items-center justify-between">
-                            <h3 class="font-black text-slate-800 uppercase text-xs tracking-widest">Intramurals Configuration</h3>
-                            <button onclick="saveGeneralConfig()" class="text-[10px] bg-blue-600 text-white px-4 py-1.5 rounded-lg font-bold uppercase hover:bg-blue-700">Save Changes</button>
+                    <!-- General Identity -->
+                    <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden settings-card">
+                        <div class="px-6 py-4 border-b bg-slate-50/50">
+                            <h3 class="text-xs font-black uppercase tracking-widest text-slate-800 italic">Intramurals Identity</h3>
                         </div>
-                        <div class="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="p-6 space-y-4">
                             <div>
-                                <label class="block text-[10px] font-black text-slate-400 uppercase mb-2">Event Name</label>
-                                <input id="configEventName" type="text" placeholder="e.g. UDD Intramurals" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none text-sm font-semibold">
+                                <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5">Intramurals Name</label>
+                                <input type="text" id="systemName" placeholder="e.g. Intramurals" class="w-full bg-slate-50 border-2 border-slate-100 rounded-xl px-4 py-3 text-sm font-bold text-slate-800 focus:border-blue-500 outline-none transition-all">
                             </div>
                             <div>
-                                <label class="block text-[10px] font-black text-slate-400 uppercase mb-2">Academic Year</label>
-                                <input id="configYear" type="text" placeholder="e.g. 2025-2026" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none text-sm font-semibold">
+                                <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5">Event Year</label>
+                                <input type="number" id="systemYear" placeholder="2026" class="w-full bg-slate-50 border-2 border-slate-100 rounded-xl px-4 py-3 text-sm font-bold text-slate-800 focus:border-blue-500 outline-none transition-all">
                             </div>
+                            <button onclick="saveGeneralSettings()" class="w-full bg-blue-600 text-white py-3 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-blue-700 transition-all shadow-lg shadow-blue-100 mt-2">Update Identity</button>
                         </div>
-                    </section>
+                    </div>
 
-                    <!-- Section: Admin Management -->
-                    <section class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-                        <div class="px-6 py-4 border-b border-slate-100 bg-slate-50/50 flex items-center justify-between">
-                            <h3 class="font-black text-slate-800 uppercase text-xs tracking-widest">Administrator Management</h3>
+                    <!-- Admin Management -->
+                    <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden settings-card" style="border-top-color: #6366f1;">
+                        <div class="px-6 py-4 border-b bg-slate-50/50">
+                            <h3 class="text-xs font-black uppercase tracking-widest text-slate-800 italic">Admin Accounts</h3>
                         </div>
                         <div class="p-6">
-                            <form id="addAdminForm" class="flex gap-3 mb-6">
-                                <input id="newAdminEmail" type="email" required placeholder="New admin email address" class="flex-1 px-4 py-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none text-sm font-semibold">
-                                <button type="submit" class="bg-slate-900 text-white px-6 py-2.5 rounded-xl font-black uppercase text-[10px] tracking-widest hover:bg-slate-800">Add Admin</button>
-                            </form>
-                            
                             <div class="space-y-3" id="adminList">
-                                <!-- Admin items will appear here -->
-                                <div class="animate-pulse flex items-center justify-between p-4 bg-slate-50 rounded-xl">
-                                    <div class="h-4 w-32 bg-slate-200 rounded"></div>
-                                    <div class="h-8 w-20 bg-slate-200 rounded"></div>
+                                <!-- Admins will be listed here -->
+                                <div class="flex items-center justify-between p-3 bg-slate-50 rounded-xl">
+                                    <div class="flex items-center gap-3">
+                                        <div class="h-8 w-8 bg-indigo-100 text-indigo-600 rounded-lg flex items-center justify-center text-[10px] font-black uppercase">SA</div>
+                                        <div>
+                                            <p class="text-[10px] font-black text-slate-800 uppercase leading-none">Super Admin</p>
+                                            <p id="currentAdminEmail" class="text-[8px] font-bold text-slate-400 uppercase tracking-tighter">---</p>
+                                        </div>
+                                    </div>
+                                    <span class="text-[8px] font-black px-2 py-1 bg-indigo-50 text-indigo-600 rounded uppercase">Primary</span>
                                 </div>
                             </div>
+                            <button class="w-full border-2 border-dashed border-slate-200 text-slate-400 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-slate-50 hover:border-slate-300 transition-all mt-4">Add Sub-Admin</button>
                         </div>
-                    </section>
+                    </div>
 
-                    <!-- Section: Data Maintenance -->
-                    <section class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-                        <div class="px-6 py-4 border-b border-slate-100 bg-slate-50/50">
-                            <h3 class="font-black text-slate-800 uppercase text-xs tracking-widest text-red-600">Danger Zone</h3>
+                    <!-- Reset & Archive -->
+                    <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden settings-card" style="border-top-color: #f43f5e;">
+                        <div class="px-6 py-4 border-b bg-slate-50/50">
+                            <h3 class="text-xs font-black uppercase tracking-widest text-slate-800 italic">Data Management</h3>
                         </div>
-                        <div class="p-6 grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div class="p-4 border border-red-100 rounded-2xl bg-red-50/30 flex flex-col justify-between">
-                                <div>
-                                    <h4 class="font-bold text-slate-900 text-sm">Reset Season</h4>
-                                    <p class="text-xs text-slate-500 mt-1">Archive all current matches and results to start a new season.</p>
-                                </div>
-                                <button onclick="resetSeason()" class="mt-4 border border-red-200 text-red-600 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-red-600 hover:text-white transition-all">Archive Data</button>
+                        <div class="p-6 space-y-4">
+                            <div class="bg-red-50 p-4 rounded-xl border border-red-100">
+                                <p class="text-[10px] font-black text-red-600 uppercase mb-1 italic">Reset Current Season</p>
+                                <p class="text-[8px] text-red-400 font-bold uppercase leading-relaxed">This will clear all Matches, Scores, and Results but keep Sports, Teams, and Players. This action is IRREVERSIBLE.</p>
                             </div>
-                            <div class="p-4 border border-blue-100 rounded-2xl bg-blue-50/30 flex flex-col justify-between">
-                                <div>
-                                    <h4 class="font-bold text-slate-900 text-sm">Backup Database</h4>
-                                    <p class="text-xs text-slate-500 mt-1">Export all system data (JSON) for security purposes.</p>
-                                </div>
-                                <button onclick="backupDatabase()" class="mt-4 border border-blue-200 text-blue-600 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-blue-600 hover:text-white transition-all">Download Backup</button>
+                            <div class="flex gap-3">
+                                <button onclick="archiveSeason()" class="flex-1 bg-slate-900 text-white py-3 rounded-xl text-[9px] font-black uppercase tracking-widest hover:bg-slate-800 transition-all">Archive Data</button>
+                                <button onclick="confirmReset()" class="flex-1 bg-red-600 text-white py-3 rounded-xl text-[9px] font-black uppercase tracking-widest hover:bg-red-700 transition-all">Clear Season</button>
                             </div>
                         </div>
-                    </section>
+                    </div>
+
+                    <!-- Database Backup -->
+                    <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden settings-card" style="border-top-color: #10b981;">
+                        <div class="px-6 py-4 border-b bg-slate-50/50">
+                            <h3 class="text-xs font-black uppercase tracking-widest text-slate-800 italic">Backup & Security</h3>
+                        </div>
+                        <div class="p-6 space-y-4">
+                            <div class="flex items-center justify-between p-3 bg-green-50 rounded-xl border border-green-100">
+                                <div>
+                                    <p class="text-[10px] font-black text-green-700 uppercase leading-none">Auto-Backup</p>
+                                    <p class="text-[8px] font-bold text-green-600 uppercase tracking-tighter mt-1">Daily cloud backup active</p>
+                                </div>
+                                <div class="relative inline-block w-10 align-middle select-none transition duration-200 ease-in">
+                                    <input type="checkbox" name="toggle" id="toggle" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer" checked/>
+                                    <label for="toggle" class="toggle-label block overflow-hidden h-6 rounded-full bg-gray-300 cursor-pointer"></label>
+                                </div>
+                            </div>
+                            <button onclick="downloadBackup()" class="w-full flex items-center justify-center gap-2 bg-emerald-600 text-white py-3 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-emerald-700 transition-all shadow-lg shadow-emerald-100">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a2 2 0 002 2h12a2 2 0 002-2v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                                Download Backup (.json)
+                            </button>
+                        </div>
+                    </div>
+
                 </div>
-            </div>
 
-            <footer class="h-10 bg-slate-900 text-white flex items-center justify-between px-8 text-[8px] font-black uppercase tracking-widest">
-                <span>Intramurals 2026 Settings</span>
-                <span class="text-slate-500 italic">v1.0.4 stable</span>
-            </footer>
-        </main>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <footer class="h-10 bg-slate-900 text-white flex items-center justify-between px-8 text-[8px] font-black uppercase tracking-[0.2em]">
+            <span id="footerText">Intramurals 2026 Management System</span>
+            <div class="flex items-center gap-2">
+                <span class="h-1.5 w-1.5 bg-green-500 rounded-full"></span>
+                <span>Config Engine Live</span>
+            </div>
+        </footer>
+    </main>
+
+    <!-- Success Modal -->
+    <div id="modalOverlay" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-[9999] hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl w-full max-w-sm overflow-hidden shadow-2xl animate-in fade-in zoom-in duration-200">
+            <div id="modalColor" class="h-2 bg-blue-600"></div>
+            <div class="p-8 text-center">
+                <div id="modalIcon" class="w-16 h-16 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                </div>
+                <h3 id="modalTitle" class="text-lg font-black text-slate-900 uppercase italic mb-2 tracking-tighter">Action Successful</h3>
+                <p id="modalMessage" class="text-xs text-slate-500 font-medium leading-relaxed mb-6">System settings have been updated and synchronized across the network.</p>
+                <button onclick="closeModal()" class="w-full bg-slate-900 text-white py-3 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-slate-800 transition-all">Dismiss</button>
+            </div>
+        </div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
-        import { getAuth, onAuthStateChanged, signOut, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
-        import { getFirestore, collection, doc, setDoc, getDoc, onSnapshot, addDoc, deleteDoc, query, getDocs } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
+        import { getAuth, onAuthStateChanged, signOut, signInAnonymously, updatePassword } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+        import { getFirestore, doc, getDoc, setDoc, collection, onSnapshot, getDocs, deleteDoc, writeBatch } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
 
-        // Constants
+        // --- Configuration ---
         const firebaseConfig = {
             apiKey: "AIzaSyD5Gkjk7tk48Hv9zgvdlSsdR8FH_nwtGRc",
             authDomain: "intramurals-score-leaderboard.firebaseapp.com",
@@ -190,176 +331,183 @@
             messagingSenderId: "455345215033",
             appId: "1:455345215033:web:66a387d0fa0fa4453e5fe8"
         };
-        const currentAppId = 'intramurals-2026';
 
-        // Initialize Firebase
+        const currentAppId = 'intramurals-2026';
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        // State & UI Elements
+        // --- State ---
         let currentUser = null;
-        const authScreen = document.getElementById('authScreen');
-        const mainWrapper = document.getElementById('mainWrapper');
-        const adminListContainer = document.getElementById('adminList');
+        let configData = {
+            name: "Intramurals",
+            year: "2026"
+        };
 
-        // Check Auth
-        onAuthStateChanged(auth, (user) => {
+        // --- Auth Guard ---
+        onAuthStateChanged(auth, async (user) => {
             if (user) {
                 currentUser = user;
-                authScreen.style.display = 'none';
-                mainWrapper.classList.remove('hidden');
-                setupUI(user);
-                loadSettings();
-                listenAdmins();
+                updateAdminUI(user);
+                syncConfig();
             } else {
-                signInAnonymously(auth).catch(err => {
-                    console.error("Auth error:", err);
-                });
-            }
-        });
-
-        function setupUI(user) {
-            const email = user.email || "Admin User";
-            document.getElementById('adminNameDisplay').innerText = email.split('@')[0];
-            document.getElementById('adminInitial').innerText = email.charAt(0).toUpperCase();
-        }
-
-        // --- CORE FUNCTIONS ---
-
-        // Load General Config
-        async function loadSettings() {
-            const configRef = doc(db, 'artifacts', currentAppId, 'public', 'data', 'system_config');
-            const snap = await getDoc(configRef);
-            if(snap.exists()) {
-                const data = snap.data();
-                document.getElementById('configEventName').value = data.eventName || '';
-                document.getElementById('configYear').value = data.year || '';
-            }
-        }
-
-        // Save General Config
-        window.saveGeneralConfig = async () => {
-            const name = document.getElementById('configEventName').value;
-            const year = document.getElementById('configYear').value;
-            
-            try {
-                const configRef = doc(db, 'artifacts', currentAppId, 'public', 'data', 'system_config');
-                await setDoc(configRef, { eventName: name, year: year, updatedAt: new Date().toISOString() }, { merge: true });
-                showToast("Settings updated successfully!");
-            } catch (e) {
-                showToast("Error saving settings.", true);
-            }
-        }
-
-        // Admin Management logic
-        function listenAdmins() {
-            const adminRef = collection(db, 'artifacts', currentAppId, 'public', 'data', 'administrators');
-            onSnapshot(adminRef, (snapshot) => {
-                adminListContainer.innerHTML = '';
-                if(snapshot.empty) {
-                    adminListContainer.innerHTML = '<p class="text-center py-4 text-xs text-slate-400 font-bold italic">No secondary admins added.</p>';
-                    return;
+                try {
+                    await signInAnonymously(auth);
+                } catch (e) {
+                    console.error("Auth failed", e);
                 }
-                snapshot.forEach(docSnap => {
-                    const admin = docSnap.data();
-                    const div = document.createElement('div');
-                    div.className = "flex items-center justify-between p-4 bg-slate-50 border border-slate-100 rounded-2xl group hover:border-blue-200 transition-all";
-                    div.innerHTML = `
-                        <div class="flex items-center gap-3">
-                            <div class="h-8 w-8 rounded-full bg-slate-200 flex items-center justify-center text-[10px] font-black">${admin.email.charAt(0).toUpperCase()}</div>
-                            <div>
-                                <p class="text-sm font-bold text-slate-800">${admin.email}</p>
-                                <p class="text-[9px] text-slate-400 font-black uppercase">Added: ${new Date(admin.addedAt).toLocaleDateString()}</p>
-                            </div>
-                        </div>
-                        <button onclick="removeAdmin('${docSnap.id}')" class="opacity-0 group-hover:opacity-100 bg-red-50 text-red-600 px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase transition-all hover:bg-red-600 hover:text-white">Remove</button>
-                    `;
-                    adminListContainer.appendChild(div);
-                });
-            }, (err) => console.error(err));
-        }
+            }
+        });
 
-        document.getElementById('addAdminForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const emailInput = document.getElementById('newAdminEmail');
-            const email = emailInput.value.trim();
+        function updateAdminUI(user) {
+            const email = user.email || "Admin@guest.com";
+            const namePart = email.split('@')[0];
             
-            if(!email) return;
+            document.getElementById('adminName').textContent = namePart;
+            document.getElementById('adminInitials').textContent = namePart.substring(0, 2).toUpperCase();
+            document.getElementById('activeEmail').textContent = email;
+            document.getElementById('currentAdminEmail').textContent = email;
+            document.getElementById('authOverlay').style.display = 'none';
+        }
 
-            try {
-                const adminRef = collection(db, 'artifacts', currentAppId, 'public', 'data', 'administrators');
-                await addDoc(adminRef, {
-                    email: email,
-                    addedAt: new Date().toISOString(),
-                    role: 'admin'
-                });
-                emailInput.value = '';
-                showToast("New admin added!");
-            } catch (err) {
-                showToast("Failed to add admin.", true);
-            }
-        });
-
-        window.removeAdmin = async (id) => {
-            if(!confirm("Are you sure you want to remove this administrator's access?")) return;
-            try {
-                await deleteDoc(doc(db, 'artifacts', currentAppId, 'public', 'data', 'administrators', id));
-                showToast("Admin removed.");
-            } catch (err) {
-                showToast("Error removing admin.", true);
+        // --- Settings Logic ---
+        async function syncConfig() {
+            const configRef = doc(db, 'artifacts', currentAppId, 'public', 'config');
+            const snap = await getDoc(configRef);
+            
+            if (snap.exists()) {
+                configData = snap.data();
+                document.getElementById('systemName').value = configData.name;
+                document.getElementById('systemYear').value = configData.year;
+                updateBrandUI();
             }
         }
 
-        // Mock functions for Danger Zone
-        window.resetSeason = () => {
-            const confirmed = confirm("WARNING: This will clear all match results and move them to history. Continue?");
-            if(confirmed) {
-                showToast("Simulating archive process...");
-                setTimeout(() => showToast("Data archived successfully!"), 1500);
-            }
-        }
+        window.saveGeneralSettings = async () => {
+            const name = document.getElementById('systemName').value;
+            const year = document.getElementById('systemYear').value;
+            
+            if(!name || !year) return alert("Please fill all fields");
 
-        window.backupDatabase = async () => {
-            showToast("Generating backup package...");
-            // Simple logic: Fetch all sports and download as JSON
+            const configRef = doc(db, 'artifacts', currentAppId, 'public', 'config');
             try {
-                const sportsRef = collection(db, 'artifacts', currentAppId, 'public', 'data', 'sports');
-                const snap = await getDocs(sportsRef);
-                const data = snap.docs.map(d => d.data());
-                const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = `backup_intramurals_${new Date().toISOString().split('T')[0]}.json`;
-                a.click();
+                await setDoc(configRef, { name, year }, { merge: true });
+                configData = { name, year };
+                updateBrandUI();
+                showModal("Settings Updated", "General system identity has been refreshed.", "blue");
+                
+                const status = document.getElementById('saveStatus');
+                status.classList.remove('hidden');
+                setTimeout(() => status.classList.add('hidden'), 3000);
             } catch (e) {
-                showToast("Backup failed.", true);
+                console.error(e);
             }
+        };
+
+        function updateBrandUI() {
+            const brand = document.getElementById('sidebarBrand');
+            const footer = document.getElementById('footerText');
+            brand.innerHTML = `${configData.name}<span class="text-yellow-400">${configData.year}</span>`;
+            footer.textContent = `${configData.name} ${configData.year} Management System`;
         }
 
-        // UI Interactions
-        document.getElementById('profileToggle').addEventListener('click', (e) => {
+        // --- Reset Logic ---
+        window.confirmReset = async () => {
+            if(confirm("CRITICAL ACTION: Are you sure you want to delete ALL matches and scores? This will reset the leaderboard to zero.")) {
+                try {
+                    const matchesRef = collection(db, 'artifacts', currentAppId, 'public', 'data', 'matches');
+                    const snap = await getDocs(matchesRef);
+                    
+                    const batch = writeBatch(db);
+                    snap.docs.forEach(d => batch.delete(d.ref));
+                    await batch.commit();
+
+                    showModal("Season Reset", "All match records have been cleared. Leaderboard is now blank.", "red");
+                } catch(e) {
+                    console.error(e);
+                }
+            }
+        };
+
+        // --- Archive & Backup ---
+        window.downloadBackup = async () => {
+            const collections = ['sports', 'teams', 'players', 'matches'];
+            let fullBackup = { timestamp: new Date().toISOString(), config: configData };
+
+            for(const coll of collections) {
+                const snap = await getDocs(collection(db, 'artifacts', currentAppId, 'public', 'data', coll));
+                fullBackup[coll] = snap.docs.map(d => d.data());
+            }
+
+            const blob = new Blob([JSON.stringify(fullBackup, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `intramurals_${configData.year}_backup.json`;
+            a.click();
+        };
+
+        // --- UI Interactions ---
+        const profileToggle = document.getElementById('profileToggle');
+        const profileDropdown = document.getElementById('profileDropdown');
+        const sidebar = document.getElementById('sidebar');
+        const openSidebar = document.getElementById('openSidebar');
+        const closeSidebar = document.getElementById('closeSidebar');
+        const sidebarOverlay = document.getElementById('sidebarOverlay');
+
+        profileToggle.addEventListener('click', (e) => {
             e.stopPropagation();
-            document.getElementById('profileDropdown').classList.toggle('show');
+            profileDropdown.classList.toggle('show');
         });
 
-        window.addEventListener('click', () => {
-            document.getElementById('profileDropdown').classList.remove('show');
+        document.addEventListener('click', () => profileDropdown.classList.remove('show'));
+
+        openSidebar.addEventListener('click', () => {
+            sidebar.classList.remove('sidebar-closed');
+            sidebarOverlay.classList.remove('hidden');
         });
 
-        document.getElementById('logoutBtn').addEventListener('click', async () => {
-            await signOut(auth);
-            location.reload();
+        [closeSidebar, sidebarOverlay].forEach(el => el.addEventListener('click', () => {
+            sidebar.classList.add('sidebar-closed');
+            sidebarOverlay.classList.add('hidden');
+        }));
+
+        document.getElementById('logoutBtn').addEventListener('click', () => {
+            signOut(auth).then(() => window.location.reload());
         });
 
-        function showToast(msg, isError = false) {
-            const toast = document.createElement('div');
-            toast.className = `fixed bottom-8 right-8 px-6 py-3 rounded-xl text-xs font-black uppercase tracking-widest text-white z-[2000] shadow-2xl ${isError ? 'bg-red-600' : 'bg-slate-900'}`;
-            toast.innerText = msg;
-            document.body.appendChild(toast);
-            setTimeout(() => toast.remove(), 3000);
+        // --- Modal Helpers ---
+        window.showModal = (title, msg, color) => {
+            const overlay = document.getElementById('modalOverlay');
+            const colorBar = document.getElementById('modalColor');
+            const icon = document.getElementById('modalIcon');
+            
+            document.getElementById('modalTitle').textContent = title;
+            document.getElementById('modalMessage').textContent = msg;
+            
+            colorBar.className = `h-2 bg-${color}-600`;
+            icon.className = `w-16 h-16 bg-${color}-50 text-${color}-600 rounded-full flex items-center justify-center mx-auto mb-4`;
+            
+            overlay.classList.remove('hidden');
+            overlay.classList.add('flex');
+        };
+
+        window.closeModal = () => {
+            document.getElementById('modalOverlay').classList.add('hidden');
+        };
+
+        window.archiveSeason = () => {
+            showModal("Feature Coming Soon", "The automatic archiving system is scheduled for the v2.0 update.", "slate");
         }
+
+        window.changePassBtn.addEventListener('click', () => {
+            const newPass = prompt("Enter new password (min 6 chars):");
+            if(newPass && newPass.length >= 6) {
+                updatePassword(auth.currentUser, newPass).then(() => {
+                    showModal("Password Changed", "Security credentials updated successfully.", "blue");
+                }).catch(e => alert(e.message));
+            }
+        });
 
     </script>
 </body>
