@@ -7,9 +7,6 @@
 **Intramurals Leaderboard** is a web-based system designed to manage and display intramural competition data such as team standings, match results, player statistics, and MVP awards.  
 It uses **Firebase Firestore** for real-time updates and supports both **Admin** and **Viewer** dashboards.
 
-🔗 Repository:  
-https://github.com/Luigibarte4563/Intramurals-Leaderboard
-
 ---
 
 ## 🌐 Live Demos
