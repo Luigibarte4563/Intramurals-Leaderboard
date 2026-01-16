@@ -4,61 +4,118 @@
 ![JavaScript](https://img.shields.io/badge/JavaScript-ES6-yellow?style=flat-square&logo=javascript)
 ![Firebase](https://img.shields.io/badge/Firebase-Firestore-orange?style=flat-square&logo=firebase)
 
-**Intramurals Leaderboard** is a web application designed to track, display, and manage team scores, match results, player statistics, and MVP awards for intramural competitions. It provides real-time updates using Firebase Firestore and supports admin management of teams, players, and matches.
+**Intramurals Leaderboard** is a web-based system designed to manage and display intramural competition data such as team standings, match results, player statistics, and MVP awards.  
+It uses **Firebase Firestore** for real-time updates and supports both **Admin** and **Viewer** dashboards.
 
-## 🌐 Live Demo
+🔗 Repository:  
+https://github.com/Luigibarte4563/Intramurals-Leaderboard
 
-You can view the live demo here: [Intramurals Leaderboard Live](https://luigibarte4563.github.io/Intramurals-Leaderboard/)
+---
+
+## 🌐 Live Demos
+
+### 🔐 Admin Dashboard
+Used for managing teams, players, matches, and scores.
+
+👉 https://luigibarte4563.github.io/Intramurals-Leaderboard/
+
+### 👀 Viewer Dashboard
+Public-facing dashboard for viewing standings, match results, and statistics.
+
+👉 https://luigibarte4563.github.io/Intramurals-Leaderboard/ViewerDashboard/home.html
+
+---
 
 ## 🛠️ Features
 
-- Admin authentication and dashboard
+### Admin Features
+- Admin authentication
 - Add, edit, and delete teams
 - Add, edit, and delete players
-- Manage matches and update scores
-- View MVP and player statistics per sport
-- Real-time leaderboard updates
-- Responsive design for desktop and mobile
+- Create and manage matches
+- Update scores and match status
+- Assign MVPs
+- Real-time Firestore updates
+
+### Viewer Features
+- View live team leaderboards
+- View match results and schedules
+- View player rankings and MVPs
+- Sport-based filtering
+- Read-only public access
+
+---
 
 ## ⚡ Technologies Used
 
 - **Frontend:** HTML, CSS, JavaScript (ES Modules)
-- **Backend / Database:** Firebase Firestore
-- **Authentication:** Firebase Auth (Anonymous Sign-In for demo)
-- **Hosting:** GitHub Pages (Live Demo)
+- **Database:** Firebase Firestore
+- **Authentication:** Firebase Auth (Anonymous Sign-In / Admin Login)
+- **Hosting:** GitHub Pages
+
+---
 
 ## 🚀 Getting Started
 
-1. Clone the repository:
+### 1️⃣ Clone the Repository
 
-   ```bash
-   git clone https://github.com/Luigibarte4563/Intramurals-Leaderboard.git
-   cd Intramurals-Leaderboard
-Open index.html in a browser, or run a local server:
+```bash
+git clone https://github.com/Luigibarte4563/Intramurals-Leaderboard.git
+cd Intramurals-Leaderboard
+2️⃣ Run Locally
+Open index.html directly in a browser or use a local server:
 
 bash
 Copy code
-# Using VS Code Live Server extension
+# Using VS Code Live Server
 http://127.0.0.1:5500/index.html
-Ensure Firebase configuration is correctly set in your scripts.
+3️⃣ Firebase Setup
+Ensure your Firebase configuration is correctly set in the JavaScript files:
+
+Firebase App
+
+Firebase Auth
+
+Firebase Firestore
+
+Firestore security rules
 
 🔧 Usage
-Admin Dashboard: Add teams, players, and manage matches.
+Admin Dashboard
 
-Leaderboard: View team rankings and player stats.
+Manage teams, players, and matches
 
-Match Updates: Record match scores and MVPs in real time.
+Update scores and standings
+
+Control competition data
+
+Viewer Dashboard
+
+View leaderboards and match results
+
+Monitor live updates
+
+No login required
 
 📂 Project Structure
-graphql
+bash
 Copy code
 Intramurals-Leaderboard/
-├─ index.html          # Main landing page
-├─ assets/             # Images, CSS, and JS assets
-├─ scripts/            # Firebase and app logic
+├─ index.html                # Admin dashboard entry
+├─ ViewerDashboard/
+│  └─ home.html              # Viewer dashboard
+├─ assets/                   # Images, CSS, JS assets
+├─ scripts/                  # Firebase & application logic
 └─ README.md
 🤝 Contribution
-Feel free to fork this repository and submit pull requests. Any improvements to UI, performance, or features are welcome!
+Contributions are welcome!
 
-📄 License
-This project is open source and available under the MIT License.
+Fork the repository
+
+Create a new branch
+
+Commit your changes
+
+Open a Pull Request
+
+UI improvements, feature additions, and optimizations are encouraged.
